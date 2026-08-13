@@ -56,4 +56,9 @@ enum EventStatus: string implements HasColor, HasIcon, HasLabel
     {
         return [self::Approved, self::Completed];
     }
+
+    public function isPubliclyVisible(): bool
+    {
+        return in_array($this, self::publiclyVisible(), true);
+    }
 }

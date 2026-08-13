@@ -1,9 +1,55 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+/* خط تجوّل — مستضاف ذاتياً، وزنان فقط حفاظاً على الحجم */
+@font-face {
+    font-family: 'Tajawal';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/tajawal-arabic-400-normal.woff2') format('woff2');
+    unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+
+@font-face {
+    font-family: 'Tajawal';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/fonts/tajawal-arabic-700-normal.woff2') format('woff2');
+    unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Tajawal', ui-sans-serif, system-ui, 'Segoe UI', Tahoma, sans-serif;
+
+    /* هوية بهجة: برتقالي دافئ (فرح) + تركواز (أمان وهدوء) */
+    --color-joy-50: #fff8ed;
+    --color-joy-100: #ffefd4;
+    --color-joy-200: #ffdba8;
+    --color-joy-300: #ffc170;
+    --color-joy-400: #ff9d37;
+    --color-joy-500: #ff7f10;
+    --color-joy-600: #f06406;
+    --color-joy-700: #c74a08;
+    --color-joy-800: #9e3a0f;
+    --color-joy-900: #7f3210;
+    --color-calm-50: #f0fdfa;
+    --color-calm-100: #ccfbf1;
+    --color-calm-200: #99f6e4;
+    --color-calm-300: #5eead4;
+    --color-calm-400: #2dd4bf;
+    --color-calm-500: #14b8a6;
+    --color-calm-600: #0d9488;
+    --color-calm-700: #0f766e;
+    --color-calm-800: #115e59;
+    --color-calm-900: #134e4a;
+}
+
+/* تحسينات عربية عامة */
+html {
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    text-rendering: optimizeLegibility;
 }
