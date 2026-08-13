@@ -36,7 +36,12 @@ class EventFactory extends Factory
             'area_id' => Area::query()->inRandomOrder()->value('id') ?? Area::factory(),
             'shelter_center_id' => null,
             'title' => fake()->randomElement($titles),
-            'description' => fake()->realText(200),
+            'description' => fake()->randomElement([
+                'فقرات ترفيهية متنوعة وألعاب جماعية مع فريق متخصص، والدعوة عامة لكل الأطفال والأهالي.',
+                'نشاط ترفيهي تفاعلي يهدف لإدخال البهجة وتخفيف الضغوط عن أطفالنا الأحباء.',
+                'يوم مليء بالمرح والضحك: مسابقات وجوائز وفقرات مفاجئة بانتظار الصغار.',
+                'جلسة دعم نفسي بأسلوب اللعب والحكايات بإشراف مختصين متطوعين.',
+            ]),
             'location_details' => 'الساحة الرئيسية قرب المدخل',
             'start_date' => fake()->dateTimeBetween('now', '+14 days')->format('Y-m-d'),
             'start_time' => sprintf('%02d:00', $startHour),

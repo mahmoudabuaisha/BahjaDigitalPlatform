@@ -16,7 +16,11 @@ class TeamFactory extends Factory
         return [
             'name' => 'فريق '.fake()->unique()->firstName(),
             'slug' => 'team-'.Str::lower(Str::random(6)),
-            'description' => fake()->realText(120),
+            'description' => fake()->randomElement([
+                'فريق تطوعي يقدم أنشطة ترفيهية ودعماً نفسياً لأطفال غزة في مراكز الإيواء والمخيمات.',
+                'مجموعة شبابية متخصصة في العروض المسرحية والألعاب الحركية للأطفال.',
+                'نصنع البسمة أينما كنا — فقرات متنوعة ترفيهية وتعليمية لكل الأعمار.',
+            ]),
             'contact_name' => fake()->name(),
             'whatsapp_phone' => '97059'.fake()->numerify('#######'),
             'is_active' => true,

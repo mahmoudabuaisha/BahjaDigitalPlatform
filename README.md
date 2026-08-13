@@ -1,58 +1,64 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# منصّة بَهْجَة الرقمية 🎈
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+روزنامة رقمية تجمع فعاليات الترفيه والدعم النفسي لأطفال غزة في مكان واحد — **تعمل دون إنترنت**.
 
-## About Laravel
+مبادرة إنسانية تصل العائلات داخل مراكز الإيواء وخارجها بفعاليات "صنّاع الفرح" (الفرق الترفيهية التطوعية).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## التقنيات
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| الطبقة | التقنية |
+|---|---|
+| الإطار | Laravel 13 (PHP 8.3) |
+| لوحتا التحكم | Filament 4 — `/admin` للإدارة و `/team` للفرق |
+| الواجهة العامة | Blade + Alpine.js + Tailwind CSS 4 (RTL، خط Tajawal مستضاف ذاتياً) |
+| Offline | PWA بـ Service Worker مُقدَّم عبر Blade (3 استراتيجيات كاش) |
+| قاعدة البيانات | MySQL / MariaDB (utf8mb4) |
+| رموز QR | endroid/qr-code (SVG بلا GD) |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## التشغيل محلياً
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+npm install && npm run build
+cp .env.example .env        # ثم اضبطوا بيانات قاعدة البيانات
+php artisan key:generate
+php artisan migrate --seed  # يزرع المحافظات والتصنيفات وحساب الأدمن + بيانات تجريبية محلياً
+php artisan serve
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+- الموقع العام: http://127.0.0.1:8000
+- لوحة الإدارة: http://127.0.0.1:8000/admin — الحساب من متغيري البيئة `BAHJA_ADMIN_EMAIL` / `BAHJA_ADMIN_PASSWORD`
+- لوحة الفرق: http://127.0.0.1:8000/team (تسجيل ذاتي بموافقة الإدارة)
+- حساب فريق تجريبي (محلياً): `manager0@demo.test` / `password`
 
-## Contributing
+## الاختبارات
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+php artisan test
+```
 
-## Code of Conduct
+تغطي: عزل بيانات الفرق (الاختبار الحرج)، دورة الاعتماد والرفض، سلوك المراقب عند تعديل المعتمد،
+أمر الإتمام اليومي، الصفحات العامة ووسوم OG، تغذية JSON مع ETag، والتقييمات مع الحماية.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## بنية الأدوار
 
-## Security Vulnerabilities
+- **super_admin**: كل الصلاحيات + إدارة حسابات المشرفين
+- **admin**: إدارة الفعاليات والفرق والمحتوى والتقارير
+- **team_manager**: فعاليات فريقه فقط (مسودة ← اعتماد ← تسجيل حضور)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## دورة حياة الفعالية
 
-## License
+```
+draft ← الفريق يكتب
+pending ← الفريق يرسل | تعديل الفريق لفعالية معتمدة يعيدها هنا تلقائياً
+approved ← الإدارة تعتمد (تظهر للعائلات)
+rejected ← الإدارة ترفض بسبب إلزامي يظهر للفريق
+completed ← تلقائياً بعد انتهاء التاريخ (أمر مجدول 00:15) ← الفريق يسجل الحضور الفعلي
+cancelled ← الفريق يلغي
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**تقارير الأثر تُحسب حصراً من `completed` بأرقام الحضور الفعلية** (هدف المبادرة: 1000 طفل + 3000 غير مباشر).
+
+## النشر
+
+راجعوا [دليل النشر الكامل](docs/DEPLOYMENT.md) — مكتوب لاستضافة مشتركة رخيصة بدون SSH ضمن ميزانية المبادرة (~400 شيكل/سنة).
