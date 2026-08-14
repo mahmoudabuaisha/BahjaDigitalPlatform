@@ -12,6 +12,7 @@
 #   SEED_DEMO=1            زرع بيانات تجريبية (للعرض على العميل)
 #   ADMIN_EMAIL=..         بريد حساب المدير الأول
 #   DEPLOY_SSH_KEY="ssh-ed25519 AAAA..."   مفتاح عام يُضاف للمستخدم deploy (لنشر GitHub Actions)
+#   PATCH_FILE=/root/x.patch   رقعة تُطبَّق بعد الاستنساخ — للنشر قبل دفعها إلى GitHub
 #
 set -euo pipefail
 
@@ -21,6 +22,7 @@ BRANCH="${BRANCH:-main}"
 SEED_DEMO="${SEED_DEMO:-0}"
 ADMIN_EMAIL="${ADMIN_EMAIL:-admin@${DOMAIN}}"
 DEPLOY_SSH_KEY="${DEPLOY_SSH_KEY:-}"
+PATCH_FILE="${PATCH_FILE:-}"
 
 APP_DIR=/var/www/bahja
 PHP_V=8.3
@@ -30,6 +32,7 @@ log() { printf '\n\033[1;36m==> %s\033[0m\n' "$1"; }
 
 [[ $EUID -eq 0 ]] || { echo "شغّل السكربت بصلاحية root"; exit 1; }
 [[ -e "$APP_DIR" ]] && { echo "$APP_DIR موجود مسبقاً — أوقفت التنفيذ كي لا أطمس تثبيتاً قائماً"; exit 1; }
+[[ -n "$PATCH_FILE" && ! -f "$PATCH_FILE" ]] && { echo "لم أجد ملف الرقعة: $PATCH_FILE"; exit 1; }
 
 DB_PASSWORD="$(openssl rand -base64 24 | tr -d '/+=' | head -c 24)"
 ADMIN_PASSWORD="$(openssl rand -base64 18 | tr -d '/+=' | head -c 16)"
@@ -76,8 +79,14 @@ log "جلب المشروع"
 git clone --branch "$BRANCH" "$REPO_URL" "$APP_DIR"
 cd "$APP_DIR"
 
+if [[ -n "$PATCH_FILE" ]]; then
+    log "تطبيق الرقعة: $PATCH_FILE"
+    git -c user.name="Deploy" -c user.email="deploy@${DOMAIN}" am --3way "$PATCH_FILE"
+    PATCH_APPLIED=1
+fi
+
 log "تثبيت الاعتماديات وبناء الأصول"
-sudo -u deploy composer install --no-dev --optimize-autoloader --no-interaction
+composer install --no-dev --optimize-autoloader --no-interaction
 npm ci --no-audit --no-fund
 npm run build
 
@@ -219,3 +228,17 @@ cat <<DONE
 وحوّل وضع التشفير إلى Full (strict).
 ════════════════════════════════════════════════════════════
 DONE
+
+if [[ "${PATCH_APPLIED:-0}" == "1" ]]; then
+    cat <<WARN
+
+تنبيه: نُشرت الشيفرة من رقعة محلية لم تُدفَع إلى GitHub بعد.
+حتى يعمل التحديث التلقائي لاحقاً، ادفعها من داخل الخادم:
+
+  cd ${APP_DIR}
+  git push https://<GITHUB_TOKEN>@github.com/<user>/<repo> HEAD:${BRANCH}
+
+قبل ذلك لا تشغّل deploy/update.sh — فهو يعيد الضبط إلى ما في GitHub
+ويُلغي الرقعة المطبَّقة محلياً.
+WARN
+fi
