@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventQrController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
@@ -14,6 +15,7 @@ Route::get('/', HomeController::class)->name('home');
 
 Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
 Route::get('/e/{event}', [EventController::class, 'short'])->name('events.short');
+Route::get('/events/{event}/qr.svg', EventQrController::class)->name('events.qr');
 Route::post('/events/{event}/feedback', [FeedbackController::class, 'storeForEvent'])
     ->middleware('throttle:feedback')
     ->name('events.feedback');

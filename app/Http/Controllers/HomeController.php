@@ -29,6 +29,12 @@ class HomeController extends Controller
 
         $categories = Category::orderBy('sort_order')->get();
 
+        // الافتراضي هو "اليوم"، إلا إن خلا اليوم من الفعاليات — عندها لا نستقبل
+        // العائلة بشاشة فارغة، بل بكل الأيام القادمة
+        $defaultDay = $events->contains(fn (Event $event) => $event->start_date->isToday())
+            ? 'today'
+            : 'all';
+
         return view('pages.home', [
             'eventsByDay' => $eventsByDay,
             'areas' => $areas,
@@ -37,7 +43,7 @@ class HomeController extends Controller
                 'area' => (string) $request->query('area', ''),
                 'center' => (string) $request->query('center', ''),
                 'category' => (string) $request->query('cat', ''),
-                'day' => (string) $request->query('day', ''),
+                'day' => (string) $request->query('day', $defaultDay),
             ],
         ]);
     }

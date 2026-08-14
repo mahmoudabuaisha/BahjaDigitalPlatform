@@ -28,7 +28,8 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->brandName('بَهْجَة — لوحة الإدارة')
             ->colors([
-                'primary' => Color::Amber,
+                // سماوي Broadsheet — نفس لون التفاعل في الموقع العام
+                'primary' => Color::hex('#0088b0'),
             ])
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')

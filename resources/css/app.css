@@ -1,55 +1,429 @@
 @import 'tailwindcss';
 
-/* خط تجوّل — مستضاف ذاتياً، وزنان فقط حفاظاً على الحجم */
-@font-face {
-    font-family: 'Tajawal';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url('/fonts/tajawal-arabic-400-normal.woff2') format('woff2');
-    unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
-}
+/* ══════════════════════════════════════════════════════════════════════════
+   منصّة بَهْجَة — نظام Broadsheet البصري
+   ورق فاتح، حبر شبه أسود، وخط نسخي عربي: أميري للعناوين ونسخ للنص.
+   السماوي هو لون التفاعل، والأرجواني لون ثانٍ نادر. لا صناديق ولا خطوط
+   فاصلة لبناء الصفحة — الفراغ وحده يفصل الأقسام.
+   ══════════════════════════════════════════════════════════════════════ */
 
+/* الخطوط مستضافة ذاتياً: الشبكة في غزة بطيئة، ولا نريد طلباً خارجياً
+   يعطّل أول رسم — ونحتاجها محفوظة في الـ Service Worker للعمل دون اتصال.
+   ملفات woff2 في public/fonts منسوخة من حزم @fontsource المذكورة في
+   package.json (مجلد files/ داخل كل حزمة)، بنفس أسمائها. */
+
+/* أميري — للعناوين، وزن واحد (700) وهو الوزن الوحيد الذي يستعمله التصميم */
 @font-face {
-    font-family: 'Tajawal';
+    font-family: 'Amiri';
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url('/fonts/tajawal-arabic-700-normal.woff2') format('woff2');
-    unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+    src: url('/fonts/amiri-arabic-700-normal.woff2') format('woff2');
+    unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+
+/* نسخ عربي — لنص المتن */
+@font-face {
+    font-family: 'Noto Naskh Arabic';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/noto-naskh-arabic-arabic-400-normal.woff2') format('woff2');
+    unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+
+@font-face {
+    font-family: 'Noto Naskh Arabic';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('/fonts/noto-naskh-arabic-arabic-600-normal.woff2') format('woff2');
+    unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0897-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC;
+}
+
+/* Source Serif 4 — خط نظام Broadsheet نفسه: يحمل الأرقام والحروف اللاتينية
+   فقط (نطاق لاتيني)، فتظهر الأرقام والتواريخ بصريّاً كما في التصميم بينما
+   يبقى النص العربي على النسخ. */
+@font-face {
+    font-family: 'Source Serif 4';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/source-serif-4-latin-400-normal.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+    font-family: 'Source Serif 4';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('/fonts/source-serif-4-latin-600-normal.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @theme {
-    --font-sans: 'Tajawal', ui-sans-serif, system-ui, 'Segoe UI', Tahoma, sans-serif;
+    /* الخطوط — الرقم يقع خارج نطاق النسخ العربي فيلتقطه Source Serif تلقائياً */
+    --font-sans: 'Noto Naskh Arabic', 'Source Serif 4', Times, serif;
+    --font-body: 'Noto Naskh Arabic', 'Source Serif 4', Times, serif;
+    --font-display: 'Amiri', 'Source Serif 4', Times, serif;
+    --font-figure: 'Source Serif 4', 'Noto Naskh Arabic', Times, serif;
 
-    /* هوية بهجة: برتقالي دافئ (فرح) + تركواز (أمان وهدوء) */
-    --color-joy-50: #fff8ed;
-    --color-joy-100: #ffefd4;
-    --color-joy-200: #ffdba8;
-    --color-joy-300: #ffc170;
-    --color-joy-400: #ff9d37;
-    --color-joy-500: #ff7f10;
-    --color-joy-600: #f06406;
-    --color-joy-700: #c74a08;
-    --color-joy-800: #9e3a0f;
-    --color-joy-900: #7f3210;
-    --color-calm-50: #f0fdfa;
-    --color-calm-100: #ccfbf1;
-    --color-calm-200: #99f6e4;
-    --color-calm-300: #5eead4;
-    --color-calm-400: #2dd4bf;
-    --color-calm-500: #14b8a6;
-    --color-calm-600: #0d9488;
-    --color-calm-700: #0f766e;
-    --color-calm-800: #115e59;
-    --color-calm-900: #134e4a;
+    /* الأرضية والحبر */
+    --color-paper: #f3f2f2;
+    --color-surface: #eae9e9;
+    --color-ink: #201e1d;
+
+    /* سلّم الرمادي — مولّد في OKLCH على سلّم إضاءة واحد */
+    --color-ash-100: #f8f4f4;
+    --color-ash-200: #eae7e7;
+    --color-ash-300: #d7d3d3;
+    --color-ash-400: #bab6b6;
+    --color-ash-500: #9b9797;
+    --color-ash-600: #7d7979;
+    --color-ash-700: #605d5d;
+    --color-ash-800: #444141;
+    --color-ash-900: #2d2b2b;
+
+    /* السماوي — لون التفاعل. اللون الأساس (base) هو حبر النظام نفسه،
+       والسلّم 100–900 لخلفياته ونصوصه */
+    --color-cyan-base: #0088b0;
+    --color-cyan-100: #e9f8ff;
+    --color-cyan-200: #cbeeff;
+    --color-cyan-300: #99e0ff;
+    --color-cyan-400: #62c5ee;
+    --color-cyan-500: #38a6cf;
+    --color-cyan-600: #1186ac;
+    --color-cyan-700: #006786;
+    --color-cyan-800: #004961;
+    --color-cyan-900: #0a303e;
+
+    /* الأرجواني — اللون الثاني، يُستعمل نادراً (اليوم، النجوم، التنبيه) */
+    --color-magenta-base: #d6006c;
+    --color-magenta-100: #fff1f4;
+    --color-magenta-200: #ffdee6;
+    --color-magenta-300: #ffc0d0;
+    --color-magenta-400: #ff90b1;
+    --color-magenta-500: #ff458e;
+    --color-magenta-600: #d82071;
+    --color-magenta-700: #aa0b56;
+    --color-magenta-800: #790e3d;
+    --color-magenta-900: #4b1528;
+
+    /* وحدة المسافة 5px — كثافة النظام 1.25× مضمّنة في السلّم:
+       p-2 = 10px، p-3 = 15px، p-4 = 20px، p-6 = 30px، p-8 = 40px */
+    --spacing: 0.3125rem;
+
+    --radius-sm: 1px;
+    --radius-md: 2px;
+    --radius-lg: 4px;
+
+    --shadow-sm: 0 1px 2px color-mix(in srgb, #2d2b2b 14%, transparent);
+    --shadow-md: 0 3px 10px color-mix(in srgb, #2d2b2b 16%, transparent);
+    --shadow-lg: 0 12px 32px color-mix(in srgb, #2d2b2b 22%, transparent);
 }
 
-/* تحسينات عربية عامة */
-html {
-    -webkit-text-size-adjust: 100%;
+@layer base {
+    html {
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        background: var(--color-paper);
+        color: var(--color-ink);
+        font-family: var(--font-body);
+        font-size: 15px;
+        line-height: 1.7;
+        text-rendering: optimizeLegibility;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        font-family: var(--font-display);
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    /* حالات لوحة المفاتيح مُعرّفة في النظام — لا حلقة المتصفح الزرقاء */
+    :focus {
+        outline: none;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-cyan-base);
+        outline-offset: 2px;
+    }
+
+    ::selection {
+        background: color-mix(in srgb, var(--color-cyan-base) 30%, transparent);
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
 }
 
-body {
-    text-rendering: optimizeLegibility;
+@layer components {
+    /* — أزرار — */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 44px; /* هدف لمس مريح على الهاتف */
+        padding: --spacing(2) --spacing(4);
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 1.2;
+        color: var(--color-ink);
+        text-decoration: none;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        transition: background-color .15s, color .15s, border-color .15s;
+    }
+
+    .btn:disabled {
+        opacity: .45;
+        cursor: not-allowed;
+    }
+
+    .btn-primary {
+        background: var(--color-cyan-base);
+        color: var(--color-paper);
+    }
+
+    .btn-primary:hover {
+        background: var(--color-cyan-600);
+    }
+
+    .btn-primary:active {
+        background: var(--color-cyan-700);
+    }
+
+    .btn-secondary {
+        border-color: color-mix(in srgb, var(--color-ink) 16%, transparent);
+    }
+
+    .btn-secondary:hover {
+        background: color-mix(in srgb, var(--color-ink) 7%, transparent);
+    }
+
+    .btn-secondary:active {
+        background: color-mix(in srgb, var(--color-ink) 14%, transparent);
+    }
+
+    .btn-ghost {
+        color: var(--color-cyan-700);
+    }
+
+    .btn-ghost:hover {
+        background: color-mix(in srgb, var(--color-cyan-base) 10%, transparent);
+    }
+
+    .btn-ghost:active {
+        background: color-mix(in srgb, var(--color-cyan-base) 18%, transparent);
+    }
+
+    .btn-block {
+        width: 100%;
+    }
+
+    /* — بطاقة — الصندوق الوحيد في النظام: للعناصر المستقلة (فعالية) فقط،
+         لا لبناء الصفحة — */
+    .card {
+        display: flex;
+        flex-direction: column;
+        gap: --spacing(2);
+        padding: --spacing(3);
+        background: var(--color-surface);
+        border-radius: var(--radius-md);
+    }
+
+    a.card {
+        color: inherit;
+        text-decoration: none;
+        transition: background-color .15s;
+    }
+
+    a.card:hover {
+        background: color-mix(in srgb, var(--color-cyan-base) 9%, var(--color-surface));
+    }
+
+    /* — وسوم — */
+    .tag {
+        display: inline-flex;
+        align-items: center;
+        font-size: 12px;
+        letter-spacing: .02em;
+        padding: 3px 10px;
+        border-radius: calc(var(--radius-md) * .75);
+        white-space: nowrap;
+    }
+
+    .tag-cyan {
+        background: var(--color-cyan-100);
+        color: var(--color-cyan-800);
+    }
+
+    .tag-magenta {
+        background: var(--color-magenta-100);
+        color: var(--color-magenta-800);
+    }
+
+    .tag-neutral {
+        background: var(--color-ash-100);
+        color: var(--color-ash-800);
+    }
+
+    .tag-outline {
+        border: 1px solid var(--color-cyan-base);
+        color: var(--color-cyan-700);
+    }
+
+    /* — حقول — */
+    .field > label {
+        display: block;
+        font-size: 13px;
+        margin-bottom: 5px;
+        color: var(--color-ash-700);
+    }
+
+    .input {
+        width: 100%;
+        min-height: 44px;
+        padding: --spacing(2) --spacing(2);
+        font: inherit;
+        font-size: 15px;
+        color: var(--color-ink);
+        caret-color: var(--color-cyan-base);
+        background: var(--color-surface);
+        border: 1px solid color-mix(in srgb, var(--color-ink) 16%, transparent);
+        border-radius: var(--radius-md);
+    }
+
+    .input::placeholder {
+        color: color-mix(in srgb, var(--color-ink) 65%, transparent);
+        opacity: 1;
+    }
+
+    .input:hover {
+        border-color: color-mix(in srgb, var(--color-ink) 45%, transparent);
+    }
+
+    .input:focus-visible {
+        border-color: var(--color-cyan-base);
+        outline-offset: 0;
+    }
+
+    textarea.input {
+        min-height: 90px;
+        resize: vertical;
+        line-height: 1.7;
+    }
+
+    select.input {
+        appearance: none;
+        background-image: linear-gradient(45deg, transparent 50%, var(--color-ash-700) 50%),
+                          linear-gradient(135deg, var(--color-ash-700) 50%, transparent 50%);
+        background-position: 14px calc(50% + 1px), 19px calc(50% + 1px);
+        background-size: 5px 5px, 5px 5px;
+        background-repeat: no-repeat;
+        padding-inline-start: 30px;
+    }
+
+    /* — أثاث الصفحة الأولى: الخط الثخين فالرفيع تحت الترويسة —
+         المكان الوحيد الذي يطبع فيه النظام خطوطاً */
+    .masthead-rule {
+        height: 2px;
+        background: var(--color-ink);
+    }
+
+    .masthead-rule + .masthead-rule {
+        height: 1px;
+        margin-top: 3px;
+        opacity: .5;
+    }
+
+    /* — تبويب اليوم — الشريط السفلي بلون التفاعل عند الاختيار */
+    .day-tab {
+        flex: 1;
+        min-height: 44px;
+        padding: --spacing(2) 8px;
+        font-family: var(--font-display);
+        font-weight: 700;
+        font-size: 16px;
+        color: var(--color-ash-600);
+        background: transparent;
+        border: none;
+        border-bottom: 3px solid var(--color-ash-300);
+        cursor: pointer;
+        transition: color .15s, border-color .15s;
+    }
+
+    .day-tab:hover {
+        color: var(--color-ink);
+        border-bottom-color: var(--color-cyan-300);
+    }
+
+    .day-tab[aria-selected='true'] {
+        color: var(--color-ink);
+        border-bottom-color: var(--color-cyan-base);
+    }
+
+    /* — رقاقة التصفية — */
+    .chip {
+        min-height: 40px;
+        padding: 8px 14px;
+        font-size: 14px;
+        color: var(--color-ash-800);
+        background: transparent;
+        border: 1px solid var(--color-ash-400);
+        border-radius: 999px;
+        cursor: pointer;
+        transition: background-color .15s, color .15s, border-color .15s;
+    }
+
+    .chip:hover {
+        border-color: var(--color-cyan-base);
+        color: var(--color-cyan-700);
+    }
+
+    .chip[aria-pressed='true'] {
+        background: var(--color-cyan-700);
+        border-color: var(--color-cyan-700);
+        color: var(--color-paper);
+    }
+
+    /* — معالجة الصور: شبكة نقاط الطباعة الصحفية — */
+    .halftone {
+        position: relative;
+        overflow: hidden;
+        filter: grayscale(.35) contrast(1.15);
+    }
+
+    .halftone::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: radial-gradient(circle, rgba(0, 0, 0, .22) 30%, transparent 32%);
+        background-size: 3px 3px;
+        mix-blend-mode: multiply;
+    }
+
+    /* — شريط تقدّم — */
+    .meter {
+        height: 10px;
+        background: var(--color-ash-300);
+        border-radius: var(--radius-sm);
+        overflow: hidden;
+    }
+
+    .meter > span {
+        display: block;
+        height: 100%;
+        background: var(--color-cyan-600);
+    }
 }
