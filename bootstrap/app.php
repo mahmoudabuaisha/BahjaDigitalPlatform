@@ -12,6 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // خلف Cloudflare (أو أي بروكسي): بدون هذا يرى لارافل عنوان البروكسي
+        // وحده — فيصبح حدّ التقييم «5 بالساعة لكل IP» حدّاً واحداً لكل الزوار
+        // مجتمعين، وتخرج روابط route() بـ http بدل https في وسوم OG وكروت QR
+        $middleware->trustProxies(at: '*');
+
         // عدّاد المشاهدات يصل عبر sendBeacon بلا رمز CSRF
         $middleware->validateCsrfTokens(except: [
             't/*',
