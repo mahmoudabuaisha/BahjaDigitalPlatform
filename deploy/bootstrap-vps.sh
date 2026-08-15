@@ -71,6 +71,7 @@ log "قاعدة البيانات"
 mysql <<SQL
 CREATE DATABASE IF NOT EXISTS bahja CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER IF NOT EXISTS 'bahja'@'127.0.0.1' IDENTIFIED BY '${DB_PASSWORD}';
+ALTER USER 'bahja'@'127.0.0.1' IDENTIFIED BY '${DB_PASSWORD}';
 GRANT ALL PRIVILEGES ON bahja.* TO 'bahja'@'127.0.0.1';
 FLUSH PRIVILEGES;
 SQL
@@ -108,7 +109,12 @@ log "الهجرات والبيانات الأولى"
 php artisan migrate --force
 php artisan db:seed --force
 if [[ "$SEED_DEMO" == "1" ]]; then
+    # مصانع البيانات التجريبية تستدعي fake() من fakerphp — وهي اعتمادية تطوير
+    # حذفها التثبيت أعلاه؛ نعيدها مؤقتاً للزرع ثم نعود إلى تثبيت الإنتاج
+    log "تثبيت اعتماديات التطوير مؤقتاً لزرع البيانات التجريبية"
+    composer install --optimize-autoloader --no-interaction
     php artisan db:seed --class="Database\\Seeders\\DemoSeeder" --force
+    composer install --no-dev --optimize-autoloader --no-interaction
 fi
 php artisan optimize
 
