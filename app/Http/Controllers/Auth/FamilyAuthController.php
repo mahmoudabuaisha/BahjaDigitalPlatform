@@ -45,11 +45,13 @@ class FamilyAuthController extends Controller
 
         $request->session()->regenerate();
 
-        // أعضاء الفرق والإدارة يدخلون من لوحاتهم، لا من هنا
-        if (! Auth::user()->isFamily()) {
-            $panel = Auth::user()->role->isAdministrative() ? '/admin' : '/team';
+        // الإدارة إلى لوحتها، ومسؤول الفريق إلى لوحة المنظِّم داخل الموقع
+        if (Auth::user()->role->isAdministrative()) {
+            return redirect()->to('/admin');
+        }
 
-            return redirect()->to($panel);
+        if (! Auth::user()->isFamily()) {
+            return redirect()->route('organizer.dashboard');
         }
 
         return redirect()->intended(route('account'));

@@ -87,7 +87,7 @@
                                     <x-ui.icon name="users" class="size-4 text-brand-500"/> ملفي الشخصي
                                 </a>
                             @else
-                                <a href="{{ auth()->user()->role->isAdministrative() ? url('/admin') : url('/team') }}"
+                                <a href="{{ auth()->user()->role->isAdministrative() ? url('/admin') : route('organizer.dashboard') }}"
                                    class="flex min-h-[42px] items-center gap-2 rounded-xl px-3 no-underline hover:bg-brand-50">
                                     <x-ui.icon name="grid" class="size-4 text-brand-500"/> لوحة التحكّم
                                 </a>

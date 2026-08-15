@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\EventStatus;
 use App\Enums\RegistrationStatus;
 use App\Enums\UserRole;
 use App\Models\Child;
@@ -225,6 +226,86 @@ class FamilyRegistrationTest extends TestCase
             'team_id' => $event->team_id,
         ]);
         $this->actingAs($manager)->get('/team/events/'.$event->id.'/edit')->assertOk();
+    }
+
+    public function test_organizer_pages_are_limited_to_active_team_managers(): void
+    {
+        $event = $this->upcomingEvent();
+
+        // وليّ أمر: ممنوع
+        $this->actingAs($this->family());
+        $this->get(route('organizer.dashboard'))->assertForbidden();
+
+        // مسؤول فريق نشط: مسموح، ويرى فعالياته وحدها
+        $manager = User::factory()->create([
+            'role' => UserRole::TeamManager,
+            'team_id' => $event->team_id,
+        ]);
+
+        $this->actingAs($manager);
+        $this->get(route('organizer.dashboard'))->assertOk()->assertSee($event->title);
+        $this->get(route('organizer.events'))->assertOk()->assertSee($event->title);
+
+        $otherEvent = Event::factory()->approved()->create(['title' => 'فعالية فريق آخر']);
+        $this->get(route('organizer.events'))->assertDontSee('فعالية فريق آخر');
+    }
+
+    public function test_families_are_notified_when_an_event_is_rescheduled_or_cancelled(): void
+    {
+        $event = $this->upcomingEvent();
+        $family = $this->family();
+
+        $this->actingAs($family);
+        $this->post(route('registrations.store', $event), ['children' => $family->children->pluck('id')->all()]);
+
+        $event->update(['start_date' => today()->addDays(9)]);
+        $this->assertDatabaseHas('user_notifications', ['user_id' => $family->id, 'type' => 'event_changed']);
+
+        $event->update(['status' => EventStatus::Cancelled]);
+        $this->assertDatabaseHas('user_notifications', ['user_id' => $family->id, 'type' => 'event_cancelled']);
+    }
+
+    public function test_reminder_command_notifies_families_of_tomorrow_events(): void
+    {
+        $event = Event::factory()->approved()->create([
+            'start_date' => today()->addDay(),
+            'start_time' => '10:00',
+            'expected_children' => 10,
+        ]);
+
+        $family = $this->family();
+
+        Registration::create([
+            'event_id' => $event->id,
+            'user_id' => $family->id,
+            'child_id' => $family->children->first()->id,
+            'children_count' => 1,
+            'status' => RegistrationStatus::Pending,
+        ]);
+
+        $this->artisan('registrations:remind')->assertSuccessful();
+
+        $this->assertDatabaseHas('user_notifications', [
+            'user_id' => $family->id,
+            'type' => 'event_reminder',
+        ]);
+    }
+
+    public function test_notification_tabs_filter_by_group(): void
+    {
+        $family = $this->family();
+        UserNotification::send($family, 'admin_message', 'رسالة من الإدارة');
+        UserNotification::send($family, 'registration_accepted', 'قُبل حجزكم');
+
+        $this->actingAs($family);
+
+        $this->get(route('notifications', ['tab' => 'messages']))
+            ->assertOk()
+            ->assertSee('رسالة من الإدارة')
+            ->assertDontSee('قُبل حجزكم');
+
+        $this->delete(route('notifications.clear'))->assertSessionHas('notifications_cleared');
+        $this->assertSame(0, $family->notifications()->count());
     }
 
     public function test_notifications_can_be_marked_read(): void

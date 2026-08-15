@@ -12,11 +12,13 @@ use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizerController;
+use App\Http\Controllers\OrganizerDashboardController;
 use App\Http\Controllers\PwaController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\TeamPublicController;
 use App\Http\Controllers\TrackController;
+use App\Http\Middleware\EnsureTeamManager;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -64,6 +66,13 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/account/notifications', [NotificationController::class, 'index'])->name('notifications');
     Route::post('/account/notifications/read', [NotificationController::class, 'markAllRead'])->name('notifications.read');
+    Route::delete('/account/notifications', [NotificationController::class, 'destroyAll'])->name('notifications.clear');
+
+    // ── لوحة الفريق المنظِّم (عرض؛ النماذج في لوحة Filament) ──
+    Route::middleware(EnsureTeamManager::class)->group(function () {
+        Route::get('/organizer', [OrganizerDashboardController::class, 'dashboard'])->name('organizer.dashboard');
+        Route::get('/organizer/events', [OrganizerDashboardController::class, 'events'])->name('organizer.events');
+    });
 
     Route::get('/my-events', [RegistrationController::class, 'index'])->name('my-events');
     Route::post('/events/{event}/register', [RegistrationController::class, 'store'])->name('registrations.store');

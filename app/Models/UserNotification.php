@@ -25,6 +25,33 @@ class UserNotification extends Model
         return $query->whereNull('read_at');
     }
 
+    /** تصنيف الإشعار — تبويبات صفحة الإشعارات تُبنى عليه */
+    public const GROUPS = [
+        'registrations' => ['registration_submitted', 'registration_accepted', 'registration_rejected', 'registration_received'],
+        'events' => ['event_new', 'event_changed', 'event_cancelled', 'event_reminder'],
+        'messages' => ['admin_message'],
+    ];
+
+    public function group(): string
+    {
+        foreach (self::GROUPS as $group => $types) {
+            if (in_array($this->type, $types, true)) {
+                return $group;
+            }
+        }
+
+        return 'system';
+    }
+
+    public function scopeOfGroup(Builder $query, string $group): Builder
+    {
+        if ($group === 'system') {
+            return $query->whereNotIn('type', array_merge(...array_values(self::GROUPS)));
+        }
+
+        return $query->whereIn('type', self::GROUPS[$group] ?? []);
+    }
+
     /** إنشاء إشعار — نقطة واحدة كي تبقى الصياغة والروابط متسقة */
     public static function send(User|int $user, string $type, string $title, ?string $body = null, ?string $url = null): self
     {
