@@ -13,7 +13,7 @@
         <p class="mt-1 text-ink-soft">من هنا تديرون فعالياتكم وتتابعون تسجيلات الأطفال.</p>
     </div>
 
-    <a href="{{ url('/team/events/create') }}" class="btn btn-primary">
+    <a href="{{ route('organizer.events.create') }}" class="btn btn-primary">
         <x-ui.icon name="plus" class="size-5"/> إضافة فعالية جديدة
     </a>
 </div>
@@ -56,7 +56,7 @@
         <div class="mt-4 rounded-2xl border border-dashed border-brand-200 p-10 text-center">
             <p class="font-bold">لم ترفعوا فعالية بعد</p>
             <p class="mt-1 text-ink-soft">أضيفوا أول فعالية، وبعد اعتماد الإدارة تظهر للعائلات.</p>
-            <a href="{{ url('/team/events/create') }}" class="btn btn-primary mt-4">إضافة فعالية</a>
+            <a href="{{ route('organizer.events.create') }}" class="btn btn-primary mt-4">إضافة فعالية</a>
         </div>
     @else
         <div class="mt-4 flex flex-col gap-3">

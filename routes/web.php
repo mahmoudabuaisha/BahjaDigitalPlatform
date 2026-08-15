@@ -13,6 +13,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\OrganizerDashboardController;
+use App\Http\Controllers\OrganizerEventController;
 use App\Http\Controllers\PwaController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\SitemapController;
@@ -68,10 +69,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/account/notifications/read', [NotificationController::class, 'markAllRead'])->name('notifications.read');
     Route::delete('/account/notifications', [NotificationController::class, 'destroyAll'])->name('notifications.clear');
 
-    // ── لوحة الفريق المنظِّم (عرض؛ النماذج في لوحة Filament) ──
+    // ── لوحة الفريق المنظِّم ──
     Route::middleware(EnsureTeamManager::class)->group(function () {
         Route::get('/organizer', [OrganizerDashboardController::class, 'dashboard'])->name('organizer.dashboard');
         Route::get('/organizer/events', [OrganizerDashboardController::class, 'events'])->name('organizer.events');
+
+        Route::get('/organizer/events/create', [OrganizerEventController::class, 'create'])->name('organizer.events.create');
+        Route::post('/organizer/events', [OrganizerEventController::class, 'store'])->name('organizer.events.store');
+        Route::get('/organizer/events/{event}/edit', [OrganizerEventController::class, 'edit'])->name('organizer.events.edit');
+        Route::put('/organizer/events/{event}', [OrganizerEventController::class, 'update'])->name('organizer.events.update');
+        Route::delete('/organizer/events/{event}', [OrganizerEventController::class, 'destroy'])->name('organizer.events.destroy');
     });
 
     Route::get('/my-events', [RegistrationController::class, 'index'])->name('my-events');

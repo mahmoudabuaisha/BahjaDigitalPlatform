@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\InitialsAvatarProvider;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -28,9 +29,11 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             ->brandName('بَهْجَة — لوحة الإدارة')
             ->colors([
-                // سماوي Broadsheet — نفس لون التفاعل في الموقع العام
-                'primary' => Color::hex('#0088b0'),
+                // البنفسجي نفسه المستعمل في الموقع العام (--color-brand-500)
+                'primary' => Color::hex('#7c5cff'),
             ])
+            ->sidebarCollapsibleOnDesktop()
+            ->defaultAvatarProvider(InitialsAvatarProvider::class)
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->discoverPages(in: app_path('Filament/Admin/Pages'), for: 'App\Filament\Admin\Pages')
             ->pages([

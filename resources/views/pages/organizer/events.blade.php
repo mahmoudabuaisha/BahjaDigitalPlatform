@@ -13,10 +13,16 @@
         <p class="mt-1 text-ink-soft">عرض وإدارة جميع الفعاليات التي أنشأها فريقكم.</p>
     </div>
 
-    <a href="{{ url('/team/events/create') }}" class="btn btn-primary">
+    <a href="{{ route('organizer.events.create') }}" class="btn btn-primary">
         <x-ui.icon name="plus" class="size-5"/> إضافة فعالية جديدة
     </a>
 </div>
+
+@if(session('event_saved'))
+    <p class="mt-4 flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 font-medium text-emerald-700">
+        <x-ui.icon name="check" class="size-5"/> {{ session('event_saved') }}
+    </p>
+@endif
 
 {{-- بطاقات الأرقام --}}
 <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -61,7 +67,7 @@
         <div class="rounded-2xl border border-dashed border-brand-200 p-12 text-center">
             <span class="icon-tile tone tone-violet icon-tile-lg mx-auto"><x-ui.icon name="calendar"/></span>
             <p class="mt-3 text-lg font-bold">لا فعاليات في هذا التبويب</p>
-            <a href="{{ url('/team/events/create') }}" class="btn btn-primary mt-4">إضافة فعالية جديدة</a>
+            <a href="{{ route('organizer.events.create') }}" class="btn btn-primary mt-4">إضافة فعالية جديدة</a>
         </div>
     @else
         <div class="flex flex-col gap-3">

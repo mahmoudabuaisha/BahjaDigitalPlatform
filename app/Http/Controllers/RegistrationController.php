@@ -70,6 +70,10 @@ class RegistrationController extends Controller
                 : 'اكتمل العدد في هذه الفعالية.');
         }
 
+        // الفريق يختار في نموذج الفعالية: تسجيل مباشر يُقبل فوراً، أو بموافقته
+        $status = $event->registration_mode->initialStatus();
+        $direct = $status === RegistrationStatus::Accepted;
+
         foreach ($newChildren as $child) {
             $event->registrations()->updateOrCreate(
                 ['child_id' => $child->id],
@@ -77,17 +81,17 @@ class RegistrationController extends Controller
                     'user_id' => $user->id,
                     'children_count' => 1,
                     'note' => $data['note'] ?? null,
-                    'status' => RegistrationStatus::Pending,
+                    'status' => $status,
                     'review_note' => null,
-                    'reviewed_at' => null,
+                    'reviewed_at' => $direct ? now() : null,
                 ],
             );
         }
 
         UserNotification::send(
             $user,
-            'registration_submitted',
-            'وصل طلب حجزكم — بانتظار موافقة الفريق',
+            $direct ? 'registration_accepted' : 'registration_submitted',
+            $direct ? 'تأكّد حجزكم' : 'وصل طلب حجزكم — بانتظار موافقة الفريق',
             $event->title.' · '.$newChildren->count().' من الأطفال',
             route('events.show', $event),
         );
@@ -97,7 +101,7 @@ class RegistrationController extends Controller
             UserNotification::send(
                 $manager,
                 'registration_received',
-                'طلب حجز جديد على «'.$event->title.'»',
+                ($direct ? 'تسجيل جديد على «' : 'طلب حجز جديد على «').$event->title.'»',
                 $user->name.' — '.$newChildren->count().' من الأطفال',
             );
         }

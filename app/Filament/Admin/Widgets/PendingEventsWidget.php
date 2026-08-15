@@ -12,7 +12,7 @@ use Filament\Widgets\TableWidget;
 
 class PendingEventsWidget extends TableWidget
 {
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 6;
 
     protected static bool $isLazy = false;
 

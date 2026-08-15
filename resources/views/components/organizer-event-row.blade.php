@@ -38,7 +38,7 @@
 
         <div x-show="open" x-cloak @click.outside="open = false"
              class="absolute end-0 top-full z-30 mt-1 w-48 rounded-2xl border border-brand-100 bg-white p-2 shadow-lg">
-            <a href="{{ url('/team/events/'.$event->id.'/edit') }}" class="flex min-h-[40px] items-center gap-2 rounded-xl px-3 no-underline hover:bg-brand-50">
+            <a href="{{ route('organizer.events.edit', $event) }}" class="flex min-h-[40px] items-center gap-2 rounded-xl px-3 no-underline hover:bg-brand-50">
                 <x-ui.icon name="paint-brush" class="size-4 text-brand-500"/> تعديل الفعالية
             </a>
             <a href="{{ url('/team/events/'.$event->id.'/edit') }}" class="flex min-h-[40px] items-center gap-2 rounded-xl px-3 no-underline hover:bg-brand-50">

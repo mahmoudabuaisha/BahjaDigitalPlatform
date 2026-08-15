@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\InitialsAvatarProvider;
 use App\Filament\Team\Auth\RegisterTeam;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -29,9 +30,10 @@ class TeamPanelProvider extends PanelProvider
             ->registration(RegisterTeam::class)
             ->brandName('بَهْجَة — لوحة الفريق')
             ->colors([
-                // سماوي Broadsheet — نفس لون التفاعل في الموقع العام
-                'primary' => Color::hex('#0088b0'),
+                // البنفسجي نفسه المستعمل في الموقع العام (--color-brand-500)
+                'primary' => Color::hex('#7c5cff'),
             ])
+            ->defaultAvatarProvider(InitialsAvatarProvider::class)
             ->discoverResources(in: app_path('Filament/Team/Resources'), for: 'App\Filament\Team\Resources')
             ->discoverPages(in: app_path('Filament/Team/Pages'), for: 'App\Filament\Team\Pages')
             ->pages([

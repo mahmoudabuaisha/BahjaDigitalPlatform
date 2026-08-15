@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\Audience;
 use App\Enums\EventStatus;
+use App\Enums\RegistrationMode;
 use App\Enums\RegistrationStatus;
 use App\Observers\EventObserver;
+use Database\Factories\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,12 +15,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 #[ObservedBy(EventObserver::class)]
 class Event extends Model
 {
-    /** @use HasFactory<\Database\Factories\EventFactory> */
+    /** @use HasFactory<EventFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -25,8 +29,10 @@ class Event extends Model
         'category_id',
         'area_id',
         'shelter_center_id',
+        'audience',
         'title',
         'description',
+        'terms',
         'location_details',
         'start_date',
         'start_time',
@@ -34,6 +40,8 @@ class Event extends Model
         'status',
         'rejection_reason',
         'expected_children',
+        'fee',
+        'registration_mode',
         'age_min',
         'age_max',
         'actual_children',
@@ -47,6 +55,9 @@ class Event extends Model
         return [
             'start_date' => 'date',
             'status' => EventStatus::class,
+            'registration_mode' => RegistrationMode::class,
+            'audience' => Audience::class,
+            'fee' => 'decimal:2',
             'approved_at' => 'datetime',
         ];
     }
@@ -92,7 +103,7 @@ class Event extends Model
     }
 
     /** بداية الفعالية كلحظة كاملة — تُستعمل في مهلة الإلغاء */
-    public function startsAt(): \Illuminate\Support\Carbon
+    public function startsAt(): Carbon
     {
         return $this->start_date->copy()->setTimeFromTimeString($this->start_time);
     }
@@ -154,6 +165,14 @@ class Event extends Model
         }
 
         return null;
+    }
+
+    /** «مجاناً» أو «10 شيكل» — الرسوم اختيارية، والأصل أن تكون الفعالية مجانية */
+    public function feeLabel(): string
+    {
+        return $this->fee > 0
+            ? rtrim(rtrim(number_format((float) $this->fee, 2), '0'), '.').' شيكل'
+            : 'مجاناً';
     }
 
     public function imageUrl(): ?string

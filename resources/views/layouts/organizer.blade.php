@@ -7,10 +7,10 @@
     $organizerLinks = [
         ['route' => 'organizer.dashboard', 'icon' => 'grid', 'label' => 'لوحة التحكّم', 'url' => null],
         ['route' => 'organizer.events', 'icon' => 'calendar', 'label' => 'فعالياتي', 'url' => null],
-        ['route' => null, 'icon' => 'plus', 'label' => 'إضافة فعالية', 'url' => url('/team/events/create')],
-        ['route' => null, 'icon' => 'bolt', 'label' => 'تسجيل الحضور والتقارير', 'url' => url('/team')],
-        ['route' => 'notifications', 'icon' => 'megaphone', 'label' => 'الإشعارات', 'url' => null],
-        ['route' => 'contact', 'icon' => 'envelope', 'label' => 'تواصلوا معنا', 'url' => null],
+        ['route' => 'organizer.events.create', 'icon' => 'plus', 'label' => 'إضافة فعالية', 'url' => null],
+        ['route' => null, 'icon' => 'chart', 'label' => 'التقارير', 'url' => url('/team')],
+        ['route' => 'notifications', 'icon' => 'megaphone', 'label' => 'الرسائل', 'url' => null],
+        ['route' => 'account.profile', 'icon' => 'cog', 'label' => 'الإعدادات', 'url' => null],
     ];
     $unread = auth()->user()->unreadNotificationsCount();
 @endphp

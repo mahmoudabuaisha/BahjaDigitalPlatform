@@ -153,7 +153,26 @@
                             </div>
                         </div>
                     @endif
+
+                    @if($event->fee > 0)
+                        <div class="flex items-start gap-3">
+                            <span class="icon-tile"><x-ui.icon name="money"/></span>
+                            <div>
+                                <dt class="text-sm text-ink-soft">رسوم المشاركة</dt>
+                                <dd class="font-bold">{{ $event->feeLabel() }}</dd>
+                            </div>
+                        </div>
+                    @endif
                 </dl>
+
+                @if($event->terms)
+                    <div class="mt-5 rounded-2xl bg-brand-50/70 p-4">
+                        <p class="flex items-center gap-2 font-bold text-brand-700">
+                            <x-ui.icon name="shield-check" class="size-5"/> شروط وملاحظات
+                        </p>
+                        <p class="mt-1 whitespace-pre-line text-ink-soft">{{ $event->terms }}</p>
+                    </div>
+                @endif
             </div>
 
             {{-- ═══ حجز مقعد ═══ --}}
