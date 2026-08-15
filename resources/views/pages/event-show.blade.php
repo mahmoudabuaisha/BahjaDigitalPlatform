@@ -62,7 +62,7 @@
                      class="aspect-[16/9] w-full rounded-3xl object-cover shadow-[0_10px_40px_rgb(31_25_55_/_10%)]">
             @else
                 <x-ui.scene :name="$event->category?->slug ?? 'default'"
-                            :tone="$event->category?->toneHex() ?? '#7c5cff'"
+                            :tone="$event->category?->toneHex() ?? '#7c5cff'" fit="meet"
                             class="aspect-[16/7] w-full rounded-3xl shadow-[0_10px_40px_rgb(31_25_55_/_10%)]"/>
             @endif
 
@@ -254,7 +254,15 @@
                             <x-ui.icon name="plus" class="size-5"/> أضيفوا طفلاً
                         </a>
                     @elseif($event->acceptsRegistrations() && $bookableChildren->isNotEmpty())
-                        <form method="POST" action="{{ route('registrations.store', $event) }}" class="flex flex-col gap-3">
+                        {{-- حجوزات محفوظة على الجهاز بانتظار عودة الشبكة --}}
+                        <p data-queued-bookings class="hidden mb-3 flex items-start gap-2 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                            <x-ui.icon name="clock" class="mt-0.5 size-4 shrink-0"/>
+                            <span>
+                                لديكم <b data-queued-count>0</b> طلب حجز محفوظ على هذا الجهاز — يُرسل تلقائياً فور عودة الإنترنت.
+                            </span>
+                        </p>
+
+                        <form method="POST" action="{{ route('registrations.store', $event) }}" data-booking-form class="flex flex-col gap-3">
                             @csrf
 
                             <div class="field">
@@ -275,7 +283,10 @@
                             </label>
 
                             <button type="submit" class="btn btn-primary btn-block">أرسلوا طلب الحجز</button>
-                            <p class="text-center text-sm text-ink-soft">يراجع الفريق الطلب ويصلكم إشعار بالردّ.</p>
+                            <p class="text-center text-sm text-ink-soft">
+                                يراجع الفريق الطلب ويصلكم إشعار بالردّ.
+                                وإن انقطع الإنترنت يُحفظ الطلب على جهازكم ويُرسل تلقائياً عند عودته.
+                            </p>
                         </form>
                     @elseif($bookableChildren->isEmpty() && $myRegistrations->isNotEmpty())
                         <a href="{{ route('my-events') }}" class="btn btn-outline btn-block">كل حجوزاتي</a>

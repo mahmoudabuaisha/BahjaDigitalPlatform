@@ -6,6 +6,7 @@ use App\Enums\RegistrationStatus;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Models\UserNotification;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +28,11 @@ class RegistrationController extends Controller
         ]);
     }
 
-    public function store(Request $request, Event $event): RedirectResponse
+    /**
+     * الحجز يصل إمّا من النموذج مباشرة، وإمّا من طابور «دون اتصال»
+     * حين تعود الشبكة — فيُردّ بـ JSON على الطلبات التي تنتظره.
+     */
+    public function store(Request $request, Event $event): RedirectResponse|JsonResponse
     {
         abort_unless($event->status->isPubliclyVisible(), 404);
 
@@ -43,11 +48,11 @@ class RegistrationController extends Controller
         $children = $user->children()->whereIn('id', $data['children'])->get();
 
         if ($children->isEmpty()) {
-            return back()->with('registration_error', 'اختاروا طفلاً واحداً على الأقل.');
+            return $this->failed($request, 'اختاروا طفلاً واحداً على الأقل.');
         }
 
         if ($event->hasEnded()) {
-            return back()->with('registration_error', 'انتهى موعد هذه الفعالية.');
+            return $this->failed($request, 'انتهى موعد هذه الفعالية.');
         }
 
         // الأطفال المحجوزون مسبقاً لا يُحتسبون مرتين
@@ -59,13 +64,13 @@ class RegistrationController extends Controller
         $newChildren = $children->reject(fn ($child) => $alreadyBooked->contains($child->id));
 
         if ($newChildren->isEmpty()) {
-            return back()->with('registration_error', 'هؤلاء الأطفال محجوزون في هذه الفعالية بالفعل.');
+            return $this->failed($request, 'هؤلاء الأطفال محجوزون في هذه الفعالية بالفعل.');
         }
 
         $remaining = $event->seatsRemaining();
 
         if ($remaining !== null && $newChildren->count() > $remaining) {
-            return back()->with('registration_error', $remaining > 0
+            return $this->failed($request, $remaining > 0
                 ? 'لم يتبقَّ سوى '.$remaining.' مقعد — اختاروا عدداً أقل من الأطفال.'
                 : 'اكتمل العدد في هذه الفعالية.');
         }
@@ -106,7 +111,25 @@ class RegistrationController extends Controller
             );
         }
 
+        $message = $direct
+            ? 'تأكّد حجزكم في «'.$event->title.'».'
+            : 'وصل طلب حجزكم في «'.$event->title.'» — بانتظار ردّ الفريق.';
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true, 'message' => $message]);
+        }
+
         return back()->with('registration_done', true);
+    }
+
+    /** رسالة رفض واحدة للنموذج وللطابور معاً */
+    private function failed(Request $request, string $message): RedirectResponse|JsonResponse
+    {
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => false, 'message' => $message], 422);
+        }
+
+        return back()->with('registration_error', $message);
     }
 
     public function destroy(Registration $registration): RedirectResponse

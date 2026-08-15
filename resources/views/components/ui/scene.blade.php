@@ -1,4 +1,4 @@
-@props(['name' => 'default', 'tone' => '#7c5cff'])
+@props(['name' => 'default', 'tone' => '#7c5cff', 'fit' => 'slice'])
 
 {{--
     رسمة الفئة: مشهد مرسوم بـ SVG يحلّ محلّ الأيقونة المجرّدة حين لا تكون
@@ -12,8 +12,9 @@
     $white = '#ffffff';
 @endphp
 
-<svg {{ $attributes->merge(['class' => 'size-full']) }} viewBox="0 0 320 200" fill="none"
-     preserveAspectRatio="xMidYMid slice" role="img" aria-hidden="true">
+{{-- slice تملأ الإطار بالقصّ، وmeet تُظهر المشهد كاملاً على أرضية السماء نفسها --}}
+<svg {{ $attributes->merge(['class' => 'block w-full']) }} viewBox="0 0 320 200" fill="none"
+     preserveAspectRatio="xMidYMid {{ $fit }}" style="background:{{ $sky }}" role="img" aria-hidden="true">
 
     {{-- الخلفية والأرض — مشتركة بين كل المشاهد --}}
     <rect width="320" height="200" fill="{{ $sky }}"/>

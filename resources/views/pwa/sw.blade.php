@@ -151,6 +151,92 @@ async function trimUploads(cache) {
     }
 }
 
+/* ── طابور الحجز دون اتصال ──
+   الصفحة تحفظ الطلب في IndexedDB، وهذا الحدث يُرسله في الخلفية فور
+   عودة الشبكة حتى لو أغلق وليّ الأمر الموقع (كروم/أندرويد).
+   المتصفّحات التي لا تدعم Background Sync تُرسله الصفحة عند فتحها. */
+const QUEUE_DB = 'bahja-offline';
+const QUEUE_STORE = 'bookings';
+const SYNC_TAG = 'bahja-bookings';
+
+function queueDatabase() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(QUEUE_DB, 1);
+
+        request.onupgradeneeded = () => {
+            if (! request.result.objectStoreNames.contains(QUEUE_STORE)) {
+                request.result.createObjectStore(QUEUE_STORE, { keyPath: 'id', autoIncrement: true });
+            }
+        };
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+function queueTransact(mode, run) {
+    return queueDatabase().then((db) => new Promise((resolve, reject) => {
+        const tx = db.transaction(QUEUE_STORE, mode);
+        const request = run(tx.objectStore(QUEUE_STORE));
+
+        tx.oncomplete = () => resolve(request?.result);
+        tx.onerror = () => reject(tx.error);
+    }));
+}
+
+async function flushQueue() {
+    const pending = await queueTransact('readonly', (store) => store.getAll()).catch(() => []);
+
+    let sent = 0;
+
+    for (const item of pending) {
+        const body = new FormData();
+
+        body.append('_token', item.token ?? '');
+        body.append('note', item.note ?? '');
+        (item.children ?? []).forEach((child) => body.append('children[]', child));
+
+        let response;
+
+        try {
+            response = await fetch(item.url, {
+                method: 'POST',
+                body,
+                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin',
+            });
+        } catch (error) {
+            throw error; // الشبكة ما زالت مقطوعة: يُعيد المتصفح المحاولة لاحقاً
+        }
+
+        // جلسة منتهية: نُبقي الطلب حتى يسجّل وليّ الأمر دخوله من الصفحة
+        if (response.status === 419 || response.status === 401) {
+            continue;
+        }
+
+        await queueTransact('readwrite', (store) => store.delete(item.id));
+
+        if (response.ok) {
+            sent++;
+        }
+    }
+
+    if (sent > 0) {
+        const clients = await self.clients.matchAll({ includeUncontrolled: true });
+
+        clients.forEach((client) => client.postMessage({
+            type: 'bookings-synced',
+            message: sent === 1 ? 'أُرسل حجزكم المحفوظ.' : 'أُرسلت ' + sent + ' من حجوزاتكم المحفوظة.',
+        }));
+    }
+}
+
+self.addEventListener('sync', (event) => {
+    if (event.tag === SYNC_TAG) {
+        event.waitUntil(flushQueue());
+    }
+});
+
 self.addEventListener('fetch', (event) => {
     const request = event.request;
 
