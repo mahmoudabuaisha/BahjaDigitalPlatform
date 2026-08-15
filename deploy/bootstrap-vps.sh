@@ -136,6 +136,16 @@ openssl req -x509 -nodes -days 825 -newkey rsa:2048 \
 chmod 600 /etc/ssl/bahja/origin.key
 
 log "إعداد Nginx"
+# صيغة HTTP/2 تغيّرت في nginx 1.25.1: قبلها معامل في listen، وبعدها توجيه مستقل.
+# أوبونتو 24.04 يشحن 1.24، فالكشف عن النسخة ضروري لا تجميلي.
+NGINX_VERSION="$(nginx -v 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
+if [[ "$(printf '%s\n' "1.25.1" "$NGINX_VERSION" | sort -V | head -1)" == "1.25.1" ]]; then
+    LISTEN_443="listen 443 ssl;
+    http2 on;"
+else
+    LISTEN_443="listen 443 ssl http2;"
+fi
+
 cat > /etc/nginx/sites-available/bahja <<NGINX
 server {
     listen 80;
@@ -144,8 +154,7 @@ server {
 }
 
 server {
-    listen 443 ssl;
-    http2 on;
+    ${LISTEN_443}
     server_name ${DOMAIN} www.${DOMAIN};
 
     ssl_certificate     /etc/ssl/bahja/origin.pem;
