@@ -86,6 +86,9 @@ if [[ -n "$PATCH_FILE" ]]; then
     PATCH_APPLIED=1
 fi
 
+# التحديثات اللاحقة تُشغَّل غالباً بـ root على شجرة مملوكة لـ deploy
+git config --global --add safe.directory "$APP_DIR" 2>/dev/null || true
+
 log "تثبيت الاعتماديات وبناء الأصول"
 composer install --no-dev --optimize-autoloader --no-interaction
 npm ci --no-audit --no-fund
