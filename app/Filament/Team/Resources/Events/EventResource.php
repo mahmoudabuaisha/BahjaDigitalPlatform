@@ -5,6 +5,7 @@ namespace App\Filament\Team\Resources\Events;
 use App\Filament\Team\Resources\Events\Pages\CreateEvent;
 use App\Filament\Team\Resources\Events\Pages\EditEvent;
 use App\Filament\Team\Resources\Events\Pages\ListEvents;
+use App\Filament\Team\Resources\Events\RelationManagers\RegistrationsRelationManager;
 use App\Filament\Team\Resources\Events\Schemas\EventForm;
 use App\Filament\Team\Resources\Events\Tables\EventsTable;
 use App\Models\Event;
@@ -30,6 +31,14 @@ class EventResource extends Resource
     {
         return parent::getEloquentQuery()
             ->where('team_id', auth()->user()->team_id);
+    }
+
+    /** @return array<class-string> */
+    public static function getRelations(): array
+    {
+        return [
+            RegistrationsRelationManager::class,
+        ];
     }
 
     public static function form(Schema $schema): Schema

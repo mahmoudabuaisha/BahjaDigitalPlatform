@@ -7,6 +7,7 @@ use App\Filament\Admin\Resources\Events\Pages\CreateEvent;
 use App\Filament\Admin\Resources\Events\Pages\EditEvent;
 use App\Filament\Admin\Resources\Events\Pages\ListEvents;
 use App\Filament\Admin\Resources\Events\Pages\ViewEvent;
+use App\Filament\Admin\Resources\Events\RelationManagers\RegistrationsRelationManager;
 use App\Filament\Admin\Resources\Events\Schemas\EventForm;
 use App\Filament\Admin\Resources\Events\Schemas\EventInfolist;
 use App\Filament\Admin\Resources\Events\Tables\EventsTable;
@@ -44,6 +45,14 @@ class EventResource extends Resource
     public static function getNavigationBadgeColor(): ?string
     {
         return 'warning';
+    }
+
+    /** @return array<class-string> */
+    public static function getRelations(): array
+    {
+        return [
+            RegistrationsRelationManager::class,
+        ];
     }
 
     public static function form(Schema $schema): Schema

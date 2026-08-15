@@ -44,17 +44,49 @@
                 <a href="{{ route('home') }}" class="nav-link" @if(request()->routeIs('home')) aria-current="page" @endif>الرئيسية</a>
                 <a href="{{ route('events.index') }}" class="nav-link" @if(request()->routeIs('events.index')) aria-current="page" @endif>الفعاليات</a>
                 <a href="{{ route('organizers') }}" class="nav-link" @if(request()->routeIs('organizers')) aria-current="page" @endif>المنظِّمون</a>
-                <a href="{{ route('guide') }}" class="nav-link" @if(request()->routeIs('guide')) aria-current="page" @endif>عن بَهْجَة</a>
+                <a href="{{ route('about') }}" class="nav-link" @if(request()->routeIs('about')) aria-current="page" @endif>عن بَهْجَة</a>
                 <a href="{{ route('contact') }}" class="nav-link" @if(request()->routeIs('contact')) aria-current="page" @endif>تواصلوا معنا</a>
             </nav>
 
             <div class="ms-auto hidden items-center gap-2 lg:flex">
-                {{-- حسابات العائلات ميزة قادمة — الأزرار في مكانها ومعطّلة كي لا تَعِد بما لا يعمل --}}
-                <span class="btn btn-outline btn-sm" aria-disabled="true" title="قريباً">إنشاء حساب</span>
-                <span class="btn btn-primary btn-sm" aria-disabled="true" title="قريباً">
-                    تسجيل دخول
-                    <span class="rounded-full bg-white/25 px-2 text-[11px]">قريباً</span>
-                </span>
+                @guest
+                    <a href="{{ route('register') }}" class="btn btn-outline btn-sm">إنشاء حساب</a>
+                    <a href="{{ route('login') }}" class="btn btn-primary btn-sm">تسجيل دخول</a>
+                @endguest
+
+                @auth
+                    <div x-data="{ menu: false }" class="relative">
+                        <button type="button" @click="menu = ! menu" :aria-expanded="menu ? 'true' : 'false'"
+                                class="btn btn-outline btn-sm">
+                            <span class="grid size-6 place-items-center rounded-full bg-brand-100 text-xs font-bold text-brand-700">
+                                {{ mb_substr(auth()->user()->name, 0, 1) }}
+                            </span>
+                            {{ \Illuminate\Support\Str::limit(auth()->user()->name, 14) }}
+                            <x-ui.icon name="chevron-down" class="size-4"/>
+                        </button>
+
+                        <div x-show="menu" x-cloak @click.outside="menu = false" x-transition.opacity
+                             class="absolute end-0 top-full z-50 mt-2 w-52 rounded-2xl border border-brand-100 bg-white p-2 shadow-lg">
+                            @if(auth()->user()->isFamily())
+                                <a href="{{ route('my-events') }}" class="flex min-h-[42px] items-center gap-2 rounded-xl px-3 no-underline hover:bg-brand-50">
+                                    <x-ui.icon name="calendar" class="size-4 text-brand-500"/> فعالياتي
+                                </a>
+                            @else
+                                <a href="{{ auth()->user()->role->isAdministrative() ? url('/admin') : url('/team') }}"
+                                   class="flex min-h-[42px] items-center gap-2 rounded-xl px-3 no-underline hover:bg-brand-50">
+                                    <x-ui.icon name="grid" class="size-4 text-brand-500"/> لوحة التحكّم
+                                </a>
+                            @endif
+
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="flex min-h-[42px] w-full items-center gap-2 rounded-xl px-3 text-start text-rose-600 hover:bg-rose-50">
+                                    <x-ui.icon name="arrow-back" class="size-4"/> تسجيل الخروج
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @endauth
             </div>
 
             <button type="button" @click="open = ! open" :aria-expanded="open ? 'true' : 'false'"
@@ -74,7 +106,8 @@
                     ['route' => 'home', 'label' => 'الرئيسية'],
                     ['route' => 'events.index', 'label' => 'الفعاليات'],
                     ['route' => 'organizers', 'label' => 'المنظِّمون'],
-                    ['route' => 'guide', 'label' => 'عن بَهْجَة'],
+                    ['route' => 'about', 'label' => 'عن بَهْجَة'],
+                    ['route' => 'guide', 'label' => 'دليل الاستخدام'],
                     ['route' => 'contact', 'label' => 'تواصلوا معنا'],
                 ] as $item)
                     <li>
@@ -85,6 +118,23 @@
                     </li>
                 @endforeach
             </ul>
+
+            <div class="mt-3 flex flex-col gap-2 border-t border-brand-100 pt-3">
+                @guest
+                    <a href="{{ route('login') }}" class="btn btn-primary btn-block">تسجيل دخول</a>
+                    <a href="{{ route('register') }}" class="btn btn-outline btn-block">إنشاء حساب</a>
+                @endguest
+
+                @auth
+                    @if(auth()->user()->isFamily())
+                        <a href="{{ route('my-events') }}" class="btn btn-outline btn-block">فعالياتي</a>
+                    @endif
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-ghost btn-block text-rose-600">تسجيل الخروج</button>
+                    </form>
+                @endauth
+            </div>
         </nav>
     </header>
 

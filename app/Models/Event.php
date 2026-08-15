@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EventStatus;
+use App\Enums\RegistrationStatus;
 use App\Observers\EventObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -83,6 +84,42 @@ class Event extends Model
     public function feedback(): HasMany
     {
         return $this->hasMany(Feedback::class);
+    }
+
+    public function registrations(): HasMany
+    {
+        return $this->hasMany(Registration::class);
+    }
+
+    /** المقاعد المحجوزة فعلاً — مجموع الأطفال في الحجوزات المؤكَّدة */
+    public function seatsTaken(): int
+    {
+        return (int) $this->registrations()
+            ->where('status', RegistrationStatus::Confirmed)
+            ->sum('children_count');
+    }
+
+    /** المقاعد المتبقية، أو null حين لم يحدّد الفريق عدداً متوقعاً (بلا حدّ) */
+    public function seatsRemaining(): ?int
+    {
+        if (! $this->expected_children) {
+            return null;
+        }
+
+        return max(0, $this->expected_children - $this->seatsTaken());
+    }
+
+    public function isFull(): bool
+    {
+        return $this->seatsRemaining() === 0;
+    }
+
+    /** هل يقبل الحجز الآن؟ فعالية ظاهرة، لم يمض موعدها، وفيها متّسع */
+    public function acceptsRegistrations(): bool
+    {
+        return $this->status->isPubliclyVisible()
+            && ! $this->hasEnded()
+            && ! $this->isFull();
     }
 
     public function scopePubliclyVisible(Builder $query): Builder

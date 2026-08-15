@@ -156,6 +156,88 @@
                 </dl>
             </div>
 
+            {{-- ═══ حجز مقعد ═══ --}}
+            @php
+                $remaining = $event->seatsRemaining();
+                $myRegistration = auth()->check()
+                    ? $event->registrations()->where('user_id', auth()->id())->first()
+                    : null;
+                $isBooked = $myRegistration && $myRegistration->status === \App\Enums\RegistrationStatus::Confirmed;
+            @endphp
+
+            <div class="card gap-3 p-6">
+                <div class="flex items-center justify-between gap-2">
+                    <h2 class="text-lg font-bold">حجز مقعد</h2>
+                    @if($remaining !== null)
+                        <span class="badge {{ $remaining > 0 ? '' : 'bg-rose-50 text-rose-700' }}">
+                            {{ $remaining > 0 ? 'بقي '.$remaining.' مقعد' : 'اكتمل العدد' }}
+                        </span>
+                    @endif
+                </div>
+
+                @if(session('registration_done'))
+                    <p class="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 font-medium text-emerald-700">
+                        <x-ui.icon name="check" class="size-5"/> تم تأكيد حجزكم — نراكم في الموعد.
+                    </p>
+                @endif
+
+                @if(session('registration_cancelled'))
+                    <p class="rounded-2xl bg-brand-50 px-4 py-3 text-brand-700">أُلغي حجزكم.</p>
+                @endif
+
+                @if(session('registration_error'))
+                    <p class="rounded-2xl bg-rose-50 px-4 py-3 text-rose-700">{{ session('registration_error') }}</p>
+                @endif
+
+                @guest
+                    <p class="text-ink-soft">سجّلوا الدخول لحجز مقاعد لأطفالكم — الحجز مجاني ولا يستغرق دقيقة.</p>
+                    <a href="{{ route('login') }}" class="btn btn-primary btn-block">تسجيل الدخول للحجز</a>
+                    <a href="{{ route('register') }}" class="btn btn-ghost btn-block">ليس لديكم حساب؟ أنشئوا واحداً</a>
+                @endguest
+
+                @auth
+                    @if($isBooked)
+                        <p class="flex items-center gap-2 text-emerald-700">
+                            <x-ui.icon name="check" class="size-5"/>
+                            حجزكم مؤكَّد لـ {{ $myRegistration->children_count }} من الأطفال.
+                        </p>
+
+                        <form method="POST" action="{{ route('registrations.destroy', $event) }}"
+                              onsubmit="return confirm('هل تريدون إلغاء الحجز؟')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline btn-block">إلغاء الحجز</button>
+                        </form>
+
+                        <a href="{{ route('my-events') }}" class="btn btn-ghost btn-block">كل حجوزاتي</a>
+                    @elseif($event->acceptsRegistrations())
+                        <form method="POST" action="{{ route('registrations.store', $event) }}" class="flex flex-col gap-3">
+                            @csrf
+                            <label class="field">
+                                <span>عدد الأطفال</span>
+                                <select name="children_count" class="input">
+                                    @for($count = 1; $count <= min(10, $remaining ?? 10); $count++)
+                                        <option value="{{ $count }}">{{ $count }}</option>
+                                    @endfor
+                                </select>
+                            </label>
+
+                            <label class="field">
+                                <span>ملاحظة للفريق (اختياري)</span>
+                                <input type="text" name="note" maxlength="300" class="input" placeholder="مثال: طفل يحتاج مرافقاً">
+                            </label>
+
+                            <button type="submit" class="btn btn-primary btn-block">أكّدوا الحجز</button>
+                        </form>
+                    @else
+                        <p class="text-ink-soft">
+                            {{ $event->hasEnded() ? 'انتهى موعد هذه الفعالية.' : 'اكتمل العدد في هذه الفعالية — تابعوا الروزنامة لفعاليات أخرى.' }}
+                        </p>
+                        <a href="{{ route('events.index') }}" class="btn btn-outline btn-block">فعاليات أخرى</a>
+                    @endif
+                @endauth
+            </div>
+
             {{-- الفريق المنظّم --}}
             <a href="{{ route('teams.show', $event->team) }}" class="card card-hover flex-row items-center gap-4 p-5 no-underline">
                 @if($event->team->logo_path)
