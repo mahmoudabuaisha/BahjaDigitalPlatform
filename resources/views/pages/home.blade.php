@@ -1,136 +1,216 @@
 @extends('layouts.app')
 
 @section('content')
-@php
-    // اليوم النشط عند أول رسم من السيرفر — كي تظهر الصفحة صحيحة قبل عمل Alpine وبدونه
-    $activeDay = $initialFilters['day'] ?: 'today';
-    $activeArea = $initialFilters['area'];
-    $headings = ['today' => 'فعاليات اليوم', 'tomorrow' => 'فعاليات الغد'];
-@endphp
 
-<div x-data="eventCalendar(@js($initialFilters))">
+{{-- ═══ البطل ═══ --}}
+<section class="surface-tint relative overflow-hidden">
+    <div class="mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:py-20">
+        <div>
+            <span class="badge bg-white shadow-sm">
+                <x-ui.icon name="sparkles" class="size-4 text-brand-500"/> رسالة بَهْجَة
+            </span>
 
-    {{-- دعوة التثبيت — تظهر فقط إذا عرض المتصفح التثبيت ولم يُرفض سابقاً --}}
-    <div x-data="installPrompt" x-show="available" x-cloak
-         class="mb-3 flex flex-wrap items-center gap-2 bg-cyan-100 px-3 py-2">
-        <span class="flex-1 text-sm leading-relaxed text-cyan-800">
-            ثبّتوا بَهْجَة على الشاشة الرئيسية — تعمل مثل تطبيق، بلا تنزيل.
-        </span>
-        <button type="button" @click="dismiss()" class="btn btn-ghost min-h-[36px] text-sm">لاحقاً</button>
-        <button type="button" @click="install()" class="btn btn-primary min-h-[36px] text-sm">تثبيت</button>
-    </div>
+            <h1 class="mt-4 text-4xl leading-[1.25] font-bold sm:text-5xl">
+                اكتشفوا وشاركوا في
+                <span class="bg-gradient-to-l from-brand-600 to-brand-400 bg-clip-text text-transparent">فعاليات ممتعة وآمنة</span>
+                لأطفالكم
+            </h1>
 
-    <h1 class="text-[34px] leading-tight sm:text-[42px]">أين نجد الفرح اليوم؟</h1>
+            <p class="mt-4 max-w-xl text-lg leading-relaxed text-ink-soft">
+                كل لحظة لعب هي فرصة جديدة للتعلّم والنموّ. نجمع فعاليات الترفيه والدعم النفسي
+                في المحافظات الخمس، ونعرضها لكم يوماً بيوم — وتعمل حتى حين تضعف الشبكة.
+            </p>
 
-    <p class="mt-1 max-w-xl text-ash-800">
-        كل فعاليات الترفيه والدعم النفسي في المحافظات الخمس، مرتّبة يوماً بيوم.
-    </p>
-
-    {{-- التصفية — تعمل محلياً على ما هو معروض: بلا أي طلب شبكة، ودون اتصال --}}
-    <section class="mt-4" aria-label="تصفية الفعاليات">
-        <div class="flex max-w-md gap-2" role="tablist" aria-label="اليوم">
-            <button type="button" role="tab" class="day-tab" :aria-selected="day === 'today'"
-                    @click="day = 'today'" aria-selected="{{ $activeDay === 'today' ? 'true' : 'false' }}">اليوم</button>
-            <button type="button" role="tab" class="day-tab" :aria-selected="day === 'tomorrow'"
-                    @click="day = 'tomorrow'" aria-selected="{{ $activeDay === 'tomorrow' ? 'true' : 'false' }}">غداً</button>
-            <button type="button" role="tab" class="day-tab" :aria-selected="day === 'all'"
-                    @click="day = 'all'" aria-selected="{{ $activeDay === 'all' ? 'true' : 'false' }}">كل الأيام</button>
-        </div>
-
-        <div class="mt-2 flex flex-wrap gap-2">
-            <button type="button" class="chip" :aria-pressed="area === ''" @click="area = ''" aria-pressed="{{ $activeArea === '' ? 'true' : 'false' }}">
-                كل المحافظات
-            </button>
-            @foreach($areas as $areaOption)
-                <button type="button" class="chip"
-                        :aria-pressed="area === '{{ $areaOption->slug }}'"
-                        @click="area = '{{ $areaOption->slug }}'"
-                        aria-pressed="{{ $activeArea === $areaOption->slug ? 'true' : 'false' }}">{{ $areaOption->name }}</button>
-            @endforeach
-        </div>
-
-        {{-- تصفية أدق — مركز الإيواء ونوع النشاط، مطويّة كي تبقى الشاشة الأولى بسيطة --}}
-        <details class="mt-3">
-            <summary class="inline-flex cursor-pointer list-none items-center gap-1 text-sm text-cyan-700 hover:underline">
-                تصفية أدق — مركز الإيواء ونوع النشاط
-            </summary>
-
-            <div class="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label class="field block">
-                    <span class="block">مركز الإيواء / المخيم</span>
-                    <select x-model="center" class="input">
-                        <option value="">كل المراكز</option>
-                        @foreach($areas as $areaOption)
-                            @foreach($areaOption->shelterCenters as $shelterCenter)
-                                <option value="{{ $shelterCenter->id }}" x-show="area === '' || area === '{{ $areaOption->slug }}'">
-                                    {{ $shelterCenter->name }} — {{ $areaOption->name }}
-                                </option>
-                            @endforeach
-                        @endforeach
-                    </select>
-                </label>
-
-                <label class="field block">
-                    <span class="block">نوع النشاط</span>
-                    <select x-model="category" class="input">
-                        <option value="">كل الأنواع</option>
-                        @foreach($categories as $categoryOption)
-                            <option value="{{ $categoryOption->slug }}">{{ $categoryOption->name }}</option>
-                        @endforeach
-                    </select>
-                </label>
+            <div class="mt-6 flex flex-wrap gap-3">
+                <a href="{{ route('events.index') }}" class="btn btn-primary">
+                    <x-ui.icon name="calendar" class="size-5"/> تصفّحوا الفعاليات
+                </a>
+                <a href="{{ url('/team/register') }}" class="btn btn-outline">
+                    <x-ui.icon name="plus" class="size-5"/> سجّلوا فريقكم
+                </a>
             </div>
-        </details>
-    </section>
 
-    <div class="mt-6 flex items-baseline justify-between gap-3">
-        <h2 class="text-[22px]" x-text="listHeading">{{ $headings[$activeDay] ?? 'الأيام الأربعة عشر القادمة' }}</h2>
-        <span class="font-figure text-sm text-ash-700" x-text="listCount"></span>
+            <dl class="mt-8 grid max-w-lg grid-cols-2 gap-4 sm:grid-cols-4">
+                @foreach([
+                    ['value' => $stats['upcoming'], 'label' => 'فعالية قادمة'],
+                    ['value' => $stats['completed'], 'label' => 'فعالية منفَّذة'],
+                    ['value' => $stats['children'], 'label' => 'طفل حضر'],
+                    ['value' => $stats['teams'], 'label' => 'فريق تطوّعي'],
+                ] as $stat)
+                    <div class="rounded-2xl bg-white/70 p-3 text-center shadow-sm">
+                        <dt class="text-2xl font-bold text-brand-700">{{ number_format($stat['value']) }}</dt>
+                        <dd class="text-sm text-ink-soft">{{ $stat['label'] }}</dd>
+                    </div>
+                @endforeach
+            </dl>
+        </div>
+
+        {{-- لوحة زخرفية: بطاقة فعالية مصغّرة فوق أشكال ملوّنة --}}
+        <div class="relative hidden lg:block" aria-hidden="true">
+            <div class="absolute -top-6 start-6 size-28 rounded-3xl bg-brand-200/70 blur-xl"></div>
+            <div class="absolute bottom-0 end-10 size-36 rounded-full bg-pink-200/60 blur-2xl"></div>
+
+            <div class="relative mx-auto mb-14 max-w-sm rotate-2 rounded-3xl bg-white p-5 shadow-[0_20px_60px_rgb(93_60_190_/_18%)]">
+                <div class="thumb-fallback tone tone-violet grid h-40 place-items-center rounded-2xl">
+                    <x-brand-mark class="size-20"/>
+                </div>
+                <p class="mt-4 text-lg font-bold">يوم ألعاب في ساحة المركز</p>
+                <p class="mt-1 flex items-center gap-2 text-sm text-ink-soft">
+                    <x-ui.icon name="map-pin" class="size-4 text-brand-400"/> مركز الإيواء — الساحة الشمالية
+                </p>
+                <div class="mt-4 flex items-center justify-between">
+                    <span class="badge tone tone-amber badge-tone"><x-ui.icon name="cake" class="size-4"/> من 4 إلى 10 سنوات</span>
+                    <span class="btn btn-primary btn-sm">عرض التفاصيل</span>
+                </div>
+            </div>
+
+            <div class="absolute bottom-0 start-0 flex -rotate-3 items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-lg">
+                <span class="icon-tile tone tone-emerald size-10"><x-ui.icon name="shield-check"/></span>
+                <span class="text-sm font-bold">كل فعالية معتمَدة من الإدارة</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ═══ شريط البحث ═══ --}}
+<section class="mx-auto -mt-8 max-w-7xl px-4 sm:px-6">
+    <form method="GET" action="{{ route('events.index') }}"
+          class="grid gap-3 rounded-3xl border border-brand-100 bg-white p-4 shadow-[0_10px_40px_rgb(31_25_55_/_8%)] md:grid-cols-[1.4fr_1fr_1fr_auto]">
+        <label class="field">
+            <span class="sr-only">ابحثوا عن فعالية</span>
+            <span class="relative block">
+                <x-ui.icon name="search" class="absolute top-1/2 start-4 size-5 -translate-y-1/2 text-brand-400"/>
+                <input type="search" name="q" class="input ps-12" placeholder="ابحثوا باسم الفعالية أو المكان">
+            </span>
+        </label>
+
+        <label class="field">
+            <span class="sr-only">الفئة</span>
+            <select name="cat" class="input">
+                <option value="">جميع الفئات</option>
+                @foreach($categories as $category)
+                    <option value="{{ $category->slug }}">{{ $category->name }}</option>
+                @endforeach
+            </select>
+        </label>
+
+        <label class="field">
+            <span class="sr-only">المحافظة</span>
+            <select name="area" class="input">
+                <option value="">كل المحافظات</option>
+                @foreach($areas as $area)
+                    <option value="{{ $area->slug }}">{{ $area->name }}</option>
+                @endforeach
+            </select>
+        </label>
+
+        <button type="submit" class="btn btn-primary md:min-w-32">
+            <x-ui.icon name="search" class="size-5"/> بحث
+        </button>
+    </form>
+</section>
+
+{{-- ═══ الفئات ═══ --}}
+<section class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+    <div class="flex flex-wrap items-end justify-between gap-3">
+        <div>
+            <h2 class="section-title">
+                <span class="icon-tile tone tone-violet size-11"><x-ui.icon name="grid"/></span>
+                الفئات
+            </h2>
+            <p class="mt-1 text-ink-soft">اختاروا نوع النشاط الذي يحبّه أطفالكم.</p>
+        </div>
+        <a href="{{ route('events.index') }}" class="btn btn-ghost btn-sm">كل الفعاليات ←</a>
     </div>
 
-    {{-- الروزنامة مجمعة حسب اليوم --}}
-    @forelse($eventsByDay as $date => $dayEvents)
-        @php $carbonDate = \Illuminate\Support\Carbon::parse($date); @endphp
-        <section data-day-group class="mt-4">
-            <h3 class="flex items-baseline gap-2 text-[19px]" x-show="day === 'all'" @if($activeDay !== 'all') x-cloak @endif>
-                <span>
-                    @if($carbonDate->isToday()) اليوم
-                    @elseif($carbonDate->isTomorrow()) غداً
-                    @else {{ $carbonDate->translatedFormat('l') }}
-                    @endif
-                </span>
-                <span class="font-figure text-sm font-normal text-ash-700">{{ $carbonDate->translatedFormat('j F') }}</span>
-            </h3>
+    <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        <a href="{{ route('events.index') }}" class="card card-hover tone tone-violet items-center gap-3 p-5 text-center no-underline">
+            <span class="icon-tile icon-tile-lg"><x-ui.icon name="grid"/></span>
+            <span class="font-bold">جميع الفئات</span>
+            <span class="text-sm text-ink-soft">{{ $stats['upcoming'] }} فعالية قادمة</span>
+        </a>
 
-            <div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                @foreach($dayEvents as $event)
+        @foreach($categories as $category)
+            <a href="{{ route('events.index', ['cat' => $category->slug]) }}"
+               class="card card-hover {{ $category->toneClass() }} items-center gap-3 p-5 text-center no-underline">
+                <span class="icon-tile icon-tile-lg"><x-ui.icon :name="$category->iconKey()"/></span>
+                <span class="font-bold">{{ $category->name }}</span>
+                <span class="text-sm text-ink-soft">
+                    {{ $category->events_count }} {{ $category->events_count === 1 ? 'فعالية قادمة' : 'فعاليات قادمة' }}
+                </span>
+            </a>
+        @endforeach
+    </div>
+</section>
+
+{{-- ═══ الفعاليات القادمة ═══ --}}
+<section class="surface-tint py-14">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+            <div>
+                <h2 class="section-title">
+                    <span class="icon-tile tone tone-amber size-11"><x-ui.icon name="calendar"/></span>
+                    الفعاليات القادمة
+                </h2>
+                <p class="mt-1 text-ink-soft">أقرب المواعيد في المحافظات الخمس.</p>
+            </div>
+            <a href="{{ route('events.index') }}" class="btn btn-outline btn-sm">عرض الكل</a>
+        </div>
+
+        @if($upcoming->isEmpty())
+            <div class="mt-6 rounded-3xl border border-dashed border-brand-200 bg-white/70 p-10 text-center">
+                <span class="icon-tile tone tone-violet icon-tile-lg mx-auto"><x-ui.icon name="calendar"/></span>
+                <p class="mt-3 text-lg font-bold">لا فعاليات منشورة حالياً</p>
+                <p class="mt-1 text-ink-soft">الفرق التطوعية ترفع جداولها باستمرار — عودوا قريباً.</p>
+            </div>
+        @else
+            <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                @foreach($upcoming as $event)
                     <x-event-card :event="$event"/>
                 @endforeach
             </div>
-        </section>
-    @empty
-        <p class="mt-4 max-w-md text-ash-800">
-            لا فعاليات منشورة حالياً — عودوا قريباً، الفرق الترفيهية ترفع جداولها باستمرار.
-        </p>
-    @endforelse
-
-    {{-- حالة "لا نتائج" بعد التصفية --}}
-    <div id="empty-results" class="mt-4 hidden max-w-md">
-        <p class="text-ash-800">لا فعاليات تطابق هذه التصفية في الأيام القادمة.</p>
-        <button type="button" @click="resetFilters()" class="btn btn-ghost mt-1 px-0">اعرضوا كل الفعاليات</button>
+        @endif
     </div>
+</section>
 
-    {{-- الطريق حين لا تجد العائلة فعالية قريبة --}}
-    <section class="mt-8 max-w-xl">
-        <h2 class="text-[19px]">لا تجدون فعالية قريبة؟</h2>
-        <p class="mt-1 text-ash-800">
-            شاركونا احتياج منطقتكم، أو أخبروا فريقاً ترفيهياً تعرفونه بالانضمام إلى بَهْجَة.
+{{-- ═══ لماذا بَهْجَة ═══ --}}
+<section class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+    <h2 class="section-title justify-center text-center">لماذا بَهْجَة؟</h2>
+    <p class="mx-auto mt-1 max-w-xl text-center text-ink-soft">
+        منصّة واحدة تجمع الفرق والعائلات، بأبسط طريق ممكن.
+    </p>
+
+    <div class="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        @foreach([
+            ['icon' => 'sparkles', 'tone' => 'tone-violet', 'title' => 'فعاليات للأطفال', 'text' => 'ترفيه ودعم نفسي واحتفالات، مصمّمة لأعمار الأطفال في مراكز الإيواء.'],
+            ['icon' => 'grid', 'tone' => 'tone-amber', 'title' => 'فعاليات متنوّعة', 'text' => 'ألعاب ورسم ومسرح ورياضة وحكايات — لكل طفل ما يحبّه.'],
+            ['icon' => 'megaphone', 'tone' => 'tone-rose', 'title' => 'إعلانات فورية', 'text' => 'الجدول يصل عبر واتساب وكروت QR في المراكز، ويُحفظ على الهاتف.'],
+            ['icon' => 'shield-check', 'tone' => 'tone-emerald', 'title' => 'آمن وموثوق', 'text' => 'كل فعالية تمرّ على اعتماد الإدارة قبل أن تظهر للعائلات.'],
+        ] as $feature)
+            <div class="card tone {{ $feature['tone'] }} gap-3 p-6">
+                <span class="icon-tile icon-tile-lg"><x-ui.icon :name="$feature['icon']"/></span>
+                <h3 class="text-lg font-bold">{{ $feature['title'] }}</h3>
+                <p class="leading-relaxed text-ink-soft">{{ $feature['text'] }}</p>
+            </div>
+        @endforeach
+    </div>
+</section>
+
+{{-- ═══ دعوة الفرق ═══ --}}
+<section class="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-l from-brand-700 to-brand-500 px-6 py-12 text-center text-white sm:px-12">
+        <div class="absolute -top-10 -start-10 size-40 rounded-full bg-white/10"></div>
+        <div class="absolute -bottom-12 end-0 size-52 rounded-full bg-white/10"></div>
+
+        <h2 class="relative text-3xl font-bold text-white">عندكم فريق ترفيهي؟</h2>
+        <p class="relative mx-auto mt-3 max-w-xl leading-relaxed text-brand-50">
+            سجّلوا فريقكم وارفعوا جدول فعالياتكم بأنفسكم — بعد اعتماد الإدارة تصل فعالياتكم لآلاف العائلات.
         </p>
-        <div class="mt-2 flex flex-wrap gap-2">
-            <a href="{{ route('feedback.create') }}" class="btn btn-secondary">أرسلوا ملاحظة</a>
-            <a href="{{ url('/team/register') }}" class="btn btn-ghost">انضموا كفريق</a>
+        <div class="relative mt-6 flex flex-wrap justify-center gap-3">
+            <a href="{{ url('/team/register') }}" class="btn bg-white text-brand-700 hover:bg-brand-50">سجّلوا فريقكم الآن</a>
+            <a href="{{ route('organizers') }}" class="btn border-white/50 text-white hover:bg-white/10">تعرّفوا على المنظِّمين</a>
         </div>
-    </section>
+    </div>
+</section>
 
-</div>
 @endsection

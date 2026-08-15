@@ -3,15 +3,15 @@
 @section('title', 'رأيكم يهمنا — '.\App\Support\Settings::get('site_name'))
 
 @section('content')
-<div class="max-w-xl">
+<div class="mx-auto max-w-xl px-4 py-10 sm:px-6">
 
     <h1 class="text-[32px] leading-tight">رأيكم يهمنا</h1>
-    <p class="mt-2 leading-relaxed text-ash-800">
+    <p class="mt-2 leading-relaxed text-ink-soft">
         تقييمكم يساعد فريق بَهْجَة والفرق التطوعية على تحسين الفعاليات القادمة.
     </p>
 
     @if(session('feedback_sent'))
-        <p class="mt-3 bg-cyan-100 px-3 py-2 text-cyan-800">وصلنا تقييمكم — شكراً جزيلاً.</p>
+        <p class="mt-3 bg-brand-50 px-3 py-2 text-brand-700">وصلنا تقييمكم — شكراً جزيلاً.</p>
     @endif
 
     <form method="POST" action="{{ route('feedback.store') }}" class="mt-6 flex flex-col gap-4">
@@ -21,10 +21,10 @@
         <input type="text" name="website" value="" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true">
 
         <div>
-            <p class="mb-1 text-sm text-ash-700">ما تقييمكم لتجربة المنصة والفعاليات؟</p>
+            <p class="mb-1 text-sm text-ink-soft">ما تقييمكم لتجربة المنصة والفعاليات؟</p>
             <x-star-rating/>
             @error('rating')
-                <p class="mt-1 text-sm text-magenta-700">اختاروا عدد النجوم أولاً</p>
+                <p class="mt-1 text-sm text-rose-600">اختاروا عدد النجوم أولاً</p>
             @enderror
         </div>
 

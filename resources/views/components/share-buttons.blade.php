@@ -11,17 +11,17 @@
     </a>
 
     <div class="flex flex-wrap gap-2">
-        <button type="button" class="btn btn-secondary flex-1"
+        <button type="button" class="btn btn-outline flex-1"
                 @click="navigator.clipboard?.writeText(@js($shortUrl ?? $url)).then(() => { toast = 'تم نسخ الرابط: ' + @js($shortUrl ?? $url); setTimeout(() => toast = '', 2600); })">
             انسخوا الرابط
         </button>
 
         @if($qrUrl)
             <details class="flex-1">
-                <summary class="btn btn-secondary w-full list-none">كرت QR</summary>
+                <summary class="btn btn-outline w-full list-none">كرت QR</summary>
                 <div class="mt-2 flex items-center gap-3">
-                    <img src="{{ $qrUrl }}" alt="رمز QR للفعالية" width="120" height="120" loading="lazy" class="size-[120px] bg-paper">
-                    <p class="text-sm leading-relaxed text-ash-800">
+                    <img src="{{ $qrUrl }}" alt="رمز QR للفعالية" width="120" height="120" loading="lazy" class="size-[120px] bg-white">
+                    <p class="text-sm leading-relaxed text-ink-soft">
                         اطبعوه أو صوّروه — يفتح صفحة الفعالية مباشرة عند مسحه.
                     </p>
                 </div>
@@ -29,5 +29,5 @@
         @endif
     </div>
 
-    <p x-show="toast" x-cloak x-text="toast" class="bg-cyan-100 px-3 py-2 text-sm text-cyan-800"></p>
+    <p x-show="toast" x-cloak x-text="toast" class="bg-brand-50 px-3 py-2 text-sm text-brand-700"></p>
 </div>

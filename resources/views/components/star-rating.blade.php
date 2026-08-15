@@ -17,20 +17,20 @@
             min-height: 46px;
             font-size: 30px;
             line-height: 1;
-            color: var(--color-ash-400);
-            border: 1px solid var(--color-ash-400);
-            border-radius: var(--radius-md);
+            color: #d7d3e4;
+            border: 1px solid #d7d3e4;
+            border-radius: 14px;
             cursor: pointer;
             transition: color .15s, border-color .15s;
         }
         .star-rating input:checked ~ label,
         .star-rating label:hover,
         .star-rating label:hover ~ label {
-            color: var(--color-magenta-600);
-            border-color: var(--color-magenta-600);
+            color: var(--color-joy-amber);
+            border-color: var(--color-joy-amber);
         }
         .star-rating input:focus-visible + label {
-            outline: 2px solid var(--color-cyan-base);
+            outline: 2px solid var(--color-brand-400);
             outline-offset: 2px;
         }
     </style>

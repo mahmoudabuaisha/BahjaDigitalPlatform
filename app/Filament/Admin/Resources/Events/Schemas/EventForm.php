@@ -114,6 +114,20 @@ class EventForm
                                 ->maxValue(65000),
                         ]),
                         Grid::make(2)->schema([
+                            TextInput::make('age_min')
+                                ->label('العمر من (سنة)')
+                                ->helperText('يظهر للعائلات على بطاقة الفعالية')
+                                ->numeric()
+                                ->minValue(0)
+                                ->maxValue(18),
+                            TextInput::make('age_max')
+                                ->label('العمر إلى (سنة)')
+                                ->numeric()
+                                ->minValue(0)
+                                ->maxValue(18)
+                                ->gte('age_min'),
+                        ]),
+                        Grid::make(2)->schema([
                             TextInput::make('actual_children')
                                 ->label('عدد الأطفال الفعلي (بعد التنفيذ)')
                                 ->numeric()

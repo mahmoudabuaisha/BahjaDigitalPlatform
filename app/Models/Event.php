@@ -33,6 +33,8 @@ class Event extends Model
         'status',
         'rejection_reason',
         'expected_children',
+        'age_min',
+        'age_max',
         'actual_children',
         'actual_caregivers',
         'image_path',
@@ -91,6 +93,24 @@ class Event extends Model
     public function scopeUpcoming(Builder $query): Builder
     {
         return $query->whereDate('start_date', '>=', today());
+    }
+
+    /** «من 4 إلى 10 سنوات» — أو null حين لم يحدّد الفريق الفئة العمرية */
+    public function ageLabel(): ?string
+    {
+        if ($this->age_min && $this->age_max) {
+            return 'من '.$this->age_min.' إلى '.$this->age_max.' سنوات';
+        }
+
+        if ($this->age_min) {
+            return $this->age_min.' سنوات فأكثر';
+        }
+
+        if ($this->age_max) {
+            return 'حتى '.$this->age_max.' سنوات';
+        }
+
+        return null;
     }
 
     public function imageUrl(): ?string

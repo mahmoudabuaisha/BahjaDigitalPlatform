@@ -13,4 +13,27 @@ class Category extends Model
     {
         return $this->hasMany(Event::class);
     }
+
+    /**
+     * صنف اللون في الواجهة العامة — يُشتق من لون Filament المخزَّن،
+     * فيبقى مصدر اللون واحداً بين اللوحة والموقع.
+     */
+    public function toneClass(): string
+    {
+        return match ($this->color) {
+            'warning' => 'tone tone-amber',
+            'danger' => 'tone tone-rose',
+            'info' => 'tone tone-sky',
+            'success' => 'tone tone-emerald',
+            default => 'tone tone-violet',
+        };
+    }
+
+    /** اسم الأيقونة في مكوّن <x-icon> — مشتق من اسم أيقونة Filament */
+    public function iconKey(): string
+    {
+        $key = str_replace(['heroicon-o-', 'heroicon-s-'], '', (string) $this->icon);
+
+        return $key !== '' ? $key : 'sparkles';
+    }
 }

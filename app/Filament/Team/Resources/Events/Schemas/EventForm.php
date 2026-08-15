@@ -56,6 +56,20 @@ class EventForm
                                 ->minValue(0)
                                 ->maxValue(65000),
                         ]),
+                        Grid::make(2)->schema([
+                            TextInput::make('age_min')
+                                ->label('العمر من (سنة)')
+                                ->helperText('يظهر للعائلات على بطاقة الفعالية')
+                                ->numeric()
+                                ->minValue(0)
+                                ->maxValue(18),
+                            TextInput::make('age_max')
+                                ->label('العمر إلى (سنة)')
+                                ->numeric()
+                                ->minValue(0)
+                                ->maxValue(18)
+                                ->gte('age_min'),
+                        ]),
                         FileUpload::make('image_path')
                             ->label('صورة للفعالية (اختياري)')
                             ->image()

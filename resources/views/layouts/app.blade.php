@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#f3f2f2">
+    <meta name="theme-color" content="#7c3aed">
 
     <title>@yield('title', \App\Support\Settings::get('site_name').' — روزنامة فعاليات أطفال غزة')</title>
     <meta name="description" content="@yield('meta_description', 'روزنامة رقمية تجمع فعاليات الترفيه والدعم النفسي لأطفال غزة في مكان واحد — اعرفوا مكان وموعد أقرب فعالية لأطفالكم.')">
@@ -14,87 +14,144 @@
     <link rel="icon" href="/icons/icon-192.png" type="image/png">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
 
-    {{-- خطوط المتن أولاً: هي التي تحمل أول سطر يقرأه الأهالي --}}
-    <link rel="preload" href="/fonts/noto-naskh-arabic-arabic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="/fonts/amiri-arabic-700-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/tajawal-arabic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/tajawal-arabic-700-normal.woff2" as="font" type="font/woff2" crossorigin>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="min-h-screen bg-paper font-body text-ink antialiased">
 
-    {{-- شريط حالة الشبكة — أرجواني عند الانقطاع، سماوي لحظة العودة --}}
-    <div id="offline-banner" class="hidden bg-magenta-100 px-4 py-2 text-sm text-magenta-800">
+    <noscript>
+        <style>[x-cloak]{display:revert !important}</style>
+    </noscript>
+</head>
+<body class="min-h-screen bg-white font-sans text-ink antialiased">
+
+    {{-- شريط حالة الشبكة --}}
+    <div id="offline-banner" class="hidden bg-brand-900 px-4 py-2 text-center text-sm text-white">
         أنتم الآن دون اتصال — تُعرض آخر البيانات المحفوظة على أجهزتكم
     </div>
-    <div id="online-banner" class="hidden bg-cyan-100 px-4 py-2 text-sm text-cyan-800">
+    <div id="online-banner" class="hidden bg-brand-100 px-4 py-2 text-center text-sm text-brand-800">
         عاد الاتصال — الروزنامة محدَّثة الآن
     </div>
 
-    <div class="mx-auto w-full max-w-4xl px-4 pt-3 sm:px-6">
-        <header>
-            <div class="flex items-center justify-between gap-3">
-                <a href="{{ route('home') }}" class="flex items-center gap-2 no-underline">
-                    <span class="size-[26px] shrink-0 rounded-full bg-magenta-500"></span>
-                    <span class="font-display text-[28px] leading-none font-bold text-ink">{{ \App\Support\Settings::get('site_name') }}</span>
-                </a>
+    <header x-data="{ open: false }" class="sticky top-0 z-40 border-b border-brand-100 bg-white/90 backdrop-blur">
+        <div class="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
+            <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2.5 no-underline">
+                <x-brand-mark class="size-11"/>
+                <span class="text-2xl font-bold text-brand-700">{{ \App\Support\Settings::get('site_name') }}</span>
+            </a>
 
-                <nav class="flex items-center gap-4 text-sm">
-                    <a href="{{ route('guide') }}" class="text-cyan-700 hover:text-cyan-600 hover:underline">دليل الاستخدام</a>
-                    <a href="{{ route('feedback.create') }}" class="hidden text-cyan-700 hover:text-cyan-600 hover:underline sm:inline">رأيكم يهمنا</a>
-                </nav>
+            <nav class="mx-auto hidden items-center gap-7 lg:flex" aria-label="التنقل الرئيسي">
+                <a href="{{ route('home') }}" class="nav-link" @if(request()->routeIs('home')) aria-current="page" @endif>الرئيسية</a>
+                <a href="{{ route('events.index') }}" class="nav-link" @if(request()->routeIs('events.index')) aria-current="page" @endif>الفعاليات</a>
+                <a href="{{ route('organizers') }}" class="nav-link" @if(request()->routeIs('organizers')) aria-current="page" @endif>المنظِّمون</a>
+                <a href="{{ route('guide') }}" class="nav-link" @if(request()->routeIs('guide')) aria-current="page" @endif>عن بَهْجَة</a>
+                <a href="{{ route('contact') }}" class="nav-link" @if(request()->routeIs('contact')) aria-current="page" @endif>تواصلوا معنا</a>
+            </nav>
+
+            <div class="ms-auto hidden items-center gap-2 lg:flex">
+                {{-- حسابات العائلات ميزة قادمة — الأزرار في مكانها ومعطّلة كي لا تَعِد بما لا يعمل --}}
+                <span class="btn btn-outline btn-sm" aria-disabled="true" title="قريباً">إنشاء حساب</span>
+                <span class="btn btn-primary btn-sm" aria-disabled="true" title="قريباً">
+                    تسجيل دخول
+                    <span class="rounded-full bg-white/25 px-2 text-[11px]">قريباً</span>
+                </span>
             </div>
 
-            {{-- أثاث الصفحة الأولى: خط ثخين يتبعه رفيع --}}
-            <div class="mt-3 masthead-rule" aria-hidden="true"></div>
-            <div class="masthead-rule" aria-hidden="true"></div>
-        </header>
+            <button type="button" @click="open = ! open" :aria-expanded="open ? 'true' : 'false'"
+                    class="ms-auto grid size-11 place-items-center rounded-xl border border-brand-100 text-brand-700 lg:hidden"
+                    aria-label="القائمة">
+                <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                    <path x-show="! open" d="M4 7h16M4 12h16M4 17h16"/>
+                    <path x-show="open" x-cloak d="M6 6l12 12M18 6 6 18"/>
+                </svg>
+            </button>
+        </div>
 
-        <main class="pt-6 pb-10">
-            @yield('content')
-        </main>
+        {{-- قائمة الهاتف --}}
+        <nav x-show="open" x-cloak x-transition.opacity class="border-t border-brand-100 bg-white px-4 py-3 lg:hidden" aria-label="التنقل">
+            <ul class="flex flex-col">
+                @foreach([
+                    ['route' => 'home', 'label' => 'الرئيسية'],
+                    ['route' => 'events.index', 'label' => 'الفعاليات'],
+                    ['route' => 'organizers', 'label' => 'المنظِّمون'],
+                    ['route' => 'guide', 'label' => 'عن بَهْجَة'],
+                    ['route' => 'contact', 'label' => 'تواصلوا معنا'],
+                ] as $item)
+                    <li>
+                        <a href="{{ route($item['route']) }}"
+                           class="flex min-h-[48px] items-center rounded-xl px-3 no-underline {{ request()->routeIs($item['route']) ? 'bg-brand-50 font-bold text-brand-700' : 'text-ink-soft' }}">
+                            {{ $item['label'] }}
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+        </nav>
+    </header>
 
-        <footer class="border-t border-ink/10 pt-6 pb-24 text-sm text-ash-700 sm:pb-10">
-            @if($about = \App\Support\Settings::get('about_text'))
-                <p class="max-w-xl leading-relaxed">{{ $about }}</p>
-            @endif
+    <main>
+        @yield('content')
+    </main>
 
-            <p class="mt-2 leading-relaxed">
-                منصّة <strong class="font-display text-ink">{{ \App\Support\Settings::get('site_name') }}</strong> —
-                نجمع فعاليات صنّاع الفرح في غزة ليصل الفرح لكل طفل.
-            </p>
-
-            <div class="mt-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+    <footer class="mt-16 border-t border-brand-100 bg-brand-50/60">
+        <div class="mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
+            <div>
+                <div class="flex items-center gap-2.5">
+                    <x-brand-mark class="size-11"/>
+                    <span class="text-2xl font-bold text-brand-700">{{ \App\Support\Settings::get('site_name') }}</span>
+                </div>
+                <p class="mt-3 max-w-xs leading-relaxed text-ink-soft">
+                    {{ \App\Support\Settings::get('about_text') ?: 'منصّة واحدة تجمع فعاليات الترفيه والدعم النفسي لأطفال غزة، وتصل إلى العائلات حتى حين تضعف الشبكة.' }}
+                </p>
                 @if($whatsapp = \App\Support\Settings::get('site_whatsapp'))
-                    <a href="https://wa.me/{{ preg_replace('/\D/', '', $whatsapp) }}" class="text-cyan-700 hover:text-cyan-600 hover:underline">تواصلوا معنا واتساب</a>
-                @endif
-                <a href="{{ route('guide') }}" class="text-cyan-700 hover:text-cyan-600 hover:underline">دليل الاستخدام</a>
-                <a href="{{ route('feedback.create') }}" class="text-cyan-700 hover:text-cyan-600 hover:underline">رأيكم يهمنا</a>
-                <a href="{{ url('/team/register') }}" class="text-cyan-700 hover:text-cyan-600 hover:underline">انضموا كفريق</a>
-            </div>
-        </footer>
-    </div>
-
-    {{-- شريط التنقل السفلي — على الهاتف فقط، حيث يُستعمل الموقع فعلياً --}}
-    <nav class="fixed inset-x-0 bottom-0 border-t border-ink/10 bg-paper sm:hidden" aria-label="التنقل السريع">
-        <ul class="mx-auto flex max-w-4xl items-stretch justify-between px-4 text-sm">
-            @php
-                $bottomLinks = [
-                    ['route' => 'home', 'label' => 'الروزنامة', 'active' => request()->routeIs('home')],
-                    ['route' => 'guide', 'label' => 'الدليل', 'active' => request()->routeIs('guide')],
-                    ['route' => 'feedback.create', 'label' => 'رأيكم', 'active' => request()->routeIs('feedback.*')],
-                ];
-            @endphp
-            @foreach($bottomLinks as $link)
-                <li class="flex-1">
-                    <a href="{{ route($link['route']) }}"
-                       @if($link['active']) aria-current="page" @endif
-                       class="flex min-h-[48px] items-center justify-center no-underline {{ $link['active'] ? 'font-display font-bold text-ink' : 'text-ash-700' }}">
-                        {{ $link['label'] }}
+                    <a href="https://wa.me/{{ preg_replace('/\D/', '', $whatsapp) }}" target="_blank" rel="noopener"
+                       class="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-emerald-600 no-underline shadow-sm">
+                        <x-ui.icon name="whatsapp" class="size-5"/> واتساب
                     </a>
-                </li>
-            @endforeach
-        </ul>
-    </nav>
+                @endif
+            </div>
+
+            <div>
+                <h2 class="text-base font-bold">روابط سريعة</h2>
+                <ul class="mt-3 flex flex-col gap-2 text-ink-soft">
+                    <li><a href="{{ route('home') }}" class="no-underline hover:text-brand-700">الرئيسية</a></li>
+                    <li><a href="{{ route('events.index') }}" class="no-underline hover:text-brand-700">الفعاليات</a></li>
+                    <li><a href="{{ route('organizers') }}" class="no-underline hover:text-brand-700">المنظِّمون</a></li>
+                    <li><a href="{{ route('guide') }}" class="no-underline hover:text-brand-700">دليل الاستخدام</a></li>
+                    <li><a href="{{ route('contact') }}" class="no-underline hover:text-brand-700">تواصلوا معنا</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h2 class="text-base font-bold">الفئات</h2>
+                <ul class="mt-3 flex flex-col gap-2 text-ink-soft">
+                    @foreach(\App\Models\Category::orderBy('sort_order')->limit(6)->get() as $footerCategory)
+                        <li>
+                            <a href="{{ route('events.index', ['cat' => $footerCategory->slug]) }}" class="no-underline hover:text-brand-700">
+                                {{ $footerCategory->name }}
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+
+            <div>
+                <h2 class="text-base font-bold">للفرق التطوعية</h2>
+                <ul class="mt-3 flex flex-col gap-2 text-ink-soft">
+                    <li><a href="{{ url('/team/register') }}" class="no-underline hover:text-brand-700">سجّلوا فريقكم</a></li>
+                    <li><a href="{{ url('/team') }}" class="no-underline hover:text-brand-700">دخول الفرق</a></li>
+                    <li><a href="{{ route('feedback.create') }}" class="no-underline hover:text-brand-700">رأيكم يهمنا</a></li>
+                </ul>
+
+                @if($whatsapp = \App\Support\Settings::get('site_whatsapp'))
+                    <p class="mt-4 text-sm text-ink-soft" dir="ltr">{{ $whatsapp }}</p>
+                @endif
+            </div>
+        </div>
+
+        <div class="border-t border-brand-100 px-4 py-5 text-center text-sm text-ink-soft">
+            جميع الحقوق محفوظة © {{ \App\Support\Settings::get('site_name') }} {{ now()->year }}
+        </div>
+    </footer>
 
 </body>
 </html>
