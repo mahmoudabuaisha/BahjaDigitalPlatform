@@ -20,10 +20,10 @@
             <img src="{{ $event->imageUrl() }}" alt="{{ $event->title }}" loading="lazy"
                  class="size-full object-cover transition duration-300 hover:scale-105" width="640" height="400">
         @else
-            {{-- لا صورة مرفوعة: موضع ملوّن بأيقونة الفئة بدل رمادي فارغ --}}
-            <span class="thumb-fallback grid size-full place-items-center">
-                <x-ui.icon :name="$event->category?->iconKey() ?? 'sparkles'" class="size-16 text-[color:var(--tone)] opacity-70"/>
-            </span>
+            {{-- لا صورة مرفوعة: رسمة الفئة بدل مربّع رمادي فارغ --}}
+            <x-ui.scene :name="$event->category?->slug ?? 'default'"
+                        :tone="$event->category?->toneHex() ?? '#7c5cff'"
+                        class="size-full transition duration-300 hover:scale-105"/>
         @endif
 
         <span class="absolute top-3 start-3 flex flex-wrap gap-2">

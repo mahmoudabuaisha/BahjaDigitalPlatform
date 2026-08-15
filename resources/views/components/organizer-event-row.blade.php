@@ -4,7 +4,8 @@
     @if($event->image_path)
         <img src="{{ $event->imageUrl() }}" alt="" width="56" height="56" class="size-14 shrink-0 rounded-2xl object-cover">
     @else
-        <span class="icon-tile icon-tile-lg"><x-ui.icon :name="$event->category?->iconKey() ?? 'sparkles'"/></span>
+        <x-ui.scene :name="$event->category?->slug ?? 'default'" :tone="$event->category?->toneHex() ?? '#7c5cff'"
+                    class="size-14 shrink-0 rounded-2xl"/>
     @endif
 
     <div class="min-w-0 flex-1">

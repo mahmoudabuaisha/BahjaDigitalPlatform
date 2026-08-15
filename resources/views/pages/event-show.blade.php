@@ -61,9 +61,9 @@
                 <img src="{{ $event->imageUrl() }}" alt="{{ $event->title }}" width="1280" height="720" loading="eager"
                      class="aspect-[16/9] w-full rounded-3xl object-cover shadow-[0_10px_40px_rgb(31_25_55_/_10%)]">
             @else
-                <div class="thumb-fallback grid aspect-[16/7] w-full place-items-center rounded-3xl">
-                    <x-ui.icon :name="$event->category?->iconKey() ?? 'sparkles'" class="size-20 text-[color:var(--tone)] opacity-70"/>
-                </div>
+                <x-ui.scene :name="$event->category?->slug ?? 'default'"
+                            :tone="$event->category?->toneHex() ?? '#7c5cff'"
+                            class="aspect-[16/7] w-full rounded-3xl shadow-[0_10px_40px_rgb(31_25_55_/_10%)]"/>
             @endif
 
             @if($event->description)

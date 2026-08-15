@@ -51,9 +51,7 @@
             <div class="absolute bottom-0 end-10 size-36 rounded-full bg-pink-200/60 blur-2xl"></div>
 
             <div class="relative mx-auto mb-14 max-w-sm rotate-2 rounded-3xl bg-white p-5 shadow-[0_20px_60px_rgb(93_60_190_/_18%)]">
-                <div class="thumb-fallback tone tone-violet grid h-40 place-items-center rounded-2xl">
-                    <x-brand-mark class="size-20"/>
-                </div>
+                <x-ui.scene name="games" tone="#f59e0b" class="h-40 w-full rounded-2xl"/>
                 <p class="mt-4 text-lg font-bold">يوم ألعاب في ساحة المركز</p>
                 <p class="mt-1 flex items-center gap-2 text-sm text-ink-soft">
                     <x-ui.icon name="map-pin" class="size-4 text-brand-400"/> مركز الإيواء — الساحة الشمالية
@@ -124,16 +122,16 @@
     </div>
 
     <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        <a href="{{ route('events.index') }}" class="card card-hover tone tone-violet items-center gap-3 p-5 text-center no-underline">
-            <span class="icon-tile icon-tile-lg"><x-ui.icon name="grid"/></span>
+        <a href="{{ route('events.index') }}" class="card card-hover tone tone-violet items-center gap-3 overflow-hidden p-5 text-center no-underline">
+            <x-ui.scene name="default" tone="#7c5cff" class="-mx-5 -mt-5 h-24 w-[calc(100%+2.5rem)]"/>
             <span class="font-bold">جميع الفئات</span>
             <span class="text-sm text-ink-soft">{{ $stats['upcoming'] }} فعالية قادمة</span>
         </a>
 
         @foreach($categories as $category)
             <a href="{{ route('events.index', ['cat' => $category->slug]) }}"
-               class="card card-hover {{ $category->toneClass() }} items-center gap-3 p-5 text-center no-underline">
-                <span class="icon-tile icon-tile-lg"><x-ui.icon :name="$category->iconKey()"/></span>
+               class="card card-hover {{ $category->toneClass() }} items-center gap-3 overflow-hidden p-5 text-center no-underline">
+                <x-ui.scene :name="$category->slug" :tone="$category->toneHex()" class="-mx-5 -mt-5 h-24 w-[calc(100%+2.5rem)]"/>
                 <span class="font-bold">{{ $category->name }}</span>
                 <span class="text-sm text-ink-soft">
                     {{ $category->events_count }} {{ $category->events_count === 1 ? 'فعالية قادمة' : 'فعاليات قادمة' }}

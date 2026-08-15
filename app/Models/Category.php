@@ -36,4 +36,16 @@ class Category extends Model
 
         return $key !== '' ? $key : 'sparkles';
     }
+
+    /** لون الفئة كقيمة سداسية — يُمرَّر إلى الرسمات المرسومة بـ SVG */
+    public function toneHex(): string
+    {
+        return match ($this->color) {
+            'warning' => '#f59e0b',
+            'danger' => '#f43f5e',
+            'info' => '#0ea5e9',
+            'success' => '#10b981',
+            default => '#7c5cff',
+        };
+    }
 }

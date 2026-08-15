@@ -6,6 +6,7 @@ use App\Enums\EventStatus;
 use App\Filament\Admin\Resources\Events\Actions\EventActions;
 use App\Filament\Admin\Resources\Events\EventResource;
 use App\Models\Event;
+use App\Support\Scene;
 use BackedEnum;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkAction;
@@ -115,11 +116,7 @@ class EventReview extends Page implements HasTable
                     ->height(44)
                     ->width(44)
                     ->extraImgAttributes(['class' => 'rounded-xl object-cover'])
-                    ->defaultImageUrl(fn (): string => 'data:image/svg+xml;base64,'.base64_encode(
-                        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44">'
-                        .'<rect width="44" height="44" rx="12" fill="#efeaff"/>'
-                        .'<circle cx="22" cy="22" r="7" fill="#7c5cff" opacity=".45"/></svg>'
-                    )),
+                    ->defaultImageUrl(fn (Event $record): string => Scene::dataUri($record->category)),
                 TextColumn::make('title')
                     ->label('الفعالية')
                     ->weight('bold')
