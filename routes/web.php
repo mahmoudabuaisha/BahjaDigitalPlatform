@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Auth\FamilyAuthController;
+use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\EventIndexController;
@@ -8,6 +10,7 @@ use App\Http\Controllers\EventQrController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\PwaController;
 use App\Http\Controllers\RegistrationController;
@@ -35,6 +38,7 @@ Route::post('/contact', [ContactController::class, 'store'])
     ->name('contact.store');
 
 Route::view('/about', 'pages.about')->name('about');
+Route::view('/faq', 'pages.faq')->name('faq');
 Route::view('/guide', 'pages.guide')->name('guide');
 
 // ── حسابات العائلات ──
@@ -47,11 +51,23 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [FamilyAuthController::class, 'logout'])->middleware('auth')->name('logout');
 
-// ── حجز المقاعد ──
+// ── حساب وليّ الأمر وحجز المقاعد ──
 Route::middleware('auth')->group(function () {
+    Route::get('/account', [AccountController::class, 'dashboard'])->name('account');
+    Route::get('/account/profile', [AccountController::class, 'profile'])->name('account.profile');
+    Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
+    Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('account.password');
+
+    Route::post('/account/children', [ChildController::class, 'store'])->name('children.store');
+    Route::put('/account/children/{child}', [ChildController::class, 'update'])->name('children.update');
+    Route::delete('/account/children/{child}', [ChildController::class, 'destroy'])->name('children.destroy');
+
+    Route::get('/account/notifications', [NotificationController::class, 'index'])->name('notifications');
+    Route::post('/account/notifications/read', [NotificationController::class, 'markAllRead'])->name('notifications.read');
+
     Route::get('/my-events', [RegistrationController::class, 'index'])->name('my-events');
     Route::post('/events/{event}/register', [RegistrationController::class, 'store'])->name('registrations.store');
-    Route::delete('/events/{event}/register', [RegistrationController::class, 'destroy'])->name('registrations.destroy');
+    Route::delete('/registrations/{registration}', [RegistrationController::class, 'destroy'])->name('registrations.destroy');
 });
 
 Route::get('/feedback', [FeedbackController::class, 'create'])->name('feedback.create');

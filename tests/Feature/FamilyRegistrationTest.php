@@ -4,9 +4,11 @@ namespace Tests\Feature;
 
 use App\Enums\RegistrationStatus;
 use App\Enums\UserRole;
+use App\Models\Child;
 use App\Models\Event;
 use App\Models\Registration;
 use App\Models\User;
+use App\Models\UserNotification;
 use Database\Seeders\AreaSeeder;
 use Database\Seeders\CategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -24,16 +26,29 @@ class FamilyRegistrationTest extends TestCase
         $this->seed(CategorySeeder::class);
     }
 
-    private function family(): User
+    private function family(int $childrenCount = 1): User
     {
-        return User::factory()->create([
+        $user = User::factory()->create([
             'role' => UserRole::Family,
             'team_id' => null,
             'is_active' => true,
         ]);
+
+        Child::factory()->count($childrenCount)->create(['user_id' => $user->id]);
+
+        return $user;
     }
 
-    public function test_visitor_can_register_an_account_and_lands_on_my_events(): void
+    private function upcomingEvent(?int $capacity = 10): Event
+    {
+        return Event::factory()->approved()->create([
+            'start_date' => today()->addDays(3),
+            'start_time' => '10:00',
+            'expected_children' => $capacity,
+        ]);
+    }
+
+    public function test_visitor_can_register_an_account_and_lands_on_the_dashboard(): void
     {
         $this->post('/register', [
             'name' => 'أم محمّد',
@@ -41,7 +56,7 @@ class FamilyRegistrationTest extends TestCase
             'phone' => '0599000000',
             'password' => 'kalimat-sirr',
             'password_confirmation' => 'kalimat-sirr',
-        ])->assertRedirect(route('my-events'));
+        ])->assertRedirect(route('account'));
 
         $this->assertAuthenticated();
         $this->assertSame(UserRole::Family, User::where('email', 'om@example.com')->first()->role);
@@ -57,80 +72,170 @@ class FamilyRegistrationTest extends TestCase
 
     public function test_guest_is_sent_to_login_before_booking(): void
     {
-        $event = Event::factory()->approved()->create(['start_date' => today()->addDays(3)]);
+        $event = $this->upcomingEvent();
 
-        $this->post(route('registrations.store', $event), ['children_count' => 2])
+        $this->post(route('registrations.store', $event), ['children' => [1]])
             ->assertRedirect(route('login'));
     }
 
-    public function test_family_can_book_a_seat_and_cancel_it(): void
+    public function test_booking_starts_pending_and_notifies_the_family(): void
     {
-        $event = Event::factory()->approved()->create([
-            'start_date' => today()->addDays(3),
-            'expected_children' => 10,
+        $event = $this->upcomingEvent();
+        $family = $this->family();
+
+        $this->actingAs($family);
+
+        $this->post(route('registrations.store', $event), [
+            'children' => $family->children->pluck('id')->all(),
+        ])->assertSessionHas('registration_done');
+
+        $registration = Registration::first();
+
+        $this->assertSame(RegistrationStatus::Pending, $registration->status);
+        $this->assertSame($family->children->first()->id, $registration->child_id);
+        $this->assertSame(1, $event->fresh()->seatsTaken());
+        $this->assertDatabaseHas('user_notifications', [
+            'user_id' => $family->id,
+            'type' => 'registration_submitted',
         ]);
+    }
+
+    public function test_family_cannot_book_a_child_of_another_family(): void
+    {
+        $event = $this->upcomingEvent();
+        $otherChild = $this->family()->children->first();
 
         $this->actingAs($this->family());
 
-        $this->post(route('registrations.store', $event), ['children_count' => 3])
-            ->assertSessionHas('registration_done');
+        $this->post(route('registrations.store', $event), ['children' => [$otherChild->id]])
+            ->assertSessionHas('registration_error');
 
-        $this->assertSame(3, $event->fresh()->seatsTaken());
-        $this->assertSame(7, $event->fresh()->seatsRemaining());
-
-        $this->delete(route('registrations.destroy', $event))
-            ->assertSessionHas('registration_cancelled');
-
-        $this->assertSame(0, $event->fresh()->seatsTaken());
+        $this->assertSame(0, Registration::count());
     }
 
     public function test_booking_is_refused_when_it_exceeds_remaining_seats(): void
     {
-        $event = Event::factory()->approved()->create([
-            'start_date' => today()->addDays(3),
-            'expected_children' => 4,
-        ]);
+        $event = $this->upcomingEvent(capacity: 1);
+        $family = $this->family(childrenCount: 2);
 
-        Registration::create([
-            'event_id' => $event->id,
-            'user_id' => $this->family()->id,
-            'children_count' => 3,
-            'status' => RegistrationStatus::Confirmed,
-        ]);
+        $this->actingAs($family);
 
-        $this->actingAs($this->family());
+        $this->post(route('registrations.store', $event), [
+            'children' => $family->children->pluck('id')->all(),
+        ])->assertSessionHas('registration_error');
 
-        $this->post(route('registrations.store', $event), ['children_count' => 2])
-            ->assertSessionHas('registration_error');
-
-        $this->assertSame(3, $event->fresh()->seatsTaken());
+        $this->assertSame(0, Registration::count());
     }
 
     public function test_booking_a_past_event_is_refused(): void
     {
         $event = Event::factory()->approved()->create(['start_date' => today()->subWeek()]);
+        $family = $this->family();
+
+        $this->actingAs($family);
+
+        $this->post(route('registrations.store', $event), ['children' => $family->children->pluck('id')->all()])
+            ->assertSessionHas('registration_error');
+
+        $this->assertSame(0, Registration::count());
+    }
+
+    public function test_family_can_cancel_more_than_a_day_before_but_not_after(): void
+    {
+        $family = $this->family();
+        $this->actingAs($family);
+
+        $far = $this->upcomingEvent();
+        $this->post(route('registrations.store', $far), ['children' => $family->children->pluck('id')->all()]);
+
+        $registration = Registration::first();
+        $this->delete(route('registrations.destroy', $registration))->assertSessionHas('registration_cancelled');
+        $this->assertSame(RegistrationStatus::Cancelled, $registration->fresh()->status);
+
+        // فعالية بعد ساعات: الإلغاء مغلق
+        $soon = Event::factory()->approved()->create([
+            'start_date' => today(),
+            'start_time' => now()->addHours(3)->format('H:i:s'),
+            'expected_children' => 10,
+        ]);
+
+        $imminent = Registration::create([
+            'event_id' => $soon->id,
+            'user_id' => $family->id,
+            'child_id' => $family->children->first()->id,
+            'children_count' => 1,
+            'status' => RegistrationStatus::Pending,
+        ]);
+
+        $this->delete(route('registrations.destroy', $imminent))->assertSessionHas('registration_error');
+        $this->assertSame(RegistrationStatus::Pending, $imminent->fresh()->status);
+    }
+
+    public function test_family_cannot_cancel_a_registration_of_another_family(): void
+    {
+        $event = $this->upcomingEvent();
+        $other = $this->family();
+
+        $registration = Registration::create([
+            'event_id' => $event->id,
+            'user_id' => $other->id,
+            'child_id' => $other->children->first()->id,
+            'children_count' => 1,
+            'status' => RegistrationStatus::Pending,
+        ]);
 
         $this->actingAs($this->family());
 
-        $this->post(route('registrations.store', $event), ['children_count' => 1])
-            ->assertSessionHas('registration_error');
-
-        $this->assertSame(0, $event->fresh()->seatsTaken());
+        $this->delete(route('registrations.destroy', $registration))->assertForbidden();
     }
 
-    public function test_rebooking_updates_the_existing_registration_instead_of_duplicating(): void
+    public function test_children_and_profile_are_managed_from_the_account(): void
     {
-        $event = Event::factory()->approved()->create([
-            'start_date' => today()->addDays(3),
-            'expected_children' => 20,
+        $family = $this->family(childrenCount: 0);
+        $this->actingAs($family);
+
+        $this->post(route('children.store'), [
+            'name' => 'أحمد',
+            'birth_date' => today()->subYears(8)->toDateString(),
+            'gender' => 'male',
+        ])->assertSessionHas('child_saved');
+
+        $child = Child::where('user_id', $family->id)->first();
+        $this->assertSame('أحمد', $child->name);
+        $this->assertSame(8, $child->age());
+
+        $this->put(route('account.profile.update'), [
+            'name' => 'أم أحمد',
+            'email' => $family->email,
+            'address' => 'مركز إيواء — خيمة 12',
+        ])->assertSessionHas('profile_saved');
+
+        $this->assertSame('أم أحمد', $family->fresh()->name);
+    }
+
+    public function test_event_page_in_both_panels_loads_with_the_registrations_tab(): void
+    {
+        $event = $this->upcomingEvent();
+
+        $admin = User::factory()->create(['role' => UserRole::SuperAdmin, 'team_id' => null]);
+        $this->actingAs($admin)->get('/admin/events/'.$event->id.'/edit')->assertOk();
+
+        $manager = User::factory()->create([
+            'role' => UserRole::TeamManager,
+            'team_id' => $event->team_id,
         ]);
+        $this->actingAs($manager)->get('/team/events/'.$event->id.'/edit')->assertOk();
+    }
 
-        $this->actingAs($family = $this->family());
+    public function test_notifications_can_be_marked_read(): void
+    {
+        $family = $this->family();
+        UserNotification::send($family, 'test', 'إشعار تجريبي');
 
-        $this->post(route('registrations.store', $event), ['children_count' => 2]);
-        $this->post(route('registrations.store', $event), ['children_count' => 5]);
+        $this->actingAs($family);
+        $this->assertSame(1, $family->unreadNotificationsCount());
 
-        $this->assertSame(1, Registration::where('user_id', $family->id)->count());
-        $this->assertSame(5, $event->fresh()->seatsTaken());
+        $this->post(route('notifications.read'))->assertSessionHas('notifications_read');
+        $this->assertSame(0, $family->fresh()->unreadNotificationsCount());
     }
 }

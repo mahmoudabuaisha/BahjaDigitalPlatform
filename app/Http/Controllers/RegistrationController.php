@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Enums\RegistrationStatus;
 use App\Models\Event;
+use App\Models\Registration;
+use App\Models\UserNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,16 +17,13 @@ class RegistrationController extends Controller
     public function index(): View
     {
         $registrations = Auth::user()->registrations()
-            ->with(['event.category', 'event.area', 'event.shelterCenter', 'event.team'])
-            ->join('events', 'events.id', '=', 'registrations.event_id')
-            ->orderBy('events.start_date')
-            ->orderBy('events.start_time')
-            ->select('registrations.*')
-            ->get();
+            ->with(['event.category', 'event.area', 'event.shelterCenter', 'event.team', 'child'])
+            ->get()
+            ->sortBy(fn (Registration $registration) => $registration->event->start_date);
 
         return view('pages.my-events', [
-            'upcoming' => $registrations->filter(fn ($registration) => ! $registration->event->hasEnded()),
-            'past' => $registrations->filter(fn ($registration) => $registration->event->hasEnded()),
+            'upcoming' => $registrations->reject(fn ($registration) => $registration->event->hasEnded())->values(),
+            'past' => $registrations->filter(fn ($registration) => $registration->event->hasEnded())->values(),
         ]);
     }
 
@@ -32,37 +31,88 @@ class RegistrationController extends Controller
     {
         abort_unless($event->status->isPubliclyVisible(), 404);
 
+        $user = Auth::user();
+
         $data = $request->validate([
-            'children_count' => ['required', 'integer', 'min:1', 'max:10'],
+            'children' => ['required', 'array', 'min:1'],
+            'children.*' => ['integer'],
             'note' => ['nullable', 'string', 'max:300'],
         ]);
+
+        // أطفال وليّ الأمر وحدهم — لا يُحجز لطفل عائلة أخرى
+        $children = $user->children()->whereIn('id', $data['children'])->get();
+
+        if ($children->isEmpty()) {
+            return back()->with('registration_error', 'اختاروا طفلاً واحداً على الأقل.');
+        }
 
         if ($event->hasEnded()) {
             return back()->with('registration_error', 'انتهى موعد هذه الفعالية.');
         }
 
+        // الأطفال المحجوزون مسبقاً لا يُحتسبون مرتين
+        $alreadyBooked = $event->registrations()
+            ->whereIn('child_id', $children->pluck('id'))
+            ->holdingSeat()
+            ->pluck('child_id');
+
+        $newChildren = $children->reject(fn ($child) => $alreadyBooked->contains($child->id));
+
+        if ($newChildren->isEmpty()) {
+            return back()->with('registration_error', 'هؤلاء الأطفال محجوزون في هذه الفعالية بالفعل.');
+        }
+
         $remaining = $event->seatsRemaining();
 
-        if ($remaining !== null && $data['children_count'] > $remaining) {
+        if ($remaining !== null && $newChildren->count() > $remaining) {
             return back()->with('registration_error', $remaining > 0
-                ? 'لم يتبقَّ سوى '.$remaining.' مقعد — عدّلوا عدد الأطفال.'
+                ? 'لم يتبقَّ سوى '.$remaining.' مقعد — اختاروا عدداً أقل من الأطفال.'
                 : 'اكتمل العدد في هذه الفعالية.');
         }
 
-        // حجز واحد لكل عائلة: إعادة الحجز تُحدّث القائم بدل أن تُنشئ ثانياً
-        $event->registrations()->updateOrCreate(
-            ['user_id' => Auth::id()],
-            [...$data, 'status' => RegistrationStatus::Confirmed],
+        foreach ($newChildren as $child) {
+            $event->registrations()->updateOrCreate(
+                ['child_id' => $child->id],
+                [
+                    'user_id' => $user->id,
+                    'children_count' => 1,
+                    'note' => $data['note'] ?? null,
+                    'status' => RegistrationStatus::Pending,
+                    'review_note' => null,
+                    'reviewed_at' => null,
+                ],
+            );
+        }
+
+        UserNotification::send(
+            $user,
+            'registration_submitted',
+            'وصل طلب حجزكم — بانتظار موافقة الفريق',
+            $event->title.' · '.$newChildren->count().' من الأطفال',
+            route('events.show', $event),
         );
+
+        // الفريق يرى الطلب في لوحته، ويصله إشعار كي لا يتأخّر الردّ
+        foreach ($event->team?->users ?? [] as $manager) {
+            UserNotification::send(
+                $manager,
+                'registration_received',
+                'طلب حجز جديد على «'.$event->title.'»',
+                $user->name.' — '.$newChildren->count().' من الأطفال',
+            );
+        }
 
         return back()->with('registration_done', true);
     }
 
-    public function destroy(Event $event): RedirectResponse
+    public function destroy(Registration $registration): RedirectResponse
     {
-        $registration = $event->registrations()
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+        abort_unless($registration->user_id === Auth::id(), 403);
+
+        if (! $registration->isCancellable()) {
+            return back()->with('registration_error',
+                'لا يمكن الإلغاء قبل أقل من 24 ساعة من الموعد — تواصلوا مع الفريق.');
+        }
 
         $registration->update(['status' => RegistrationStatus::Cancelled]);
 

@@ -91,11 +91,17 @@ class Event extends Model
         return $this->hasMany(Registration::class);
     }
 
-    /** المقاعد المحجوزة فعلاً — مجموع الأطفال في الحجوزات المؤكَّدة */
+    /** بداية الفعالية كلحظة كاملة — تُستعمل في مهلة الإلغاء */
+    public function startsAt(): \Illuminate\Support\Carbon
+    {
+        return $this->start_date->copy()->setTimeFromTimeString($this->start_time);
+    }
+
+    /** المقاعد المشغولة — الحجوزات قيد المراجعة والمقبولة */
     public function seatsTaken(): int
     {
         return (int) $this->registrations()
-            ->where('status', RegistrationStatus::Confirmed)
+            ->whereIn('status', RegistrationStatus::holdingSeat())
             ->sum('children_count');
     }
 

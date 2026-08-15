@@ -20,6 +20,10 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'phone',
+        'birth_date',
+        'gender',
+        'area_id',
+        'address',
         'password',
         'role',
         'is_active',
@@ -35,6 +39,7 @@ class User extends Authenticatable implements FilamentUser
     {
         return [
             'email_verified_at' => 'datetime',
+            'birth_date' => 'date',
             'password' => 'hashed',
             'role' => UserRole::class,
             'is_active' => 'boolean',
@@ -49,6 +54,26 @@ class User extends Authenticatable implements FilamentUser
     public function registrations(): HasMany
     {
         return $this->hasMany(Registration::class);
+    }
+
+    public function children(): HasMany
+    {
+        return $this->hasMany(Child::class);
+    }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(UserNotification::class)->latest();
+    }
+
+    public function area(): BelongsTo
+    {
+        return $this->belongsTo(Area::class);
+    }
+
+    public function unreadNotificationsCount(): int
+    {
+        return $this->notifications()->whereNull('read_at')->count();
     }
 
     public function isFamily(): bool

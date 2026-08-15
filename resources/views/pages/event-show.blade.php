@@ -159,10 +159,12 @@
             {{-- ═══ حجز مقعد ═══ --}}
             @php
                 $remaining = $event->seatsRemaining();
-                $myRegistration = auth()->check()
-                    ? $event->registrations()->where('user_id', auth()->id())->first()
-                    : null;
-                $isBooked = $myRegistration && $myRegistration->status === \App\Enums\RegistrationStatus::Confirmed;
+                $myChildren = auth()->check() ? auth()->user()->children()->orderBy('birth_date')->get() : collect();
+                $myRegistrations = auth()->check()
+                    ? $event->registrations()->where('user_id', auth()->id())->with('child')->get()
+                    : collect();
+                $bookedChildIds = $myRegistrations->whereIn('status', \App\Enums\RegistrationStatus::holdingSeat())->pluck('child_id');
+                $bookableChildren = $myChildren->reject(fn ($child) => $bookedChildIds->contains($child->id));
             @endphp
 
             <div class="card gap-3 p-6">
@@ -170,14 +172,15 @@
                     <h2 class="text-lg font-bold">حجز مقعد</h2>
                     @if($remaining !== null)
                         <span class="badge {{ $remaining > 0 ? '' : 'bg-rose-50 text-rose-700' }}">
-                            {{ $remaining > 0 ? 'بقي '.$remaining.' مقعد' : 'اكتمل العدد' }}
+                            {{ $remaining > 0 ? 'بقي '.$remaining.' مقعد من '.$event->expected_children : 'اكتمل العدد' }}
                         </span>
                     @endif
                 </div>
 
                 @if(session('registration_done'))
-                    <p class="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 font-medium text-emerald-700">
-                        <x-ui.icon name="check" class="size-5"/> تم تأكيد حجزكم — نراكم في الموعد.
+                    <p class="flex items-start gap-2 rounded-2xl bg-emerald-50 px-4 py-3 font-medium text-emerald-700">
+                        <x-ui.icon name="check" class="mt-0.5 size-5 shrink-0"/>
+                        وصل طلبكم — يراجعه الفريق ويصلكم إشعار بالردّ.
                     </p>
                 @endif
 
@@ -196,39 +199,67 @@
                 @endguest
 
                 @auth
-                    @if($isBooked)
-                        <p class="flex items-center gap-2 text-emerald-700">
-                            <x-ui.icon name="check" class="size-5"/>
-                            حجزكم مؤكَّد لـ {{ $myRegistration->children_count }} من الأطفال.
-                        </p>
+                    {{-- حجوزات هذه العائلة في هذه الفعالية --}}
+                    @foreach($myRegistrations as $registration)
+                        @php
+                            $tone = match ($registration->displayStatus()) {
+                                'accepted', 'completed' => 'bg-emerald-50 text-emerald-700',
+                                'pending' => 'bg-amber-50 text-amber-700',
+                                'rejected' => 'bg-rose-50 text-rose-700',
+                                default => 'bg-brand-50 text-ink-soft',
+                            };
+                        @endphp
+                        <div class="rounded-2xl {{ $tone }} px-4 py-3">
+                            <p class="flex flex-wrap items-center gap-2 font-bold">
+                                {{ $registration->child?->name ?? 'حجزكم' }}
+                                <span class="text-sm font-normal">— {{ $registration->status->getLabel() }}</span>
+                            </p>
+                            @if($registration->review_note)
+                                <p class="mt-1 text-sm">{{ $registration->review_note }}</p>
+                            @endif
 
-                        <form method="POST" action="{{ route('registrations.destroy', $event) }}"
-                              onsubmit="return confirm('هل تريدون إلغاء الحجز؟')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-outline btn-block">إلغاء الحجز</button>
-                        </form>
+                            @if($registration->isCancellable())
+                                <form method="POST" action="{{ route('registrations.destroy', $registration) }}"
+                                      onsubmit="return confirm('هل تريدون إلغاء الحجز؟')" class="mt-2">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-sm font-bold text-rose-600">إلغاء الحجز</button>
+                                </form>
+                            @endif
+                        </div>
+                    @endforeach
 
-                        <a href="{{ route('my-events') }}" class="btn btn-ghost btn-block">كل حجوزاتي</a>
-                    @elseif($event->acceptsRegistrations())
+                    @if($myChildren->isEmpty())
+                        <p class="text-ink-soft">أضيفوا أطفالكم أولاً كي نحجز باسم كل طفل.</p>
+                        <a href="{{ route('account.profile') }}" class="btn btn-primary btn-block">
+                            <x-ui.icon name="plus" class="size-5"/> أضيفوا طفلاً
+                        </a>
+                    @elseif($event->acceptsRegistrations() && $bookableChildren->isNotEmpty())
                         <form method="POST" action="{{ route('registrations.store', $event) }}" class="flex flex-col gap-3">
                             @csrf
-                            <label class="field">
-                                <span>عدد الأطفال</span>
-                                <select name="children_count" class="input">
-                                    @for($count = 1; $count <= min(10, $remaining ?? 10); $count++)
-                                        <option value="{{ $count }}">{{ $count }}</option>
-                                    @endfor
-                                </select>
-                            </label>
+
+                            <div class="field">
+                                <span>لمن تحجزون؟</span>
+                                <div class="flex flex-col gap-2">
+                                    @foreach($bookableChildren as $child)
+                                        <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-brand-100 p-3 has-[:checked]:border-brand-400 has-[:checked]:bg-brand-50">
+                                            <input type="checkbox" name="children[]" value="{{ $child->id }}" class="size-5 accent-brand-600">
+                                            <span class="flex-1 font-medium">{{ $child->nameWithAge() }}</span>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
 
                             <label class="field">
                                 <span>ملاحظة للفريق (اختياري)</span>
                                 <input type="text" name="note" maxlength="300" class="input" placeholder="مثال: طفل يحتاج مرافقاً">
                             </label>
 
-                            <button type="submit" class="btn btn-primary btn-block">أكّدوا الحجز</button>
+                            <button type="submit" class="btn btn-primary btn-block">أرسلوا طلب الحجز</button>
+                            <p class="text-center text-sm text-ink-soft">يراجع الفريق الطلب ويصلكم إشعار بالردّ.</p>
                         </form>
+                    @elseif($bookableChildren->isEmpty() && $myRegistrations->isNotEmpty())
+                        <a href="{{ route('my-events') }}" class="btn btn-outline btn-block">كل حجوزاتي</a>
                     @else
                         <p class="text-ink-soft">
                             {{ $event->hasEnded() ? 'انتهى موعد هذه الفعالية.' : 'اكتمل العدد في هذه الفعالية — تابعوا الروزنامة لفعاليات أخرى.' }}

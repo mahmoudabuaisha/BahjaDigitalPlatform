@@ -55,6 +55,15 @@
                 @endguest
 
                 @auth
+                    <a href="{{ route('notifications') }}" class="relative grid size-11 place-items-center rounded-xl border border-brand-100 text-brand-700 no-underline hover:bg-brand-50"
+                       aria-label="الإشعارات">
+                        <x-ui.icon name="megaphone" class="size-5"/>
+                        @php $unreadCount = auth()->user()->unreadNotificationsCount(); @endphp
+                        @if($unreadCount)
+                            <span class="absolute -top-1 -end-1 grid size-5 place-items-center rounded-full bg-rose-500 text-[11px] font-bold text-white">{{ $unreadCount }}</span>
+                        @endif
+                    </a>
+
                     <div x-data="{ menu: false }" class="relative">
                         <button type="button" @click="menu = ! menu" :aria-expanded="menu ? 'true' : 'false'"
                                 class="btn btn-outline btn-sm">
@@ -68,8 +77,14 @@
                         <div x-show="menu" x-cloak @click.outside="menu = false" x-transition.opacity
                              class="absolute end-0 top-full z-50 mt-2 w-52 rounded-2xl border border-brand-100 bg-white p-2 shadow-lg">
                             @if(auth()->user()->isFamily())
+                                <a href="{{ route('account') }}" class="flex min-h-[42px] items-center gap-2 rounded-xl px-3 no-underline hover:bg-brand-50">
+                                    <x-ui.icon name="grid" class="size-4 text-brand-500"/> لوحة التحكّم
+                                </a>
                                 <a href="{{ route('my-events') }}" class="flex min-h-[42px] items-center gap-2 rounded-xl px-3 no-underline hover:bg-brand-50">
                                     <x-ui.icon name="calendar" class="size-4 text-brand-500"/> فعالياتي
+                                </a>
+                                <a href="{{ route('account.profile') }}" class="flex min-h-[42px] items-center gap-2 rounded-xl px-3 no-underline hover:bg-brand-50">
+                                    <x-ui.icon name="users" class="size-4 text-brand-500"/> ملفي الشخصي
                                 </a>
                             @else
                                 <a href="{{ auth()->user()->role->isAdministrative() ? url('/admin') : url('/team') }}"
@@ -127,6 +142,7 @@
 
                 @auth
                     @if(auth()->user()->isFamily())
+                        <a href="{{ route('account') }}" class="btn btn-outline btn-block">لوحة التحكّم</a>
                         <a href="{{ route('my-events') }}" class="btn btn-outline btn-block">فعالياتي</a>
                     @endif
                     <form method="POST" action="{{ route('logout') }}">
@@ -167,6 +183,7 @@
                     <li><a href="{{ route('events.index') }}" class="no-underline hover:text-brand-700">الفعاليات</a></li>
                     <li><a href="{{ route('organizers') }}" class="no-underline hover:text-brand-700">المنظِّمون</a></li>
                     <li><a href="{{ route('guide') }}" class="no-underline hover:text-brand-700">دليل الاستخدام</a></li>
+                    <li><a href="{{ route('faq') }}" class="no-underline hover:text-brand-700">الأسئلة الشائعة</a></li>
                     <li><a href="{{ route('contact') }}" class="no-underline hover:text-brand-700">تواصلوا معنا</a></li>
                 </ul>
             </div>

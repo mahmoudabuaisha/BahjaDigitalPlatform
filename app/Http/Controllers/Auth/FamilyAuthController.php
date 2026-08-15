@@ -52,7 +52,7 @@ class FamilyAuthController extends Controller
             return redirect()->to($panel);
         }
 
-        return redirect()->intended(route('my-events'));
+        return redirect()->intended(route('account'));
     }
 
     public function showRegister(): View
@@ -78,7 +78,7 @@ class FamilyAuthController extends Controller
         Auth::login($user, true);
         $request->session()->regenerate();
 
-        return redirect()->route('my-events')->with('welcome', true);
+        return redirect()->route('account')->with('welcome', true);
     }
 
     public function logout(Request $request): RedirectResponse
