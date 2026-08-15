@@ -120,8 +120,9 @@ php artisan optimize
 
 log "الصلاحيات"
 chown -R deploy:www-data "$APP_DIR"
-find "$APP_DIR" -type f -exec chmod 664 {} \;
-find "$APP_DIR" -type d -exec chmod 775 {} \;
+# دفعة واحدة بـ + بدل \; — الفرق دقائق على شجرة vendor و node_modules
+find "$APP_DIR" -type f -not -path "*/node_modules/*" -exec chmod 664 {} +
+find "$APP_DIR" -type d -not -path "*/node_modules/*" -exec chmod 775 {} +
 chmod -R ug+rwx "$APP_DIR/storage" "$APP_DIR/bootstrap/cache" "$APP_DIR/public/uploads"
 chmod +x "$APP_DIR/artisan" "$APP_DIR/deploy/"*.sh 2>/dev/null || true
 
