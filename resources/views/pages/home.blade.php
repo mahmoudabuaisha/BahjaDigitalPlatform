@@ -25,7 +25,7 @@
                 <a href="{{ route('events.index') }}" class="btn btn-primary">
                     <x-ui.icon name="calendar" class="size-5"/> تصفّحوا الفعاليات
                 </a>
-                <a href="{{ url('/team/register') }}" class="btn btn-outline">
+                <a href="{{ route('teams.join') }}" class="btn btn-outline">
                     <x-ui.icon name="plus" class="size-5"/> سجّلوا فريقكم
                 </a>
             </div>
@@ -205,7 +205,7 @@
             سجّلوا فريقكم وارفعوا جدول فعالياتكم بأنفسكم — بعد اعتماد الإدارة تصل فعالياتكم لآلاف العائلات.
         </p>
         <div class="relative mt-6 flex flex-wrap justify-center gap-3">
-            <a href="{{ url('/team/register') }}" class="btn bg-white text-brand-700 hover:bg-brand-50">سجّلوا فريقكم الآن</a>
+            <a href="{{ route('teams.join') }}" class="btn bg-white text-brand-700 hover:bg-brand-50">سجّلوا فريقكم الآن</a>
             <a href="{{ route('organizers') }}" class="btn border-white/50 text-white hover:bg-white/10">تعرّفوا على المنظِّمين</a>
         </div>
     </div>

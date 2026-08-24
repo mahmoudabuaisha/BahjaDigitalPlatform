@@ -136,7 +136,7 @@
             </div>
 
             <div class="mt-6 flex flex-wrap gap-3">
-                <a href="{{ url('/team/register') }}" class="btn btn-primary">سجّلوا فريقكم</a>
+                <a href="{{ route('teams.join') }}" class="btn btn-primary">سجّلوا فريقكم</a>
                 <a href="{{ route('contact') }}" class="btn btn-outline">تواصلوا معنا</a>
             </div>
         </div>

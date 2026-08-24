@@ -204,7 +204,7 @@
             <div>
                 <h2 class="text-base font-bold">للفرق التطوعية</h2>
                 <ul class="mt-3 flex flex-col gap-2 text-ink-soft">
-                    <li><a href="{{ url('/team/register') }}" class="no-underline hover:text-brand-700">سجّلوا فريقكم</a></li>
+                    <li><a href="{{ route('teams.join') }}" class="no-underline hover:text-brand-700">سجّلوا فريقكم</a></li>
                     <li><a href="{{ url('/team') }}" class="no-underline hover:text-brand-700">دخول الفرق</a></li>
                     <li><a href="{{ route('feedback.create') }}" class="no-underline hover:text-brand-700">رأيكم يهمنا</a></li>
                 </ul>

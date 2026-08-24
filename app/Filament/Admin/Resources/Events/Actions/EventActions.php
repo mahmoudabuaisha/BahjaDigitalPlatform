@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\Events\Actions;
 
 use App\Enums\EventStatus;
+use App\Models\AuditLog;
 use App\Models\Event;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\SvgWriter;
@@ -34,6 +35,8 @@ class EventActions
                     'rejection_reason' => null,
                 ])->save();
 
+                AuditLog::record('event.approved', $record);
+
                 Notification::make()
                     ->title('تم اعتماد الفعالية')
                     ->success()
@@ -64,6 +67,8 @@ class EventActions
                     'approved_at' => null,
                 ])->save();
 
+                AuditLog::record('event.rejected', $record, reason: $data['rejection_reason']);
+
                 Notification::make()
                     ->title('تم رفض الفعالية')
                     ->body('سيرى الفريق سبب الرفض في لوحته.')
@@ -85,7 +90,7 @@ class EventActions
                 $url = $record->shortUrl();
 
                 $svg = (new Builder(
-                    writer: new SvgWriter(),
+                    writer: new SvgWriter,
                     data: $url,
                     size: 280,
                     margin: 12,

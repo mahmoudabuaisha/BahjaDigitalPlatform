@@ -6,6 +6,7 @@ use App\Enums\Audience;
 use App\Enums\EventStatus;
 use App\Enums\RegistrationMode;
 use App\Enums\RegistrationStatus;
+use App\Enums\RevisionStatus;
 use App\Observers\EventObserver;
 use Database\Factories\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -14,9 +15,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 #[ObservedBy(EventObserver::class)]
 class Event extends Model
@@ -25,7 +28,9 @@ class Event extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'public_id',
         'team_id',
+        'series_id',
         'category_id',
         'area_id',
         'shelter_center_id',
@@ -62,9 +67,38 @@ class Event extends Model
         ];
     }
 
+    protected static function booted(): void
+    {
+        // معرّف عام غير قابل للتخمين — تعتمد عليه روابط QR الثابتة
+        static::creating(function (Event $event): void {
+            $event->public_id ??= (string) Str::ulid();
+        });
+    }
+
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
+    }
+
+    public function series(): BelongsTo
+    {
+        return $this->belongsTo(EventSeries::class, 'series_id');
+    }
+
+    public function revisions(): HasMany
+    {
+        return $this->hasMany(EventRevision::class);
+    }
+
+    /** نسخة تعديل تنتظر المراجعة — وجودها يعني «تعديلات معلّقة» */
+    public function pendingRevision(): HasOne
+    {
+        return $this->hasOne(EventRevision::class)->where('status', RevisionStatus::Pending);
+    }
+
+    public function attendanceReport(): HasOne
+    {
+        return $this->hasOne(AttendanceReport::class);
     }
 
     public function category(): BelongsTo
@@ -186,8 +220,38 @@ class Event extends Model
         return $this->start_date->isPast() && ! $this->start_date->isToday();
     }
 
+    /**
+     * اسم المكان كما يجوز نشره (القسم 15.6): مركز مخفيّ الظهور
+     * تُعرض محافظته فقط، حمايةً ميدانية.
+     */
+    public function publicPlaceName(): string
+    {
+        $visibility = $this->shelterCenter?->visibility;
+
+        if ($this->shelterCenter && ($visibility?->showsName() ?? true)) {
+            return $this->shelterCenter->name;
+        }
+
+        return $this->area?->name ?? '';
+    }
+
+    /** العنوان التفصيلي — يُحجب إن كان ظهور المركز مقيّداً */
+    public function publicLocationDetails(): ?string
+    {
+        $visibility = $this->shelterCenter?->visibility;
+
+        if ($visibility && ! $visibility->showsAddress()) {
+            return null;
+        }
+
+        return $this->location_details;
+    }
+
+    /** الرابط الثابت للمشاركة وQR — لا يتغيّر مهما عُدّل العنوان */
     public function shortUrl(): string
     {
-        return route('events.short', $this);
+        return $this->public_id
+            ? route('events.stable', $this->public_id)
+            : route('events.short', $this);
     }
 }

@@ -72,7 +72,7 @@
             سجّلوا فريقكم في المنصة وارفعوا جدول فعالياتكم بأنفسكم —
             بعد اعتماد الإدارة ستصل فعالياتكم لآلاف العائلات.
         </p>
-        <a href="{{ url('/team/register') }}" class="btn btn-primary mt-2">تسجيل فريق جديد</a>
+        <a href="{{ route('teams.join') }}" class="btn btn-primary mt-2">تسجيل فريق جديد</a>
     </section>
 
 </div>

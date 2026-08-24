@@ -29,7 +29,12 @@
         <span class="text-ink-soft">تسجيل</span>
     </p>
 
-    <x-event-status-badge :event="$event"/>
+    <span class="flex flex-col items-start gap-1">
+        <x-event-status-badge :event="$event"/>
+        @if($event->relationLoaded('pendingRevision') ? $event->pendingRevision : $event->pendingRevision()->exists())
+            <span class="badge bg-amber-100 text-amber-800">تعديل قيد المراجعة</span>
+        @endif
+    </span>
 
     <div x-data="{ open: false }" class="relative">
         <button type="button" @click="open = ! open" class="grid size-9 place-items-center rounded-xl text-ink-soft hover:bg-brand-50"
@@ -42,6 +47,11 @@
             <a href="{{ route('organizer.events.edit', $event) }}" class="flex min-h-[40px] items-center gap-2 rounded-xl px-3 no-underline hover:bg-brand-50">
                 <x-ui.icon name="paint-brush" class="size-4 text-brand-500"/> تعديل الفعالية
             </a>
+            @if($event->hasEnded() || ($event->start_date->isToday() && $event->startsAt()->isPast()))
+                <a href="{{ route('organizer.events.attendance', $event) }}" class="flex min-h-[40px] items-center gap-2 rounded-xl px-3 no-underline hover:bg-brand-50">
+                    <x-ui.icon name="check" class="size-4 text-emerald-600"/> تسجيل الحضور
+                </a>
+            @endif
             <a href="{{ url('/team/events/'.$event->id.'/edit') }}" class="flex min-h-[40px] items-center gap-2 rounded-xl px-3 no-underline hover:bg-brand-50">
                 <x-ui.icon name="users" class="size-4 text-brand-500"/> حجوزات العائلات
             </a>

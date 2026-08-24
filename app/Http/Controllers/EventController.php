@@ -36,4 +36,12 @@ class EventController extends Controller
     {
         return redirect()->route('events.show', $event);
     }
+
+    /** الرابط الثابت المطبوع في QR — يصمد أمام تعديل العنوان والحالة */
+    public function stable(string $publicId): RedirectResponse
+    {
+        $event = Event::where('public_id', $publicId)->firstOrFail();
+
+        return redirect()->route('events.show', $event);
+    }
 }

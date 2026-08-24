@@ -6,6 +6,8 @@ use App\Enums\EventStatus;
 use App\Models\Event;
 use App\Models\Team;
 use App\Models\User;
+use Database\Seeders\AreaSeeder;
+use Database\Seeders\CategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,22 +19,24 @@ class EventLifecycleTest extends TestCase
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\AreaSeeder::class);
-        $this->seed(\Database\Seeders\CategorySeeder::class);
+        $this->seed(AreaSeeder::class);
+        $this->seed(CategorySeeder::class);
     }
 
-    public function test_team_manager_edit_of_approved_event_reverts_to_pending(): void
+    public function test_team_manager_edit_of_approved_event_becomes_a_pending_revision(): void
     {
         $team = Team::factory()->create();
         $manager = User::factory()->managerOf($team)->create();
-        $event = Event::factory()->approved()->create(['team_id' => $team->id]);
+        $event = Event::factory()->approved()->create(['team_id' => $team->id, 'title' => 'الأصل']);
 
         $this->actingAs($manager);
 
         $event->update(['title' => 'عنوان معدل']);
 
-        $this->assertSame(EventStatus::Pending, $event->fresh()->status);
-        $this->assertNull($event->fresh()->approved_by);
+        // قاعدة الخطة: تبقى النسخة المنشورة كما هي حتى اعتماد التعديل
+        $this->assertSame(EventStatus::Approved, $event->fresh()->status);
+        $this->assertSame('الأصل', $event->fresh()->title);
+        $this->assertSame(1, $event->revisions()->count());
     }
 
     public function test_admin_edit_of_approved_event_keeps_it_approved(): void
@@ -60,15 +64,20 @@ class EventLifecycleTest extends TestCase
         $this->assertSame(EventStatus::Approved, $event->fresh()->status);
     }
 
-    public function test_mark_completed_command_converts_past_approved_events(): void
+    public function test_archive_command_completes_past_events_and_archives_old_ones(): void
     {
         $past = Event::factory()->approved()->create(['start_date' => today()->subDays(2)]);
         $future = Event::factory()->approved()->create(['start_date' => today()->addDay()]);
+        $ancient = Event::factory()->completed()->create(['start_date' => today()->subDays(90)]);
 
-        $this->artisan('events:mark-completed')->assertSuccessful();
+        $this->artisan('events:archive')->assertSuccessful();
 
         $this->assertSame(EventStatus::Completed, $past->fresh()->status);
         $this->assertSame(EventStatus::Approved, $future->fresh()->status);
+        $this->assertSame(EventStatus::Archived, $ancient->fresh()->status);
+
+        // المؤرشفة تبقى للتقارير لكنها تخرج من العرض العام
+        $this->assertSame(0, Event::publiclyVisible()->whereKey($ancient->id)->count());
     }
 
     public function test_publicly_visible_scope_excludes_hidden_statuses(): void

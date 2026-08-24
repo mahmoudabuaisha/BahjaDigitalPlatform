@@ -3,19 +3,22 @@
 namespace App\Models;
 
 use App\Enums\EventStatus;
+use Database\Factories\TeamFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class Team extends Model
 {
-    /** @use HasFactory<\Database\Factories\TeamFactory> */
+    /** @use HasFactory<TeamFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'public_id',
         'name',
         'slug',
         'description',
@@ -32,6 +35,13 @@ class Team extends Model
             'social_links' => 'array',
             'is_active' => 'boolean',
         ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Team $team): void {
+            $team->public_id ??= (string) Str::ulid();
+        });
     }
 
     public function users(): HasMany

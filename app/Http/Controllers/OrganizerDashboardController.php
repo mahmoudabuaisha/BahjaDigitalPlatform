@@ -38,7 +38,7 @@ class OrganizerDashboardController extends Controller
                 ->where('status', RegistrationStatus::Pending)
                 ->count(),
             'recent' => (clone $events)
-                ->with(['category', 'area', 'shelterCenter'])
+                ->with(['category', 'area', 'shelterCenter', 'pendingRevision'])
                 ->withCount(['registrations as seats_taken' => fn ($query) => $query->holdingSeat()])
                 ->orderByDesc('start_date')
                 ->limit(5)
@@ -55,7 +55,7 @@ class OrganizerDashboardController extends Controller
         $base = Event::query()->where('team_id', $team->id);
 
         $events = (clone $base)
-            ->with(['category', 'area', 'shelterCenter'])
+            ->with(['category', 'area', 'shelterCenter', 'pendingRevision'])
             ->withCount(['registrations as seats_taken' => fn ($query) => $query->holdingSeat()])
             ->when($search !== '', fn (Builder $query) => $query->where('title', 'like', '%'.$search.'%'))
             ->when($filter !== '', function (Builder $query) use ($filter) {

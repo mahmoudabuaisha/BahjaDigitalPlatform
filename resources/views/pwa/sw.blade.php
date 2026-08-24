@@ -161,7 +161,8 @@ const SYNC_TAG = 'bahja-bookings';
 
 function queueDatabase() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open(QUEUE_DB, 1);
+        // بلا رقم إصدار: يفتح الإصدار الحالي كائناً ما كان
+        const request = indexedDB.open(QUEUE_DB);
 
         request.onupgradeneeded = () => {
             if (! request.result.objectStoreNames.contains(QUEUE_STORE)) {
@@ -185,7 +186,13 @@ function queueTransact(mode, run) {
 }
 
 async function flushQueue() {
-    const pending = await queueTransact('readonly', (store) => store.getAll()).catch(() => []);
+    let pending = [];
+
+    try {
+        pending = await queueTransact('readonly', (store) => store.getAll());
+    } catch (error) {
+        return; // المخزن لم يُنشأ بعد
+    }
 
     let sent = 0;
 

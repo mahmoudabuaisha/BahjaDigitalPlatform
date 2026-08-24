@@ -58,8 +58,8 @@
 @if($editing && $event->status === \App\Enums\EventStatus::Approved)
     <p class="mt-4 flex items-start gap-2 rounded-2xl bg-amber-50 px-4 py-3 text-amber-800">
         <x-ui.icon name="clock" class="mt-0.5 size-5 shrink-0"/>
-        تعديل الاسم أو الوصف أو الموعد أو المكان يُعيد الفعالية إلى مراجعة الإدارة قبل ظهورها من جديد.
-        تعديل المقاعد والشروط لا يؤثّر على نشرها.
+        تعديل الاسم أو الوصف أو الموعد أو المكان يُحفظ كنسخة تنتظر اعتماد الإدارة،
+        وتبقى النسخة المنشورة الحالية ظاهرة للعائلات حتى الاعتماد. تعديل المقاعد والشروط يُطبَّق مباشرة.
     </p>
 @endif
 
@@ -197,6 +197,31 @@
                        value="{{ old('location_details', $event->location_details ?? '') }}"
                        class="input" placeholder="أدخلوا العنوان التفصيلي للمكان">
             </label>
+
+            @unless($editing)
+                {{-- التكرار الأسبوعي: سلسلة مواعيد مستقلة حتى 8 أسابيع --}}
+                <div x-data="{ repeat: {{ old('repeat_weekly') ? 'true' : 'false' }} }"
+                     class="rounded-2xl bg-brand-50/60 p-4">
+                    <label class="flex items-center gap-3">
+                        <input type="checkbox" name="repeat_weekly" value="1" x-model="repeat" class="size-5 accent-brand-600">
+                        <span class="font-medium">تكرار أسبوعي — نفس اليوم والوقت كل أسبوع</span>
+                    </label>
+
+                    <div x-show="repeat" x-cloak class="mt-3">
+                        <label class="field block sm:max-w-56">
+                            <span>عدد الأسابيع (حتى 8)</span>
+                            <select name="repeat_count" class="input">
+                                @foreach(range(2, 8) as $count)
+                                    <option value="{{ $count }}" @selected((int) old('repeat_count', 4) === $count)>{{ $count }} أسابيع</option>
+                                @endforeach
+                            </select>
+                        </label>
+                        <p class="mt-2 text-xs text-ink-soft">
+                            كل موعد يُنشأ فعاليةً مستقلة: تُراجع وتُلغى ويسجَّل حضورها وحدها.
+                        </p>
+                    </div>
+                </div>
+            @endunless
         </section>
 
         {{-- ③ الفئة المستهدفة والمشاركة --}}

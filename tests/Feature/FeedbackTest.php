@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Event;
 use App\Models\Feedback;
+use Database\Seeders\AreaSeeder;
+use Database\Seeders\CategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,8 +17,8 @@ class FeedbackTest extends TestCase
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\AreaSeeder::class);
-        $this->seed(\Database\Seeders\CategorySeeder::class);
+        $this->seed(AreaSeeder::class);
+        $this->seed(CategorySeeder::class);
     }
 
     public function test_valid_feedback_is_stored(): void
@@ -51,7 +53,10 @@ class FeedbackTest extends TestCase
 
     public function test_event_feedback_attaches_to_event(): void
     {
-        $event = Event::factory()->completed()->create();
+        $event = Event::factory()->completed()->create([
+            'start_date' => today()->subDay(),
+            'start_time' => '10:00',
+        ]);
 
         $this->post(route('events.feedback', $event), ['rating' => 4])
             ->assertRedirect(route('events.show', $event));

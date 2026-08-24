@@ -98,7 +98,7 @@
 
             <p class="text-center text-sm text-ink-soft">
                 فريق تطوّعي؟
-                <a href="{{ url('/team/register') }}" class="text-brand-700 no-underline hover:underline">سجّلوا من هنا</a>
+                <a href="{{ route('teams.join') }}" class="text-brand-700 no-underline hover:underline">سجّلوا من هنا</a>
             </p>
         </div>
 

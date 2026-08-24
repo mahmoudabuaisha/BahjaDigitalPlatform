@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Enums\FeedbackSource;
+use Database\Factories\FeedbackFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Feedback extends Model
 {
-    /** @use HasFactory<\Database\Factories\FeedbackFactory> */
+    /** @use HasFactory<FeedbackFactory> */
     use HasFactory;
 
     protected $table = 'feedback';
@@ -18,6 +19,7 @@ class Feedback extends Model
         'event_id',
         'source',
         'rating',
+        'device_hash',
         'message',
         'subject',
         'contact_name',

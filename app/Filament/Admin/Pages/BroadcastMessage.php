@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Pages;
 
 use App\Enums\UserRole;
 use App\Models\Area;
+use App\Models\AuditLog;
 use App\Models\User;
 use App\Models\UserNotification;
 use BackedEnum;
@@ -74,6 +75,9 @@ class BroadcastMessage extends Page
         foreach ($recipients as $userId) {
             UserNotification::send($userId, 'admin_message', $data['title'], $data['body'] ?? null);
         }
+
+        AuditLog::record('broadcast.sent', null,
+            after: ['title' => $data['title'], 'recipients' => $recipients->count()]);
 
         $this->form->fill();
 

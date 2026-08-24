@@ -7,7 +7,7 @@
     @include('partials.og', [
         'ogType' => 'article',
         'ogTitle' => $event->title.' — '.$event->start_date->translatedFormat('l j F'),
-        'ogDescription' => ($event->shelterCenter?->name ?? $event->area->name).' · الساعة '.substr($event->start_time, 0, 5).($event->description ? ' — '.\Illuminate\Support\Str::limit($event->description, 100) : ''),
+        'ogDescription' => $event->publicPlaceName().' · الساعة '.substr($event->start_time, 0, 5).($event->description ? ' — '.\Illuminate\Support\Str::limit($event->description, 100) : ''),
         'ogImage' => $event->image_path,
     ])
 @endsection
@@ -31,6 +31,12 @@
             @if(session('feedback_sent'))
                 <p class="mt-4 flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 font-medium text-emerald-700">
                     <x-ui.icon name="check" class="size-5"/> شكراً لكم — تقييمكم يساعدنا على تحسين الفعاليات القادمة.
+                </p>
+            @endif
+
+            @if(session('feedback_error'))
+                <p class="mt-4 rounded-2xl bg-amber-50 px-4 py-3 font-medium text-amber-800">
+                    {{ session('feedback_error') }}
                 </p>
             @endif
 
@@ -125,9 +131,9 @@
                         <div>
                             <dt class="text-sm text-ink-soft">المكان</dt>
                             <dd class="font-bold">
-                                {{ $event->shelterCenter?->name ?? $event->area->name }}
-                                @if($event->location_details)
-                                    <span class="block font-normal text-ink-soft">{{ $event->location_details }}</span>
+                                {{ $event->publicPlaceName() }}
+                                @if($event->publicLocationDetails())
+                                    <span class="block font-normal text-ink-soft">{{ $event->publicLocationDetails() }}</span>
                                 @endif
                                 <span class="block font-normal text-ink-soft">{{ $event->area->name }}</span>
                             </dd>

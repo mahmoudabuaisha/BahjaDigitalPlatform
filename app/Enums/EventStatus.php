@@ -14,6 +14,7 @@ enum EventStatus: string implements HasColor, HasIcon, HasLabel
     case Rejected = 'rejected';
     case Cancelled = 'cancelled';
     case Completed = 'completed';
+    case Archived = 'archived';
 
     public function getLabel(): string
     {
@@ -24,6 +25,7 @@ enum EventStatus: string implements HasColor, HasIcon, HasLabel
             self::Rejected => __('مرفوضة'),
             self::Cancelled => __('ملغاة'),
             self::Completed => __('منفَّذة'),
+            self::Archived => __('مؤرشفة'),
         };
     }
 
@@ -36,6 +38,7 @@ enum EventStatus: string implements HasColor, HasIcon, HasLabel
             self::Rejected => 'danger',
             self::Cancelled => 'gray',
             self::Completed => 'info',
+            self::Archived => 'gray',
         };
     }
 
@@ -48,6 +51,7 @@ enum EventStatus: string implements HasColor, HasIcon, HasLabel
             self::Rejected => 'heroicon-o-x-circle',
             self::Cancelled => 'heroicon-o-no-symbol',
             self::Completed => 'heroicon-o-flag',
+            self::Archived => 'heroicon-o-archive-box',
         };
     }
 

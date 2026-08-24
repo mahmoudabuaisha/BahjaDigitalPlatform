@@ -6,11 +6,14 @@ use App\Enums\Audience;
 use App\Enums\EventStatus;
 use App\Enums\RegistrationMode;
 use App\Models\Area;
+use App\Models\AuditLog;
 use App\Models\Category;
 use App\Models\Event;
+use App\Models\EventSeries;
 use App\Models\ShelterCenter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -41,20 +44,44 @@ class OrganizerEventController extends Controller
         $data = $this->validated($request);
         $isDraft = $request->input('action') === 'draft';
 
-        $event = new Event($this->attributes($data));
-        $event->team_id = Auth::user()->team_id;
-        $event->created_by = Auth::id();
-        $event->status = $isDraft ? EventStatus::Draft : EventStatus::Pending;
+        // التكرار الأسبوعي (القسم 6.4): سلسلة تولّد مواعيد مستقلة حتى 8 أسابيع
+        $occurrences = 1;
+        $series = null;
 
-        if ($request->hasFile('image')) {
-            $event->image_path = $request->file('image')->store('events', 'public');
+        if ($request->boolean('repeat_weekly')) {
+            $occurrences = min(max((int) $request->input('repeat_count', 2), 2), 8);
+
+            $series = EventSeries::create([
+                'team_id' => Auth::user()->team_id,
+                'title' => $data['title'],
+                'recurrence_rule' => 'weekly',
+                'starts_on' => $data['start_date'],
+                'occurrence_count' => $occurrences,
+            ]);
         }
 
-        $event->save();
+        $imagePath = $request->hasFile('image')
+            ? $request->file('image')->store('events', 'public')
+            : null;
 
-        return redirect()->route('organizer.events')->with('event_saved', $isDraft
-            ? 'حُفظت الفعالية كمسودة — يمكنكم إكمالها وإرسالها لاحقاً.'
-            : 'أُرسلت الفعالية للاعتماد — تظهر للعائلات فور موافقة الإدارة.');
+        foreach (range(0, $occurrences - 1) as $week) {
+            $event = new Event($this->attributes($data));
+            $event->team_id = Auth::user()->team_id;
+            $event->created_by = Auth::id();
+            $event->series_id = $series?->id;
+            $event->status = $isDraft ? EventStatus::Draft : EventStatus::Pending;
+            $event->start_date = Carbon::parse($data['start_date'])->addWeeks($week);
+            $event->image_path = $imagePath;
+            $event->save();
+        }
+
+        $message = match (true) {
+            $isDraft => 'حُفظت الفعالية كمسودة — يمكنكم إكمالها وإرسالها لاحقاً.',
+            $occurrences > 1 => 'أُرسلت سلسلة من '.$occurrences.' مواعيد أسبوعية للاعتماد — كل موعد يُراجع ويُدار مستقلاً.',
+            default => 'أُرسلت الفعالية للاعتماد — تظهر للعائلات فور موافقة الإدارة.',
+        };
+
+        return redirect()->route('organizer.events')->with('event_saved', $message);
     }
 
     public function edit(Event $event): View
@@ -76,7 +103,8 @@ class OrganizerEventController extends Controller
             $previous = $event->image_path;
             $event->image_path = $request->file('image')->store('events', 'public');
 
-            if ($previous) {
+            // صورة الفعالية المنشورة تبقى: النسخة المعروضة للعائلات ما زالت تعرضها
+            if ($previous && ! $event->status->isPubliclyVisible()) {
                 Storage::disk('public')->delete($previous);
             }
         }
@@ -86,15 +114,13 @@ class OrganizerEventController extends Controller
             $event->status = EventStatus::Pending;
         }
 
-        $wasApproved = $event->status === EventStatus::Approved;
-
         $event->save();
 
-        // مراقب الفعالية يعيد المعتمدة إلى المراجعة حين يمسّ التعديلُ جوهرها
-        $backToReview = $wasApproved && $event->status === EventStatus::Pending;
+        // مراقب الفعالية حوّل التعديلات الجوهرية إلى نسخة تنتظر الاعتماد
+        $hasPendingRevision = $event->pendingRevision()->exists();
 
-        return redirect()->route('organizer.events')->with('event_saved', $backToReview
-            ? 'حُفظت تعديلات «'.$event->title.'» — وعادت الفعالية إلى مراجعة الإدارة لأن التغيير مسّ تفاصيلها الأساسية.'
+        return redirect()->route('organizer.events')->with('event_saved', $hasPendingRevision
+            ? 'حُفظ تعديل «'.$event->title.'» كنسخة بانتظار اعتماد الإدارة — والنسخة المنشورة الحالية تبقى ظاهرة للعائلات حتى الاعتماد.'
             : 'حُفظت تعديلات «'.$event->title.'».');
     }
 
@@ -106,10 +132,13 @@ class OrganizerEventController extends Controller
         if ($event->seatsTaken() > 0) {
             $event->update(['status' => EventStatus::Cancelled]);
 
+            AuditLog::record('event.cancelled', $event);
+
             return redirect()->route('organizer.events')
                 ->with('event_saved', 'أُلغيت الفعالية ووصل الإشعار إلى العائلات المسجَّلة.');
         }
 
+        AuditLog::record('event.deleted', $event);
         $event->delete();
 
         return redirect()->route('organizer.events')->with('event_saved', 'حُذفت الفعالية.');
@@ -140,6 +169,8 @@ class OrganizerEventController extends Controller
             'registration_mode' => ['required', Rule::enum(RegistrationMode::class)],
             'terms' => ['nullable', 'string', 'max:500'],
             'image' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+            'repeat_weekly' => ['nullable', 'boolean'],
+            'repeat_count' => ['nullable', 'integer', 'min:2', 'max:8'],
         ], [], [
             'title' => 'اسم الفعالية',
             'category_id' => 'الفئة',

@@ -11,12 +11,14 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\OrganizerAttendanceController;
 use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\OrganizerDashboardController;
 use App\Http\Controllers\OrganizerEventController;
 use App\Http\Controllers\PwaController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\TeamApplicationController;
 use App\Http\Controllers\TeamPublicController;
 use App\Http\Controllers\TrackController;
 use App\Http\Middleware\EnsureTeamManager;
@@ -27,12 +29,17 @@ Route::get('/', HomeController::class)->name('home');
 Route::get('/events', EventIndexController::class)->name('events.index');
 Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
 Route::get('/e/{event}', [EventController::class, 'short'])->name('events.short');
+Route::get('/r/{publicId}', [EventController::class, 'stable'])->name('events.stable');
 Route::get('/events/{event}/qr.svg', EventQrController::class)->name('events.qr');
 Route::post('/events/{event}/feedback', [FeedbackController::class, 'storeForEvent'])
     ->middleware('throttle:feedback')
     ->name('events.feedback');
 
 Route::get('/organizers', OrganizerController::class)->name('organizers');
+Route::get('/join-team', [TeamApplicationController::class, 'create'])->name('teams.join');
+Route::post('/join-team', [TeamApplicationController::class, 'store'])
+    ->middleware('throttle:feedback')
+    ->name('teams.join.store');
 Route::get('/teams/{team:slug}', [TeamPublicController::class, 'show'])->name('teams.show');
 
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
@@ -79,6 +86,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/organizer/events/{event}/edit', [OrganizerEventController::class, 'edit'])->name('organizer.events.edit');
         Route::put('/organizer/events/{event}', [OrganizerEventController::class, 'update'])->name('organizer.events.update');
         Route::delete('/organizer/events/{event}', [OrganizerEventController::class, 'destroy'])->name('organizer.events.destroy');
+
+        Route::get('/organizer/events/{event}/attendance', [OrganizerAttendanceController::class, 'create'])->name('organizer.events.attendance');
+        Route::post('/organizer/events/{event}/attendance', [OrganizerAttendanceController::class, 'store'])->name('organizer.events.attendance.store');
     });
 
     Route::get('/my-events', [RegistrationController::class, 'index'])->name('my-events');

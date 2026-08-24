@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\SecurityHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // وحده — فيصبح حدّ التقييم «5 بالساعة لكل IP» حدّاً واحداً لكل الزوار
         // مجتمعين، وتخرج روابط route() بـ http بدل https في وسوم OG وكروت QR
         $middleware->trustProxies(at: '*');
+
+        // ترويسات الأمان على كل استجابة (القسم 15.4 من خطة الإنتاج)
+        $middleware->append(SecurityHeaders::class);
 
         // عدّاد المشاهدات يصل عبر sendBeacon بلا رمز CSRF
         $middleware->validateCsrfTokens(except: [

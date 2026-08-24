@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\Users\Tables;
 
 use App\Enums\UserRole;
 use App\Filament\InitialsAvatarProvider;
+use App\Models\AuditLog;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -83,6 +84,9 @@ class UsersTable
                         ->visible(fn (User $record): bool => $record->id !== auth()->id())
                         ->action(function (User $record): void {
                             $record->update(['is_active' => ! $record->is_active]);
+
+                            AuditLog::record('user.toggled', $record,
+                                after: ['is_active' => $record->is_active]);
 
                             Notification::make()
                                 ->title($record->is_active ? 'فُعّل الحساب' : 'أُوقف الحساب')

@@ -149,7 +149,7 @@
             <p class="mt-2 text-sm leading-relaxed text-brand-50">
                 سجّلوا فريقكم اليوم، وابدؤوا برفع فعالياتكم بعد اعتماد الإدارة.
             </p>
-            <a href="{{ url('/team/register') }}" class="btn mt-4 bg-white text-brand-700 hover:bg-brand-50">سجّلوا الآن كمنظِّم</a>
+            <a href="{{ route('teams.join') }}" class="btn mt-4 bg-white text-brand-700 hover:bg-brand-50">سجّلوا الآن كمنظِّم</a>
         </div>
     </aside>
 </div>

@@ -1,5 +1,6 @@
 import Alpine from 'alpinejs';
 import './offline-queue';
+import { loadSnapshot, snapshotStatus } from './snapshot';
 
 window.Alpine = Alpine;
 
@@ -60,8 +61,7 @@ Alpine.data('savedEvents', () => ({
 
     async init() {
         try {
-            const response = await fetch('/api/v1/events');
-            const feed = await response.json();
+            const feed = (await loadSnapshot()) ?? { events: [] };
 
             const centers = new Map((feed.centers ?? []).map((c) => [c.id, c.n]));
             const areas = new Map((feed.areas ?? []).map((a) => [a.id, a.n]));
@@ -92,17 +92,30 @@ Alpine.data('savedEvents', () => ({
 
 Alpine.start();
 
-/* شريط حالة الشبكة — الانقطاع دائم الظهور، والعودة تومض ثم تختفي */
+/* شريط حالة الشبكة — الانقطاع دائم الظهور، والعودة تومض ثم تختفي.
+   عند الأوفلاين يُذكر وقت آخر تحديث، ويُحذَّر بقوة إن تجاوزت النسخة صلاحيتها. */
 const offlineBanner = document.getElementById('offline-banner');
 const onlineBanner = document.getElementById('online-banner');
 let wasOffline = ! navigator.onLine;
 
-const updateOnlineStatus = () => {
+const updateOnlineStatus = async () => {
     if (! offlineBanner) return;
 
     offlineBanner.classList.toggle('hidden', navigator.onLine);
 
+    if (! navigator.onLine) {
+        const status = snapshotStatus(await loadSnapshot());
+
+        offlineBanner.textContent = status?.expired
+            ? 'تنبيه: أنتم دون اتصال والبيانات المحفوظة قديمة — قد تكون المواعيد تغيّرت'
+            : 'أنتم الآن دون اتصال — تُعرض آخر البيانات المحفوظة'
+              + (status?.generatedLabel ? ' (آخر تحديث: ' + status.generatedLabel + ')' : '');
+
+        offlineBanner.classList.toggle('bg-rose-700', Boolean(status?.expired));
+    }
+
     if (navigator.onLine && wasOffline && onlineBanner) {
+        loadSnapshot(); // العودة للاتصال: تُجلب النسخة الأحدث فوراً
         onlineBanner.classList.remove('hidden');
         setTimeout(() => onlineBanner.classList.add('hidden'), 4000);
     }
@@ -113,6 +126,11 @@ const updateOnlineStatus = () => {
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 updateOnlineStatus();
+
+// تحميل النسخة مرة عند كل زيارة متصلة — كي تجد العائلةُ الروزنامةَ حاضرةً حين تنقطع الشبكة
+if (navigator.onLine) {
+    window.addEventListener('load', () => loadSnapshot());
+}
 
 /* عدّاد المشاهدات — sendBeacon كي لا يؤخر التصفح */
 const trackEl = document.querySelector('[data-track-event]');

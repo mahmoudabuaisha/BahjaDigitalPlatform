@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\InitialsAvatarProvider;
 use App\Filament\Team\Auth\RegisterTeam;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -27,6 +28,8 @@ class TeamPanelProvider extends PanelProvider
             ->id('team')
             ->path('team')
             ->login()
+            // متاح اختيارياً لمديري الفرق
+            ->multiFactorAuthentication(AppAuthentication::make()->recoverable())
             ->registration(RegisterTeam::class)
             ->brandName('بَهْجَة — لوحة الفريق')
             ->colors([

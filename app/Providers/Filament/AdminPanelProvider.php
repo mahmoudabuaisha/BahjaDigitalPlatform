@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\InitialsAvatarProvider;
+use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -27,6 +28,11 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            // MFA إلزامي للمشرفين (القسم 15.2) — تطبيق مصادقة + رموز استرداد
+            ->multiFactorAuthentication(
+                AppAuthentication::make()->recoverable(),
+                isRequired: fn (): bool => ! app()->runningUnitTests(),
+            )
             ->brandName('بَهْجَة — لوحة الإدارة')
             ->colors([
                 // البنفسجي نفسه المستعمل في الموقع العام (--color-brand-500)

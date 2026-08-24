@@ -149,10 +149,11 @@ class OrganizerEventFormTest extends TestCase
         $this->actingAs($intruder)->delete(route('organizer.events.destroy', $event))->assertForbidden();
     }
 
-    public function test_editing_an_approved_event_sends_it_back_for_review(): void
+    public function test_editing_an_approved_event_creates_a_pending_revision(): void
     {
         $event = Event::factory()->approved()->create();
         $manager = $this->manager($event);
+        $originalTitle = $event->title;
 
         $this->actingAs($manager)->get(route('organizer.events.edit', $event))->assertOk();
 
@@ -162,8 +163,13 @@ class OrganizerEventFormTest extends TestCase
 
         $event->refresh();
 
-        $this->assertSame('اسم بعد التعديل', $event->title);
-        $this->assertSame(EventStatus::Pending, $event->status);
+        // قاعدة الخطة: النسخة المنشورة لا تُمسّ حتى اعتماد التعديل
+        $this->assertSame($originalTitle, $event->title);
+        $this->assertSame(EventStatus::Approved, $event->status);
+
+        $revision = $event->pendingRevision;
+        $this->assertNotNull($revision);
+        $this->assertSame('اسم بعد التعديل', $revision->payload['title']);
     }
 
     public function test_editing_only_the_seat_count_keeps_the_event_published(): void

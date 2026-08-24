@@ -3,7 +3,7 @@
 @php
     $tone = $event->category?->toneClass() ?? 'tone tone-violet';
     $isToday = $event->start_date->isToday();
-    $place = $event->shelterCenter?->name ?? $event->area?->name;
+    $place = $event->publicPlaceName();
 @endphp
 
 <article {{ $attributes->class(['card card-hover '.$tone]) }}

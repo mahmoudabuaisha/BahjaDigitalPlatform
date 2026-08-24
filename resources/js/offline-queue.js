@@ -9,7 +9,7 @@
  */
 
 const DB_NAME = 'bahja-offline';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE = 'bookings';
 const SYNC_TAG = 'bahja-bookings';
 
@@ -20,6 +20,11 @@ function openDatabase() {
         request.onupgradeneeded = () => {
             if (! request.result.objectStoreNames.contains(STORE)) {
                 request.result.createObjectStore(STORE, { keyPath: 'id', autoIncrement: true });
+            }
+
+            // مخزن snapshot يُنشأ هنا أيضاً كي لا يتصارع الملفان على الإصدار
+            if (! request.result.objectStoreNames.contains('snapshot')) {
+                request.result.createObjectStore('snapshot');
             }
         };
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\ShelterCenters\Schemas;
 
+use App\Enums\LocationVisibility;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -33,6 +34,12 @@ class ShelterCenterForm
                 TextInput::make('address')
                     ->label('العنوان')
                     ->maxLength(255),
+                Select::make('visibility')
+                    ->label('مستوى الظهور للجمهور')
+                    ->options(LocationVisibility::class)
+                    ->default(LocationVisibility::PublicExact->value)
+                    ->helperText('حماية ميدانية: عند التقييد يُحجب الاسم أو العنوان التفصيلي عن الموقع العام.')
+                    ->required(),
                 Toggle::make('is_active')
                     ->label('نشط')
                     ->default(true),

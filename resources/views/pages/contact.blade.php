@@ -47,7 +47,7 @@
             </a>
         @endif
 
-        <a href="{{ url('/team/register') }}" class="card card-hover tone tone-violet items-start gap-3 p-6 no-underline">
+        <a href="{{ route('teams.join') }}" class="card card-hover tone tone-violet items-start gap-3 p-6 no-underline">
             <span class="icon-tile icon-tile-lg"><x-ui.icon name="users"/></span>
             <h2 class="text-lg font-bold">فريق يريد الانضمام؟</h2>
             <p class="text-sm text-ink-soft">سجّلوا فريقكم التطوعي وابدؤوا برفع فعالياتكم بعد الاعتماد.</p>
