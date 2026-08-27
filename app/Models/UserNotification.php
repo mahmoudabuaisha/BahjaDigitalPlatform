@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Mail\UserNotificationMail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Mail;
 
 class UserNotification extends Model
 {
@@ -55,12 +57,23 @@ class UserNotification extends Model
     /** إنشاء إشعار — نقطة واحدة كي تبقى الصياغة والروابط متسقة */
     public static function send(User|int $user, string $type, string $title, ?string $body = null, ?string $url = null): self
     {
-        return self::create([
+        $notification = self::create([
             'user_id' => $user instanceof User ? $user->id : $user,
             'type' => $type,
             'title' => $title,
             'body' => $body,
             'url' => $url,
         ]);
+
+        // الصورة البريدية للإشعار نفسه — وتعثّر البريد لا يُفشِل العملية الأصلية
+        rescue(function () use ($user, $notification): void {
+            $recipient = $user instanceof User ? $user : User::find($user);
+
+            if ($recipient?->email) {
+                Mail::to($recipient->email)->queue(new UserNotificationMail($notification));
+            }
+        }, report: true);
+
+        return $notification;
     }
 }

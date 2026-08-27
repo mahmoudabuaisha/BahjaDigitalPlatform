@@ -45,6 +45,26 @@
     </aside>
 
     <div>
+        @if(session('status'))
+            <p class="mb-4 flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 font-medium text-emerald-700">
+                <x-ui.icon name="check" class="size-5"/> {{ session('status') }}
+            </p>
+        @endif
+
+        {{-- لافتة ودّية لا بوابة: وصول البريد غير مضمون فلا نقفل الحجز على التحقق --}}
+        @if(auth()->user()->isFamily() && ! auth()->user()->hasVerifiedEmail())
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-amber-50 px-4 py-3">
+                <p class="flex items-center gap-2 font-medium text-amber-800">
+                    <x-ui.icon name="envelope" class="size-5"/>
+                    بريدكم غير مؤكَّد بعد — أرسلنا لكم رسالة تأكيد، تفقّدوا الوارد والبريد غير المرغوب.
+                </p>
+                <form method="POST" action="{{ route('verification.send') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-outline text-amber-800">إعادة إرسال الرسالة</button>
+                </form>
+            </div>
+        @endif
+
         @yield('account')
     </div>
 </div>

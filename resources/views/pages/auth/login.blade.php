@@ -56,8 +56,7 @@
                         تذكّروني
                     </label>
 
-                    {{-- استعادة كلمة المرور تحتاج خادم بريد — تُفعَّل حين تُضبط بيانات SMTP --}}
-                    <a href="{{ route('contact') }}" class="text-sm text-brand-700 no-underline hover:underline">نسيتم كلمة المرور؟ تواصلوا معنا</a>
+                    <a href="{{ route('password.request') }}" class="text-sm text-brand-700 no-underline hover:underline">نسيتم كلمة المرور؟</a>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-block">

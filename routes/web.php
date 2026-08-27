@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\FamilyAuthController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\EventController;
@@ -57,9 +59,25 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [FamilyAuthController::class, 'login'])->middleware('throttle:6,1');
     Route::get('/register', [FamilyAuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [FamilyAuthController::class, 'register'])->middleware('throttle:6,1');
+
+    // استعادة كلمة المرور بالبريد
+    Route::get('/forgot-password', [PasswordResetController::class, 'request'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'email'])
+        ->middleware('throttle:6,1')->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'form'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'update'])
+        ->middleware('throttle:6,1')->name('password.update');
 });
 
 Route::post('/logout', [FamilyAuthController::class, 'logout'])->middleware('auth')->name('logout');
+
+// ── تأكيد البريد الإلكتروني — لافتة ودّية، لا بوابة تقفل الحجز ──
+Route::middleware('auth')->group(function () {
+    Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+        ->middleware('signed')->name('verification.verify');
+    Route::post('/email/verification-notification', [EmailVerificationController::class, 'resend'])
+        ->middleware('throttle:6,1')->name('verification.send');
+});
 
 // ── حساب وليّ الأمر وحجز المقاعد ──
 Route::middleware('auth')->group(function () {
