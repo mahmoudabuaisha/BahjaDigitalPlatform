@@ -70,6 +70,7 @@ class AuditLog extends Model
             'user.toggled' => 'تفعيل/إيقاف حساب',
             'export.csv' => 'تصدير بيانات',
             'broadcast.sent' => 'رسالة عامة',
+            'images.reprocessed' => 'تنظيف صور قديمة',
             default => $action,
         };
     }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Pages;
 
+use App\Services\ImageService;
 use App\Support\Settings;
 use BackedEnum;
 use Filament\Forms\Components\FileUpload;
@@ -57,7 +58,9 @@ class ManageSettings extends Page
                             ->label('صورة المشاركة الافتراضية (واتساب) — 1200×630')
                             ->image()
                             ->disk('public')
-                            ->directory('site'),
+                            ->directory('site')
+                            // إعادة الترميز على الخادم تمسح EXIF/GPS قبل التخزين
+                            ->saveUploadedFileUsing(fn ($file): string => app(ImageService::class)->store($file, 'site', 'og_default_image')),
                     ]),
                 Section::make('أهداف المبادرة (لتقارير الأثر)')
                     ->columnSpanFull()

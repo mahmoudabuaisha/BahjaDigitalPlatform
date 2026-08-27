@@ -17,7 +17,7 @@
 
     <a href="{{ route('events.show', $event) }}" class="relative block aspect-[16/10] overflow-hidden no-underline">
         @if($event->image_path)
-            <img src="{{ $event->imageUrl() }}" alt="{{ $event->title }}" loading="lazy"
+            <img src="{{ $event->imageCardUrl() }}" alt="{{ $event->title }}" loading="lazy"
                  class="size-full object-cover transition duration-300 hover:scale-105" width="640" height="400">
         @else
             {{-- لا صورة مرفوعة: رسمة الفئة بدل مربّع رمادي فارغ --}}

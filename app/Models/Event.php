@@ -8,6 +8,7 @@ use App\Enums\RegistrationMode;
 use App\Enums\RegistrationStatus;
 use App\Enums\RevisionStatus;
 use App\Observers\EventObserver;
+use App\Services\ImageService;
 use Database\Factories\EventFactory;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -212,6 +213,27 @@ class Event extends Model
     public function imageUrl(): ?string
     {
         return $this->image_path ? Storage::disk('public')->url($this->image_path) : null;
+    }
+
+    /**
+     * نسخة WebP الأخف للبطاقات والقوائم؛ الصور القديمة (قبل تفعيل
+     * المعالجة) لا تملك نسخة بطاقة فتعود للأصل.
+     */
+    public function imageCardUrl(): ?string
+    {
+        if (! $this->image_path) {
+            return null;
+        }
+
+        foreach (['webp', 'jpg'] as $extension) {
+            $card = ImageService::cardPath($this->image_path, $extension);
+
+            if (Storage::disk('public')->exists($card)) {
+                return Storage::disk('public')->url($card);
+            }
+        }
+
+        return $this->imageUrl();
     }
 
     /** هل انتهى موعد الفعالية؟ (تُستخدم لإظهار التقييم وتسجيل الحضور) */

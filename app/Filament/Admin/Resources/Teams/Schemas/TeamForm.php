@@ -2,6 +2,7 @@
 
 namespace App\Filament\Admin\Resources\Teams\Schemas;
 
+use App\Services\ImageService;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -43,7 +44,9 @@ class TeamForm
                             ->directory('teams')
                             ->imageResizeMode('contain')
                             ->imageResizeTargetWidth(512)
-                            ->maxSize(2048),
+                            ->maxSize(2048)
+                            // إعادة الترميز على الخادم تمسح EXIF/GPS قبل التخزين
+                            ->saveUploadedFileUsing(fn ($file): string => app(ImageService::class)->store($file, 'teams', 'logo_path')),
                     ]),
 
                 Section::make('التواصل والحالة')

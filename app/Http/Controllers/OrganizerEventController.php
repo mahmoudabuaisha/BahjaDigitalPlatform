@@ -11,11 +11,11 @@ use App\Models\Category;
 use App\Models\Event;
 use App\Models\EventSeries;
 use App\Models\ShelterCenter;
+use App\Services\ImageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -33,6 +33,8 @@ class OrganizerEventController extends Controller
         '10-14' => '10 - 14 سنة',
         '4-14' => '4 - 14 سنة (كل الأعمار)',
     ];
+
+    public function __construct(private readonly ImageService $images) {}
 
     public function create(): View
     {
@@ -60,8 +62,9 @@ class OrganizerEventController extends Controller
             ]);
         }
 
+        // إعادة الترميز تمسح EXIF/GPS من الصورة قبل أن تلمس القرص
         $imagePath = $request->hasFile('image')
-            ? $request->file('image')->store('events', 'public')
+            ? $this->images->store($request->file('image'), 'events')
             : null;
 
         foreach (range(0, $occurrences - 1) as $week) {
@@ -101,11 +104,15 @@ class OrganizerEventController extends Controller
 
         if ($request->hasFile('image')) {
             $previous = $event->image_path;
-            $event->image_path = $request->file('image')->store('events', 'public');
+            $event->image_path = $this->images->store($request->file('image'), 'events');
 
-            // صورة الفعالية المنشورة تبقى: النسخة المعروضة للعائلات ما زالت تعرضها
-            if ($previous && ! $event->status->isPubliclyVisible()) {
-                Storage::disk('public')->delete($previous);
+            // صورة الفعالية المنشورة تبقى: النسخة المعروضة للعائلات ما زالت تعرضها،
+            // وصورة السلسلة الأسبوعية مشتركة فلا تُحذف ما دامت فعالية أخرى تستعملها
+            if ($previous
+                && ! $event->status->isPubliclyVisible()
+                && ! Event::where('image_path', $previous)->where('id', '!=', $event->id)->exists()
+            ) {
+                $this->images->delete($previous);
             }
         }
 
@@ -168,7 +175,7 @@ class OrganizerEventController extends Controller
             'fee' => ['nullable', 'numeric', 'min:0', 'max:9999'],
             'registration_mode' => ['required', Rule::enum(RegistrationMode::class)],
             'terms' => ['nullable', 'string', 'max:500'],
-            'image' => ['nullable', 'image', 'mimes:png,jpg,jpeg', 'max:2048'],
+            'image' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:4096'],
             'repeat_weekly' => ['nullable', 'boolean'],
             'repeat_count' => ['nullable', 'integer', 'min:2', 'max:8'],
         ], [], [

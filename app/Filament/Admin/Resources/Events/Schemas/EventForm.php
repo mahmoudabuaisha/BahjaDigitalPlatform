@@ -4,6 +4,7 @@ namespace App\Filament\Admin\Resources\Events\Schemas;
 
 use App\Enums\EventStatus;
 use App\Models\ShelterCenter;
+use App\Services\ImageService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
@@ -52,7 +53,9 @@ class EventForm
                             ->directory('events')
                             ->imageResizeMode('contain')
                             ->imageResizeTargetWidth(1280)
-                            ->maxSize(4096),
+                            ->maxSize(4096)
+                            // إعادة الترميز على الخادم تمسح EXIF/GPS قبل التخزين
+                            ->saveUploadedFileUsing(fn ($file): string => app(ImageService::class)->store($file, 'events', 'image_path')),
                     ]),
 
                 Section::make('المكان والزمان')
