@@ -8,8 +8,10 @@ use App\Models\Event;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Writer\SvgWriter;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\HtmlString;
 
 /**
@@ -24,21 +26,34 @@ class EventActions
             ->icon('heroicon-o-check-circle')
             ->color('success')
             ->visible(fn (Event $record): bool => $record->status === EventStatus::Pending)
-            ->requiresConfirmation()
             ->modalHeading('اعتماد الفعالية')
-            ->modalDescription('ستظهر الفعالية للعائلات في الموقع العام فور الاعتماد.')
-            ->action(function (Event $record): void {
+            ->modalDescription('تظهر للعائلات فوراً — أو في الموعد المجدول إن حدّدتموه.')
+            ->schema([
+                DateTimePicker::make('publish_at')
+                    ->label('نشر مؤجَّل (اختياري)')
+                    ->helperText('اتركوه فارغاً للنشر الفوري. عند تحديد موعدٍ تبقى الفعالية معتمدةً مخفيّة ويصدر إعلانها لحظة النشر.')
+                    ->seconds(false)
+                    ->minDate(now()),
+            ])
+            ->action(function (Event $record, array $data): void {
+                $publishAt = filled($data['publish_at'] ?? null) ? Carbon::parse($data['publish_at']) : null;
+
                 $record->forceFill([
                     'status' => EventStatus::Approved,
                     'approved_by' => auth()->id(),
                     'approved_at' => now(),
+                    'publish_at' => $publishAt?->isFuture() ? $publishAt : null,
                     'rejection_reason' => null,
                 ])->save();
 
-                AuditLog::record('event.approved', $record);
+                AuditLog::record('event.approved', $record, after: $record->publish_at
+                    ? ['publish_at' => $record->publish_at->toDateTimeString()]
+                    : null);
 
                 Notification::make()
-                    ->title('تم اعتماد الفعالية')
+                    ->title($record->publish_at
+                        ? 'اعتُمدت — وتُنشر '.$record->publish_at->translatedFormat('l j F الساعة H:i')
+                        : 'تم اعتماد الفعالية')
                     ->success()
                     ->send();
             });

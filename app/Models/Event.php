@@ -65,6 +65,7 @@ class Event extends Model
             'audience' => Audience::class,
             'fee' => 'decimal:2',
             'approved_at' => 'datetime',
+            'publish_at' => 'datetime',
         ];
     }
 
@@ -226,17 +227,27 @@ class Event extends Model
         return $this->seatsRemaining() === 0;
     }
 
+    /** معتمدة لكن ظهورها مجدول لاحقاً (القسم 6.1: approved ≠ published) */
+    public function isScheduledForLater(): bool
+    {
+        return (bool) $this->publish_at?->isFuture();
+    }
+
     /** هل يقبل الحجز الآن؟ فعالية ظاهرة، لم يمض موعدها، وفيها متّسع */
     public function acceptsRegistrations(): bool
     {
         return $this->status->isPubliclyVisible()
+            && ! $this->isScheduledForLater()
             && ! $this->hasEnded()
             && ! $this->isFull();
     }
 
     public function scopePubliclyVisible(Builder $query): Builder
     {
-        return $query->whereIn('status', EventStatus::publiclyVisible());
+        return $query->whereIn('status', EventStatus::publiclyVisible())
+            ->where(fn (Builder $inner) => $inner
+                ->whereNull('publish_at')
+                ->orWhere('publish_at', '<=', now()));
     }
 
     public function scopeUpcoming(Builder $query): Builder

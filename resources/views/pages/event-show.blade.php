@@ -108,66 +108,62 @@
                 <h2 class="text-lg font-bold">التفاصيل</h2>
 
                 <dl class="flex flex-col gap-4">
-                    <div class="flex items-start gap-3">
-                        <span class="icon-tile"><x-ui.icon name="calendar"/></span>
-                        <div>
-                            <dt class="text-sm text-ink-soft">اليوم والتاريخ</dt>
-                            <dd class="font-bold">{{ $event->start_date->translatedFormat('l j F Y') }}</dd>
-                        </div>
+                    <div>
+                        <dt class="flex items-center gap-3">
+                            <span class="icon-tile"><x-ui.icon name="calendar"/></span>
+                            <span class="text-sm text-ink-soft">اليوم والتاريخ</span>
+                        </dt>
+                        <dd class="-mt-4 ps-[60px] font-bold">{{ $event->start_date->translatedFormat('l j F Y') }}</dd>
                     </div>
 
-                    <div class="flex items-start gap-3">
-                        <span class="icon-tile"><x-ui.icon name="clock"/></span>
-                        <div>
-                            <dt class="text-sm text-ink-soft">الوقت</dt>
-                            <dd class="font-bold">
-                                {{ substr($event->start_time, 0, 5) }}@if($event->end_time) — {{ substr($event->end_time, 0, 5) }}@endif
-                            </dd>
-                        </div>
+                    <div>
+                        <dt class="flex items-center gap-3">
+                            <span class="icon-tile"><x-ui.icon name="clock"/></span>
+                            <span class="text-sm text-ink-soft">الوقت</span>
+                        </dt>
+                        <dd class="-mt-4 ps-[60px] font-bold">{{ substr($event->start_time, 0, 5) }}@if($event->end_time) — {{ substr($event->end_time, 0, 5) }}@endif</dd>
                     </div>
 
-                    <div class="flex items-start gap-3">
-                        <span class="icon-tile"><x-ui.icon name="map-pin"/></span>
-                        <div>
-                            <dt class="text-sm text-ink-soft">المكان</dt>
-                            <dd class="font-bold">
-                                {{ $event->publicPlaceName() }}
+                    <div>
+                        <dt class="flex items-center gap-3">
+                            <span class="icon-tile"><x-ui.icon name="map-pin"/></span>
+                            <span class="text-sm text-ink-soft">المكان</span>
+                        </dt>
+                        <dd class="-mt-4 ps-[60px] font-bold">{{ $event->publicPlaceName() }}
                                 @if($event->publicLocationDetails())
                                     <span class="block font-normal text-ink-soft">{{ $event->publicLocationDetails() }}</span>
                                 @endif
-                                <span class="block font-normal text-ink-soft">{{ $event->area->name }}</span>
-                            </dd>
-                        </div>
+                                <span class="block font-normal text-ink-soft">{{ $event->area->name }}</span></dd>
                     </div>
 
                     @if($event->ageLabel())
-                        <div class="flex items-start gap-3">
+                        <div>
+                        <dt class="flex items-center gap-3">
                             <span class="icon-tile"><x-ui.icon name="cake"/></span>
-                            <div>
-                                <dt class="text-sm text-ink-soft">الفئة العمرية</dt>
-                                <dd class="font-bold">{{ $event->ageLabel() }}</dd>
-                            </div>
-                        </div>
+                            <span class="text-sm text-ink-soft">الفئة العمرية</span>
+                        </dt>
+                        <dd class="-mt-4 ps-[60px] font-bold">{{ $event->ageLabel() }}</dd>
+                    </div>
                     @endif
 
                     @if($event->expected_children)
-                        <div class="flex items-start gap-3">
+                        <div>
+                        <dt class="flex items-center gap-3">
                             <span class="icon-tile"><x-ui.icon name="users"/></span>
-                            <div>
-                                <dt class="text-sm text-ink-soft">العدد المتوقّع</dt>
-                                <dd class="font-bold">{{ $event->expected_children }} طفلاً</dd>
-                            </div>
-                        </div>
+                            <span class="text-sm text-ink-soft">العدد المتوقّع</span>
+                        </dt>
+                        <dd class="-mt-4 ps-[60px] font-bold">{{ $event->expected_children }} طفلاً</dd>
+                    </div>
                     @endif
 
                     @if($event->fee > 0)
-                        <div class="flex items-start gap-3">
+                        <div>
+                        <dt class="flex items-center gap-3">
                             <span class="icon-tile"><x-ui.icon name="money"/></span>
-                            <div>
-                                <dt class="text-sm text-ink-soft">رسوم المشاركة</dt>
-                                <dd class="font-bold">{{ $event->feeLabel() }}</dd>
-                            </div>
-                        </div>
+                            <span class="text-sm text-ink-soft">رسوم المشاركة</span>
+                        </dt>
+                        <dd class="-mt-4 ps-[60px] font-bold">{{ $event->feeLabel() }}</dd>
+                    </div>
                     @endif
                 </dl>
 

@@ -62,6 +62,20 @@ class ManageSettings extends Page
                             // إعادة الترميز على الخادم تمسح EXIF/GPS قبل التخزين
                             ->saveUploadedFileUsing(fn ($file): string => app(ImageService::class)->store($file, 'site', 'og_default_image')),
                     ]),
+                Section::make('محتوى الصفحات (القسم 12): يُحرَّر من هنا دون الرجوع للمطوّر')
+                    ->description('اتركوا الحقل فارغاً ليظهر النص الافتراضي المجهّز في الموقع. فقرة جديدة = سطر فارغ بين الفقرتين.')
+                    ->columnSpanFull()
+                    ->schema([
+                        Textarea::make('guide_content')
+                            ->label('نص صفحة «دليل الاستخدام»')
+                            ->rows(8),
+                        Textarea::make('privacy_content')
+                            ->label('نص صفحة «سياسة الخصوصية»')
+                            ->rows(8),
+                        Textarea::make('photo_policy_content')
+                            ->label('نص صفحة «سياسة صور الأطفال»')
+                            ->rows(8),
+                    ]),
                 Section::make('أهداف المبادرة (لتقارير الأثر)')
                     ->columnSpanFull()
                     ->schema([

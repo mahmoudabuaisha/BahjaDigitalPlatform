@@ -52,6 +52,8 @@ Route::post('/contact', [ContactController::class, 'store'])
 Route::view('/about', 'pages.about')->name('about');
 Route::view('/faq', 'pages.faq')->name('faq');
 Route::view('/guide', 'pages.guide')->name('guide');
+Route::view('/privacy', 'pages.privacy')->name('privacy');
+Route::view('/photo-policy', 'pages.photo-policy')->name('photo-policy');
 
 // ── حسابات العائلات ──
 Route::middleware('guest')->group(function () {

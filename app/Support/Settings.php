@@ -21,6 +21,10 @@ class Settings
         'og_default_image' => '',
         'target_children' => 1000,
         'target_indirect' => 3000,
+        // محتوى الصفحات يُدار من اللوحة (القسم 12) — فارغ = النص الافتراضي في القالب
+        'guide_content' => '',
+        'privacy_content' => '',
+        'photo_policy_content' => '',
     ];
 
     public static function get(string $key, mixed $default = null): mixed
