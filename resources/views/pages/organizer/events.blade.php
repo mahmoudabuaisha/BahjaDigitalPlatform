@@ -24,6 +24,15 @@
     </p>
 @endif
 
+{{-- تحذير تداخل المواعيد — تنبيه ودّي لا يمنع الحفظ --}}
+@if(session('event_warning'))
+    <div class="mt-3 flex flex-col gap-1 rounded-2xl bg-amber-50 px-4 py-3 font-medium text-amber-800">
+        @foreach(session('event_warning') as $warning)
+            <p class="flex items-center gap-2"><x-ui.icon name="clock" class="size-5 shrink-0"/> تنبيه: {{ $warning }} — تأكّدوا أن الموعد مقصود.</p>
+        @endforeach
+    </div>
+@endif
+
 {{-- بطاقات الأرقام --}}
 <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
     @foreach([

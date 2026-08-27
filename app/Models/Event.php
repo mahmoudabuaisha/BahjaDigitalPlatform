@@ -143,6 +143,66 @@ class Event extends Model
         return $this->start_date->copy()->setTimeFromTimeString($this->start_time);
     }
 
+    /** بداية اليوم بالدقائق — لمقارنة تداخل المواعيد */
+    private function startMinutes(): int
+    {
+        return (int) substr($this->start_time, 0, 2) * 60 + (int) substr($this->start_time, 3, 2);
+    }
+
+    /** النهاية بالدقائق — وعند غياب وقت نهاية نفترض ساعتين */
+    private function endMinutes(): int
+    {
+        if ($this->end_time) {
+            return (int) substr($this->end_time, 0, 2) * 60 + (int) substr($this->end_time, 3, 2);
+        }
+
+        return $this->startMinutes() + 120;
+    }
+
+    /**
+     * تحذير تداخل المواعيد (بند الخطة التحذيري): فعاليات حيّة لنفس الفريق
+     * أو نفس مركز الإيواء في نفس اليوم والوقت. فواصل نصف-مفتوحة —
+     * فعالية تنتهي حين تبدأ التالية لا تُحسب تعارضاً.
+     *
+     * @return array<int, string>
+     */
+    public function conflictWarnings(): array
+    {
+        $candidates = static::query()
+            ->whereDate('start_date', $this->start_date)
+            ->whereNotIn('status', [
+                EventStatus::Draft,
+                EventStatus::Rejected,
+                EventStatus::Cancelled,
+                EventStatus::Archived,
+            ])
+            ->when($this->id, fn (Builder $query) => $query->where('id', '!=', $this->id))
+            ->where(function (Builder $query): void {
+                $query->where('team_id', $this->team_id);
+
+                if ($this->shelter_center_id) {
+                    $query->orWhere('shelter_center_id', $this->shelter_center_id);
+                }
+            })
+            ->get();
+
+        $warnings = [];
+
+        foreach ($candidates as $other) {
+            if (! ($this->startMinutes() < $other->endMinutes() && $other->startMinutes() < $this->endMinutes())) {
+                continue;
+            }
+
+            $when = substr($other->start_time, 0, 5);
+
+            $warnings[] = $other->team_id === $this->team_id
+                ? 'فريقكم لديه فعالية أخرى في الوقت نفسه: «'.$other->title.'» الساعة '.$when
+                : 'المركز نفسه محجوز بفعالية «'.$other->title.'» الساعة '.$when.' لفريق آخر';
+        }
+
+        return array_values(array_unique($warnings));
+    }
+
     /** المقاعد المشغولة — الحجوزات قيد المراجعة والمقبولة */
     public function seatsTaken(): int
     {
