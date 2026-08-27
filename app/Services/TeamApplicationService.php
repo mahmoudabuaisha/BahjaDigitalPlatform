@@ -39,6 +39,9 @@ class TeamApplicationService
                 'is_active' => true,
             ]);
 
+            // الإدارة راجعت الطلب وتواصلت مع أصحابه — بريد الحساب يُعتبر مؤكَّداً
+            $manager->forceFill(['email_verified_at' => now()])->save();
+
             $application->update([
                 'status' => TeamApplicationStatus::Approved,
                 'team_id' => $team->id,

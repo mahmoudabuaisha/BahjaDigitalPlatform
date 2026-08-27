@@ -77,6 +77,9 @@ class FamilyAuthController extends Controller
             'is_active' => true,
         ]);
 
+        // رسالة تأكيد البريد — تُرسل عبر الطابور فلا تبطئ التسجيل
+        $user->sendEmailVerificationNotification();
+
         Auth::login($user, true);
         $request->session()->regenerate();
 
