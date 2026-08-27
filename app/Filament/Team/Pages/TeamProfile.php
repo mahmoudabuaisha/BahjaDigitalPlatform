@@ -3,6 +3,7 @@
 namespace App\Filament\Team\Pages;
 
 use App\Models\Team;
+use App\Services\ImageService;
 use BackedEnum;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
@@ -58,7 +59,9 @@ class TeamProfile extends Page
                             ->directory('teams')
                             ->imageResizeMode('contain')
                             ->imageResizeTargetWidth(512)
-                            ->maxSize(2048),
+                            ->maxSize(2048)
+                            // إعادة الترميز على الخادم تمسح EXIF/GPS قبل التخزين
+                            ->saveUploadedFileUsing(fn ($file): string => app(ImageService::class)->store($file, 'teams', 'logo_path')),
                         Grid::make(2)->schema([
                             TextInput::make('contact_name')
                                 ->label('اسم المنسق')

@@ -2,7 +2,7 @@
 
 <article class="{{ $event->category?->toneClass() ?? 'tone tone-violet' }} flex flex-wrap items-center gap-4 rounded-2xl border border-brand-100 p-4">
     @if($event->image_path)
-        <img src="{{ $event->imageUrl() }}" alt="" width="56" height="56" class="size-14 shrink-0 rounded-2xl object-cover">
+        <img src="{{ $event->imageCardUrl() }}" alt="" width="56" height="56" class="size-14 shrink-0 rounded-2xl object-cover">
     @else
         <x-ui.scene :name="$event->category?->slug ?? 'default'" :tone="$event->category?->toneHex() ?? '#7c5cff'"
                     class="size-14 shrink-0 rounded-2xl"/>

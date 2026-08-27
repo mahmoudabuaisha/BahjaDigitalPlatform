@@ -15,7 +15,7 @@
 
 <article {{ $attributes->class(['card '.($event->category?->toneClass() ?? 'tone tone-violet').' gap-4 p-5 sm:flex-row sm:items-center']) }}>
     @if($event->image_path)
-        <img src="{{ $event->imageUrl() }}" alt="" width="72" height="72" class="size-18 shrink-0 rounded-2xl object-cover">
+        <img src="{{ $event->imageCardUrl() }}" alt="" width="72" height="72" class="size-18 shrink-0 rounded-2xl object-cover">
     @else
         <x-ui.scene :name="$event->category?->slug ?? 'default'" :tone="$event->category?->toneHex() ?? '#7c5cff'"
                     class="size-18 shrink-0 rounded-2xl"/>
