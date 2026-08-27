@@ -129,13 +129,24 @@ class OrganizerEventController extends Controller
 
         $event->save();
 
+        // تعديل «هذه المرة والمواعيد القادمة» (القسم 6.4): نفس التغييرات
+        // تسري على بقية مواعيد السلسلة، وكل موعد معتمد يمرّ بمساره الرقابي
+        [$futureUpdated, $futureModerated] = $this->applyToFutureOccurrences($request, $event, $data);
+
         // مراقب الفعالية حوّل التعديلات الجوهرية إلى نسخة تنتظر الاعتماد
         $hasPendingRevision = $event->pendingRevision()->exists();
 
+        $message = $hasPendingRevision
+            ? 'حُفظ تعديل «'.$event->title.'» كنسخة بانتظار اعتماد الإدارة — والنسخة المنشورة الحالية تبقى ظاهرة للعائلات حتى الاعتماد.'
+            : 'حُفظت تعديلات «'.$event->title.'».';
+
+        if ($futureUpdated > 0) {
+            $message .= ' وسرى التعديل على '.$futureUpdated.' من المواعيد القادمة في السلسلة'
+                .($futureModerated > 0 ? ' (منها '.$futureModerated.' بانتظار اعتماد الإدارة).' : '.');
+        }
+
         return redirect()->route('organizer.events')
-            ->with('event_saved', $hasPendingRevision
-                ? 'حُفظ تعديل «'.$event->title.'» كنسخة بانتظار اعتماد الإدارة — والنسخة المنشورة الحالية تبقى ظاهرة للعائلات حتى الاعتماد.'
-                : 'حُفظت تعديلات «'.$event->title.'».')
+            ->with('event_saved', $message)
             ->with('event_warning', $event->conflictWarnings());
     }
 
@@ -162,6 +173,46 @@ class OrganizerEventController extends Controller
     private function authorizeTeam(Event $event): void
     {
         abort_unless($event->team_id === Auth::user()->team_id, 403);
+    }
+
+    /**
+     * سريان التعديل على المواعيد القادمة في السلسلة — كل شيء عدا تاريخ
+     * كل موعد. الموعد المعتمد يمرّ بالمراقب فيتحول جوهريّه لنسخة معلّقة.
+     *
+     * @return array{0: int, 1: int} [عدد المُحدَّثة، منها بانتظار الاعتماد]
+     */
+    private function applyToFutureOccurrences(Request $request, Event $event, array $data): array
+    {
+        if (! $request->boolean('apply_to_future') || ! $event->series_id) {
+            return [0, 0];
+        }
+
+        $shared = collect($this->attributes($data))->except('start_date')->all();
+        $moderated = 0;
+
+        $siblings = Event::query()
+            ->where('series_id', $event->series_id)
+            ->where('id', '!=', $event->id)
+            ->whereDate('start_date', '>', $event->start_date)
+            ->whereNotIn('status', [EventStatus::Rejected, EventStatus::Cancelled, EventStatus::Archived])
+            ->orderBy('start_date')
+            ->get();
+
+        foreach ($siblings as $sibling) {
+            $sibling->fill($shared);
+
+            if ($request->hasFile('image')) {
+                $sibling->image_path = $event->image_path;
+            }
+
+            $sibling->save();
+
+            if ($sibling->pendingRevision()->exists()) {
+                $moderated++;
+            }
+        }
+
+        return [$siblings->count(), $moderated];
     }
 
     /** @return array<string, mixed> */
@@ -239,6 +290,14 @@ class OrganizerEventController extends Controller
             'ageRange' => $event && $event->age_min && $event->age_max
                 ? $event->age_min.'-'.$event->age_max
                 : null,
+            // خيار «هذه المرة والمواعيد القادمة» يظهر فقط حين توجد مواعيد لاحقة
+            'futureSiblingsCount' => $event?->series_id
+                ? Event::where('series_id', $event->series_id)
+                    ->where('id', '!=', $event->id)
+                    ->whereDate('start_date', '>', $event->start_date)
+                    ->whereNotIn('status', [EventStatus::Rejected, EventStatus::Cancelled, EventStatus::Archived])
+                    ->count()
+                : 0,
         ];
     }
 }

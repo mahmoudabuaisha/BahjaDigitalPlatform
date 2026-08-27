@@ -4,12 +4,15 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "budgets": "node scripts/check-budgets.mjs",
+        "axe": "node scripts/axe-audit.mjs"
     },
     "devDependencies": {
         "@fontsource/tajawal": "^5.3.0",
         "@tailwindcss/vite": "^4.0.0",
         "alpinejs": "^3.16.1",
+        "axe-core": "^4.13.0",
         "concurrently": "^10.0.3",
         "laravel-vite-plugin": "^3.1",
         "tailwindcss": "^4.0.0",

@@ -55,6 +55,7 @@ class AuditLog extends Model
     {
         return match ($action) {
             'event.approved' => 'اعتماد فعالية',
+            'event.published' => 'نشر فعالية مجدولة',
             'event.rejected' => 'رفض فعالية',
             'event.cancelled' => 'إلغاء فعالية',
             'event.deleted' => 'حذف فعالية',

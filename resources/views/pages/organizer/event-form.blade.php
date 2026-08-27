@@ -337,6 +337,15 @@
                 <span></span>
             @endif
 
+            {{-- سلسلة أسبوعية: سريان التعديل على المواعيد القادمة (القسم 6.4) --}}
+            @if($editing && ($futureSiblingsCount ?? 0) > 0)
+                <label class="flex w-full cursor-pointer items-center gap-2 rounded-2xl bg-sky-50 px-4 py-3 text-sm font-medium text-sky-800">
+                    <input type="checkbox" name="apply_to_future" value="1" class="size-5 accent-brand-600">
+                    طبّقوا هذا التعديل أيضاً على {{ $futureSiblingsCount }} من المواعيد القادمة في السلسلة
+                    <span class="font-normal">(كل موعد معتمد يمرّ باعتماد الإدارة كالمعتاد)</span>
+                </label>
+            @endif
+
             <div class="flex flex-wrap gap-3">
                 <a href="{{ route('organizer.events') }}" class="btn btn-outline">
                     <x-ui.icon name="x" class="size-5"/> إلغاء

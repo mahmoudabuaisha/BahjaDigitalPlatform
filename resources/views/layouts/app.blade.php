@@ -184,6 +184,8 @@
                     <li><a href="{{ route('organizers') }}" class="no-underline hover:text-brand-700">المنظِّمون</a></li>
                     <li><a href="{{ route('guide') }}" class="no-underline hover:text-brand-700">دليل الاستخدام</a></li>
                     <li><a href="{{ route('faq') }}" class="no-underline hover:text-brand-700">الأسئلة الشائعة</a></li>
+                    <li><a href="{{ route('privacy') }}" class="no-underline hover:text-brand-700">سياسة الخصوصية</a></li>
+                    <li><a href="{{ route('photo-policy') }}" class="no-underline hover:text-brand-700">سياسة صور الأطفال</a></li>
                     <li><a href="{{ route('contact') }}" class="no-underline hover:text-brand-700">تواصلوا معنا</a></li>
                 </ul>
             </div>

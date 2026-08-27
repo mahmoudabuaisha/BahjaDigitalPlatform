@@ -87,7 +87,9 @@
                 <label class="flex items-start gap-3 rounded-2xl bg-brand-50/60 p-4">
                     <input type="checkbox" name="terms" value="1" required class="mt-1 size-5 accent-brand-600">
                     <span class="text-sm">
-                        نتعهّد بالالتزام بسياسات المنصّة، ومنها عدم نشر صور أطفال دون موافقة أولياء أمورهم،
+                        نتعهّد بالالتزام بسياسات المنصّة — وأولها
+                        <a href="{{ route('photo-policy') }}" target="_blank" class="font-bold text-brand-700">سياسة صور الأطفال</a>
+                        (لا نشر لصورة طفل دون موافقة وليّ أمره) —
                         ودقّة مواعيد الفعاليات، وتسجيل الحضور الفعلي بعد كل فعالية.
                     </span>
                 </label>

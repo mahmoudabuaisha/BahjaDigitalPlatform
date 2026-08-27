@@ -137,6 +137,17 @@ class EventObserver
             return;
         }
 
+        // نشر مؤجَّل: الإعلان يصدر وقت الظهور الفعلي (أمر events:release-scheduled)
+        if ($event->publish_at?->isFuture()) {
+            return;
+        }
+
+        $this->announceToArea($event);
+    }
+
+    /** بث «فعالية جديدة» لعائلات المحافظة — يُستدعى أيضاً لحظة النشر المجدول */
+    public function announceToArea(Event $event): void
+    {
         User::query()
             ->where('role', UserRole::Family)
             ->where('is_active', true)

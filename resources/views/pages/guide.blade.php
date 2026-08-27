@@ -11,6 +11,11 @@
         ثلاث خطوات بسيطة توصلكم لأقرب فعالية لأطفالكم.
     </p>
 
+    @php $custom = trim((string) \App\Support\Settings::get('guide_content')); @endphp
+    @if($custom !== '')
+        {{-- النص المُحرَّر من لوحة الإدارة يحل محل الدليل الافتراضي --}}
+        <x-settings-content :content="$custom"/>
+    @else
     <ol class="mt-6 flex flex-col gap-6">
         <li class="flex items-start gap-3">
             <span class="min-w-[30px] text-[30px] leading-none text-rose-600">1</span>
@@ -74,6 +79,7 @@
         </p>
         <a href="{{ route('teams.join') }}" class="btn btn-primary mt-2">تسجيل فريق جديد</a>
     </section>
+    @endif
 
 </div>
 @endsection

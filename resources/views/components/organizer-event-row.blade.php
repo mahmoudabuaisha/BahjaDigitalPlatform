@@ -31,6 +31,9 @@
 
     <span class="flex flex-col items-start gap-1">
         <x-event-status-badge :event="$event"/>
+        @if($event->isScheduledForLater())
+            <span class="badge bg-sky-100 text-sky-800">تُنشر {{ $event->publish_at->translatedFormat('j F H:i') }}</span>
+        @endif
         @if($event->relationLoaded('pendingRevision') ? $event->pendingRevision : $event->pendingRevision()->exists())
             <span class="badge bg-amber-100 text-amber-800">تعديل قيد المراجعة</span>
         @endif
