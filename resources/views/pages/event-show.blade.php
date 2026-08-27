@@ -171,6 +171,11 @@
                     @endif
                 </dl>
 
+                {{-- طمأنة عن حداثة المعلومات — مهمة لمن يتصفح نسخة الأوفلاين (القسم 10) --}}
+                <p class="mt-2 border-t border-brand-100 pt-3 text-xs text-ink-soft" title="{{ $event->updated_at->translatedFormat('l j F Y — H:i') }}">
+                    آخر تحديث لمعلومات الفعالية: {{ $event->updated_at->diffForHumans() }}
+                </p>
+
                 @if($event->terms)
                     <div class="mt-5 rounded-2xl bg-brand-50/70 p-4">
                         <p class="flex items-center gap-2 font-bold text-brand-700">

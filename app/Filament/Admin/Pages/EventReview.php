@@ -122,7 +122,11 @@ class EventReview extends Page implements HasTable
                     ->weight('bold')
                     ->limit(34)
                     ->searchable()
-                    ->url(fn (Event $record): string => EventResource::getUrl('view', ['record' => $record])),
+                    ->url(fn (Event $record): string => EventResource::getUrl('view', ['record' => $record]))
+                    // تحذير التداخل يظهر للإدارة قبل قرار الاعتماد
+                    ->description(fn (Event $record): ?string => ($warnings = $record->conflictWarnings()) === []
+                        ? null
+                        : '⚠ '.implode(' · ', $warnings)),
                 TextColumn::make('team.name')
                     ->label('المنظِّم')
                     ->description(fn (Event $record): string => $record->creator?->name ?? 'منظِّم فعاليات')

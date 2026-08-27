@@ -67,6 +67,8 @@ class OrganizerEventController extends Controller
             ? $this->images->store($request->file('image'), 'events')
             : null;
 
+        $warnings = [];
+
         foreach (range(0, $occurrences - 1) as $week) {
             $event = new Event($this->attributes($data));
             $event->team_id = Auth::user()->team_id;
@@ -76,6 +78,8 @@ class OrganizerEventController extends Controller
             $event->start_date = Carbon::parse($data['start_date'])->addWeeks($week);
             $event->image_path = $imagePath;
             $event->save();
+
+            $warnings = [...$warnings, ...$event->conflictWarnings()];
         }
 
         $message = match (true) {
@@ -84,7 +88,9 @@ class OrganizerEventController extends Controller
             default => 'أُرسلت الفعالية للاعتماد — تظهر للعائلات فور موافقة الإدارة.',
         };
 
-        return redirect()->route('organizer.events')->with('event_saved', $message);
+        return redirect()->route('organizer.events')
+            ->with('event_saved', $message)
+            ->with('event_warning', array_values(array_unique($warnings)));
     }
 
     public function edit(Event $event): View
@@ -126,9 +132,11 @@ class OrganizerEventController extends Controller
         // مراقب الفعالية حوّل التعديلات الجوهرية إلى نسخة تنتظر الاعتماد
         $hasPendingRevision = $event->pendingRevision()->exists();
 
-        return redirect()->route('organizer.events')->with('event_saved', $hasPendingRevision
-            ? 'حُفظ تعديل «'.$event->title.'» كنسخة بانتظار اعتماد الإدارة — والنسخة المنشورة الحالية تبقى ظاهرة للعائلات حتى الاعتماد.'
-            : 'حُفظت تعديلات «'.$event->title.'».');
+        return redirect()->route('organizer.events')
+            ->with('event_saved', $hasPendingRevision
+                ? 'حُفظ تعديل «'.$event->title.'» كنسخة بانتظار اعتماد الإدارة — والنسخة المنشورة الحالية تبقى ظاهرة للعائلات حتى الاعتماد.'
+                : 'حُفظت تعديلات «'.$event->title.'».')
+            ->with('event_warning', $event->conflictWarnings());
     }
 
     public function destroy(Event $event): RedirectResponse
