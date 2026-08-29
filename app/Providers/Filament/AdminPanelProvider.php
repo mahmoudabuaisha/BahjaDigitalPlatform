@@ -28,11 +28,10 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
-            // MFA إلزامي للمشرفين (القسم 15.2) — تطبيق مصادقة + رموز استرداد
-            ->multiFactorAuthentication(
-                AppAuthentication::make()->recoverable(),
-                isRequired: fn (): bool => ! app()->runningUnitTests(),
-            )
+            // MFA اختياري بقرار المالك (كان إلزامياً وفق القسم 15.2 فأعاق الدخول اليومي):
+            // الدخول بريد وكلمة سر، ومن فعّل تطبيق المصادقة لحسابه يُطالَب برمزه.
+            // لإعادته إلزامياً: isRequired: fn (): bool => ! app()->runningUnitTests()
+            ->multiFactorAuthentication(AppAuthentication::make()->recoverable())
             ->brandName('بَهْجَة — لوحة الإدارة')
             ->colors([
                 // البنفسجي نفسه المستعمل في الموقع العام (--color-brand-500)
