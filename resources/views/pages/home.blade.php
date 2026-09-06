@@ -12,7 +12,7 @@
 
             <h1 class="mt-4 text-4xl leading-[1.25] font-bold sm:text-5xl">
                 اكتشفوا وشاركوا في
-                <span class="bg-gradient-to-l from-brand-600 via-brand-400 to-pink-500 bg-clip-text text-transparent">فعاليات ممتعة وآمنة</span>
+                <span class="text-joy-gradient">فعاليات ممتعة وآمنة</span>
                 لأطفالكم
             </h1>
 
