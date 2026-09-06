@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Enums\EventStatus;
+use App\Enums\OrgType;
 use Database\Factories\TeamFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
@@ -20,11 +22,20 @@ class Team extends Model
     protected $fillable = [
         'public_id',
         'name',
+        'org_type',
+        'area_id',
+        'base_location',
         'slug',
         'description',
         'logo_path',
         'contact_name',
         'whatsapp_phone',
+        'emergency_phone',
+        'coverage_details',
+        'coverage_areas',
+        'activities',
+        'volunteers_count',
+        'capacity_per_event',
         'social_links',
         'is_active',
     ];
@@ -32,9 +43,25 @@ class Team extends Model
     protected function casts(): array
     {
         return [
+            'org_type' => OrgType::class,
+            'coverage_areas' => 'array',
+            'activities' => 'array',
             'social_links' => 'array',
             'is_active' => 'boolean',
         ];
+    }
+
+    /** تسميات الأنشطة المتقنة للعرض في الصفحة العامة واللوحة */
+    public function activityLabels(): array
+    {
+        return collect($this->activities ?? [])
+            ->map(fn (string $key) => TeamApplication::ACTIVITIES[$key] ?? $key)
+            ->all();
+    }
+
+    public function area(): BelongsTo
+    {
+        return $this->belongsTo(Area::class);
     }
 
     protected static function booted(): void
