@@ -36,8 +36,13 @@
     <header x-data="{ open: false }" class="sticky top-0 z-40 border-b border-brand-100 bg-white/90 backdrop-blur">
         <div class="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
             <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2.5 no-underline">
-                <x-brand-mark class="size-11"/>
-                <span class="text-2xl font-bold text-brand-700">{{ \App\Support\Settings::get('site_name') }}</span>
+                @if(file_exists(public_path('brand/logo.png')))
+                    {{-- شعار المنصّة الأصلي — يُفعَّل تلقائياً فور وجود الملف --}}
+                    <img src="{{ asset('brand/logo.png') }}" alt="{{ \App\Support\Settings::get('site_name') }}" class="h-12 w-auto">
+                @else
+                    <x-brand-mark class="size-11"/>
+                    <span class="text-2xl font-bold text-brand-700">{{ \App\Support\Settings::get('site_name') }}</span>
+                @endif
             </a>
 
             <nav class="mx-auto hidden items-center gap-7 lg:flex" aria-label="التنقل الرئيسي">

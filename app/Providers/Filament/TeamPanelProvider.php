@@ -32,6 +32,8 @@ class TeamPanelProvider extends PanelProvider
             ->multiFactorAuthentication(AppAuthentication::make()->recoverable())
             ->registration(RegisterTeam::class)
             ->brandName('بَهْجَة — لوحة الفريق')
+            ->brandLogo(fn (): ?string => file_exists(public_path('brand/logo.png')) ? asset('brand/logo.png') : null)
+            ->brandLogoHeight('2.75rem')
             ->colors([
                 // البنفسجي نفسه المستعمل في الموقع العام (--color-brand-500)
                 'primary' => Color::hex('#2678ca'),

@@ -37,6 +37,8 @@ class AdminPanelProvider extends PanelProvider
                 // الأزرق نفسه المستعمل في الموقع العام (--color-brand-600)
                 'primary' => Color::hex('#2678ca'),
             ])
+            ->brandLogo(fn (): ?string => file_exists(public_path('brand/logo.png')) ? asset('brand/logo.png') : null)
+            ->brandLogoHeight('2.75rem')
             ->sidebarCollapsibleOnDesktop()
             ->defaultAvatarProvider(InitialsAvatarProvider::class)
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
