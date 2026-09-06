@@ -14,7 +14,7 @@ class EventsByCategoryChart extends ChartWidget
     protected int|string|array $columnSpan = 1;
 
     /** ألوان الفئات في الموقع العام — لتتطابق اللوحة مع ما تراه العائلات */
-    private const PALETTE = ['#7c5cff', '#10b981', '#f59e0b', '#f43f5e', '#0ea5e9', '#f97316'];
+    private const PALETTE = ['#3b93e4', '#10b981', '#f59e0b', '#f43f5e', '#0ea5e9', '#f97316'];
 
     protected function getType(): string
     {

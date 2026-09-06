@@ -34,7 +34,7 @@ class TeamPanelProvider extends PanelProvider
             ->brandName('بَهْجَة — لوحة الفريق')
             ->colors([
                 // البنفسجي نفسه المستعمل في الموقع العام (--color-brand-500)
-                'primary' => Color::hex('#7c5cff'),
+                'primary' => Color::hex('#2678ca'),
             ])
             ->defaultAvatarProvider(InitialsAvatarProvider::class)
             ->discoverResources(in: app_path('Filament/Team/Resources'), for: 'App\Filament\Team\Resources')

@@ -6,7 +6,7 @@
         // ألوان مكتوبة هنا لا كأصناف Tailwind: ملف CSS الخاص بـ Filament مبنيّ
         // مسبقاً، فالأصناف التي لا يستعملها هو نفسه لا وجود لها في المتصفّح.
         $cards = [
-            'all' => ['label' => 'إجمالي الفعاليات', 'icon' => 'heroicon-o-calendar-days', 'color' => '#7c5cff'],
+            'all' => ['label' => 'إجمالي الفعاليات', 'icon' => 'heroicon-o-calendar-days', 'color' => '#3b93e4'],
             'rejected' => ['label' => 'مرفوضة', 'icon' => 'heroicon-o-x-circle', 'color' => '#f43f5e'],
             'approved' => ['label' => 'مقبولة', 'icon' => 'heroicon-o-check-circle', 'color' => '#10b981'],
             'pending' => ['label' => 'قيد المراجعة', 'icon' => 'heroicon-o-clock', 'color' => '#f59e0b'],

@@ -34,8 +34,8 @@ class AdminPanelProvider extends PanelProvider
             ->multiFactorAuthentication(AppAuthentication::make()->recoverable())
             ->brandName('بَهْجَة — لوحة الإدارة')
             ->colors([
-                // البنفسجي نفسه المستعمل في الموقع العام (--color-brand-500)
-                'primary' => Color::hex('#7c5cff'),
+                // الأزرق نفسه المستعمل في الموقع العام (--color-brand-600)
+                'primary' => Color::hex('#2678ca'),
             ])
             ->sidebarCollapsibleOnDesktop()
             ->defaultAvatarProvider(InitialsAvatarProvider::class)

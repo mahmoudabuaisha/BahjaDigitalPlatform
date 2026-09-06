@@ -15,7 +15,7 @@ class Scene
     public static function dataUri(?Category $category): string
     {
         $slug = $category?->slug ?? 'default';
-        $tone = $category?->toneHex() ?? '#7c5cff';
+        $tone = $category?->toneHex() ?? '#3b93e4';
 
         return Cache::rememberForever('scene:'.$slug.':'.$tone, function () use ($slug, $tone): string {
             $svg = view('components.ui.scene', [

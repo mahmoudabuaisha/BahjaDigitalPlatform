@@ -1,20 +1,25 @@
-{{-- علامة المنصّة: مربّع بنفسجي متدرّج بوجه مبتسم — مرسومة بـ SVG، بلا ملف صورة --}}
+{{-- علامة المنصّة بروح الشعار: وجه أزرق مبتسم بتاج صغير وخدود وردية — SVG بلا ملف صورة --}}
 <svg {{ $attributes->merge(['class' => 'size-11']) }} viewBox="0 0 48 48" fill="none" role="img" aria-label="{{ \App\Support\Settings::get('site_name') }}">
     <defs>
         <linearGradient id="bahja-mark" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#a78bfa"/>
-            <stop offset="0.55" stop-color="#8b5cf6"/>
-            <stop offset="1" stop-color="#6d28d9"/>
+            <stop stop-color="#8ec8f2"/>
+            <stop offset="0.55" stop-color="#4d9fe8"/>
+            <stop offset="1" stop-color="#1f62a7"/>
         </linearGradient>
     </defs>
 
     <rect width="48" height="48" rx="15" fill="url(#bahja-mark)"/>
 
-    {{-- شرارة صغيرة أعلى اليمين --}}
-    <path d="M36.5 10.5c.4 1.6.9 2.1 2.5 2.5-1.6.4-2.1.9-2.5 2.5-.4-1.6-.9-2.1-2.5-2.5 1.6-.4 2.1-.9 2.5-2.5Z" fill="#fde68a"/>
+    {{-- تاج صغير بجواهر وردية وزرقاء --}}
+    <path d="M15 13.5l3.4 2.8 5.6-4.3 5.6 4.3 3.4-2.8-1.3 6H16.3l-1.3-6Z" fill="#fde68a"/>
+    <circle cx="18.4" cy="15.6" r="1.15" fill="#f472b6"/>
+    <circle cx="24" cy="13.2" r="1.15" fill="#7dd3fc"/>
+    <circle cx="29.6" cy="15.6" r="1.15" fill="#f472b6"/>
 
-    {{-- عينان وابتسامة --}}
-    <circle cx="18" cy="21" r="2.6" fill="#fff"/>
-    <circle cx="30" cy="21" r="2.6" fill="#fff"/>
-    <path d="M16.5 28.5c1.9 3.2 4.5 4.8 7.5 4.8s5.6-1.6 7.5-4.8" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>
+    {{-- عينان وخدّان وابتسامة --}}
+    <circle cx="18" cy="27" r="2.6" fill="#fff"/>
+    <circle cx="30" cy="27" r="2.6" fill="#fff"/>
+    <circle cx="13.4" cy="32" r="2" fill="#f9a8d4" opacity=".85"/>
+    <circle cx="34.6" cy="32" r="2" fill="#f9a8d4" opacity=".85"/>
+    <path d="M17 33.5c1.9 3 4.2 4.5 7 4.5s5.1-1.5 7-4.5" stroke="#fff" stroke-width="3.2" stroke-linecap="round"/>
 </svg>
