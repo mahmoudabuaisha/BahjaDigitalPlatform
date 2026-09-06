@@ -68,7 +68,31 @@ class Team extends Model
     {
         static::creating(function (Team $team): void {
             $team->public_id ??= (string) Str::ulid();
+
+            // المعرّف يُشتق من الاسم العربي مباشرة إن لم يُدخَل يدوياً
+            if (blank($team->slug)) {
+                $team->slug = static::uniqueSlugFromName($team->name);
+            }
         });
+    }
+
+    /**
+     * معرّف رابط مقروء من اسم الفريق كما هو — بالعربية أو اللاتينية:
+     * «فريق بسمة أمل» → فريق-بسمة-أمل، مع لاحقة رقمية عند التكرار.
+     */
+    public static function uniqueSlugFromName(string $name): string
+    {
+        $base = mb_strtolower(trim(preg_replace('/[^\p{Arabic}a-z0-9\- ]+/ui', '', $name)));
+        $base = trim(preg_replace('/[\s-]+/u', '-', $base), '-') ?: 'team';
+
+        $slug = $base;
+        $suffix = 1;
+
+        while (static::withTrashed()->where('slug', $slug)->exists()) {
+            $slug = $base.'-'.(++$suffix);
+        }
+
+        return $slug;
     }
 
     public function users(): HasMany

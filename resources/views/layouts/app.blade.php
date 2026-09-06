@@ -222,5 +222,15 @@
         </div>
     </footer>
 
+    {{-- واتساب الإدارة العائم: أي مشكلة تصل بضغطة — يظهر حين يُضبط الرقم في الإعدادات --}}
+    @if($adminWhatsapp = \App\Support\Settings::get('site_whatsapp'))
+        <a href="https://wa.me/{{ preg_replace('/\D/', '', $adminWhatsapp) }}?text={{ rawurlencode('مرحباً، أحتاج مساعدة في منصة بهجة 🙏') }}"
+           target="_blank" rel="noopener"
+           class="fixed bottom-5 end-5 z-40 grid size-14 place-items-center rounded-full bg-emerald-500 text-white shadow-xl shadow-emerald-600/30 transition hover:scale-105 hover:bg-emerald-600 print:hidden"
+           aria-label="تواصلوا مع إدارة المنصّة عبر واتساب">
+            <x-ui.icon name="whatsapp" class="size-7"/>
+        </a>
+    @endif
+
 </body>
 </html>
