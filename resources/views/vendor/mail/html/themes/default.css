@@ -304,13 +304,13 @@ body *:not(html):not(style):not(br):not(tr):not(code) {
 }
 
 .button-primary {
-    background-color: #7c5cff;
-    border-bottom: 8px solid #7c5cff;
-    border-left: 18px solid #7c5cff;
-    border-right: 18px solid #7c5cff;
-    border-top: 8px solid #7c5cff;
+    background-color: #3b93e4;
+    border-bottom: 8px solid #3b93e4;
+    border-left: 18px solid #3b93e4;
+    border-right: 18px solid #3b93e4;
+    border-top: 8px solid #3b93e4;
 }
 
 .header a {
-    color: #7c5cff;
+    color: #3b93e4;
 }

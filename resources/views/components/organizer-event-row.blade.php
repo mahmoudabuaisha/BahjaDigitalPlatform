@@ -4,7 +4,7 @@
     @if($event->image_path)
         <img src="{{ $event->imageCardUrl() }}" alt="" width="56" height="56" class="size-14 shrink-0 rounded-2xl object-cover">
     @else
-        <x-ui.scene :name="$event->category?->slug ?? 'default'" :tone="$event->category?->toneHex() ?? '#7c5cff'"
+        <x-ui.scene :name="$event->category?->slug ?? 'default'" :tone="$event->category?->toneHex() ?? '#3b93e4'"
                     class="size-14 shrink-0 rounded-2xl"/>
     @endif
 

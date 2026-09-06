@@ -68,7 +68,7 @@
                      class="aspect-[16/9] w-full rounded-3xl object-cover shadow-[0_10px_40px_rgb(31_25_55_/_10%)]">
             @else
                 <x-ui.scene :name="$event->category?->slug ?? 'default'"
-                            :tone="$event->category?->toneHex() ?? '#7c5cff'" fit="meet"
+                            :tone="$event->category?->toneHex() ?? '#3b93e4'" fit="meet"
                             class="aspect-[16/7] w-full rounded-3xl shadow-[0_10px_40px_rgb(31_25_55_/_10%)]"/>
             @endif
 

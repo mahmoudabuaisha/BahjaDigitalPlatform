@@ -39,16 +39,16 @@
     --font-sans: 'Tajawal', ui-sans-serif, system-ui, 'Segoe UI', Tahoma, sans-serif;
 
     /* البنفسجي — لون المنصّة الأساسي */
-    --color-brand-50: #f6f4ff;
-    --color-brand-100: #ede9fe;
-    --color-brand-200: #ddd6fe;
-    --color-brand-300: #c4b5fd;
-    --color-brand-400: #a78bfa;
-    --color-brand-500: #8b5cf6;
-    --color-brand-600: #7c3aed;
-    --color-brand-700: #6d28d9;
-    --color-brand-800: #5b21b6;
-    --color-brand-900: #4c1d95;
+    --color-brand-50: #f0f7fe;
+    --color-brand-100: #e0eefc;
+    --color-brand-200: #c3e0fa;
+    --color-brand-300: #97c9f5;
+    --color-brand-400: #64abed;
+    --color-brand-500: #3b93e4;
+    --color-brand-600: #2678ca;
+    --color-brand-700: #1f62a7;
+    --color-brand-800: #1e5289;
+    --color-brand-900: #1c4570;
 
     /* ألوان الفئات — مرحة ومتمايزة، وكلها تحقق تبايناً كافياً على أرضية فاتحة */
     --color-joy-amber: #f59e0b;
@@ -59,8 +59,8 @@
     --color-joy-orange: #f97316;
 
     /* الحبر والأرضيات */
-    --color-ink: #1f1937;
-    --color-ink-soft: #6b6480;
+    --color-ink: #172439;
+    --color-ink-soft: #5e6b80;
     --color-page: #ffffff;
     --color-page-tint: #faf9ff;
 
@@ -145,11 +145,11 @@
     .btn-primary {
         background: linear-gradient(135deg, var(--color-brand-500), var(--color-brand-700));
         color: #fff;
-        box-shadow: 0 6px 18px rgb(124 58 237 / 28%);
+        box-shadow: 0 6px 18px rgb(38 120 202 / 28%);
     }
 
     .btn-primary:hover:not(:disabled):not([aria-disabled='true']) {
-        box-shadow: 0 10px 26px rgb(124 58 237 / 36%);
+        box-shadow: 0 10px 26px rgb(38 120 202 / 36%);
     }
 
     .btn-outline {
@@ -324,7 +324,7 @@
         background: var(--color-brand-600);
         border-color: var(--color-brand-600);
         color: #fff;
-        box-shadow: 0 4px 14px rgb(124 58 237 / 26%);
+        box-shadow: 0 4px 14px rgb(38 120 202 / 26%);
     }
 
     /* — أقسام وعناوين — */

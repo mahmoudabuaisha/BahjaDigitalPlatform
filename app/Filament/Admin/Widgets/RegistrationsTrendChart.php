@@ -52,12 +52,12 @@ class RegistrationsTrendChart extends ChartWidget
             'datasets' => [[
                 'label' => 'تسجيل',
                 'data' => $data,
-                'borderColor' => '#7c5cff',
+                'borderColor' => '#3b93e4',
                 'backgroundColor' => 'rgba(124, 92, 255, .14)',
                 'tension' => 0.4,
                 'fill' => true,
                 'pointRadius' => 3,
-                'pointBackgroundColor' => '#7c5cff',
+                'pointBackgroundColor' => '#3b93e4',
             ]],
             'labels' => $labels,
         ];

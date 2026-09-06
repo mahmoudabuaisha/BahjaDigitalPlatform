@@ -1,4 +1,4 @@
-@props(['name' => 'default', 'tone' => '#7c5cff', 'fit' => 'slice'])
+@props(['name' => 'default', 'tone' => '#3b93e4', 'fit' => 'slice'])
 
 {{--
     رسمة الفئة: مشهد مرسوم بـ SVG يحلّ محلّ الأيقونة المجرّدة حين لا تكون

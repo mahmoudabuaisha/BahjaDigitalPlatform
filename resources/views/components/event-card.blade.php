@@ -22,7 +22,7 @@
         @else
             {{-- لا صورة مرفوعة: رسمة الفئة بدل مربّع رمادي فارغ --}}
             <x-ui.scene :name="$event->category?->slug ?? 'default'"
-                        :tone="$event->category?->toneHex() ?? '#7c5cff'"
+                        :tone="$event->category?->toneHex() ?? '#3b93e4'"
                         class="size-full transition duration-300 hover:scale-105"/>
         @endif
 

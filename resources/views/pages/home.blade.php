@@ -12,7 +12,7 @@
 
             <h1 class="mt-4 text-4xl leading-[1.25] font-bold sm:text-5xl">
                 اكتشفوا وشاركوا في
-                <span class="bg-gradient-to-l from-brand-600 to-brand-400 bg-clip-text text-transparent">فعاليات ممتعة وآمنة</span>
+                <span class="bg-gradient-to-l from-brand-600 via-brand-400 to-pink-500 bg-clip-text text-transparent">فعاليات ممتعة وآمنة</span>
                 لأطفالكم
             </h1>
 
@@ -26,7 +26,7 @@
                     <x-ui.icon name="calendar" class="size-5"/> تصفّحوا الفعاليات
                 </a>
                 <a href="{{ route('teams.join') }}"
-                   class="btn bg-emerald-600 text-white shadow-lg shadow-emerald-600/25 hover:bg-emerald-700">
+                   class="btn bg-pink-600 text-white shadow-lg shadow-pink-600/25 hover:bg-pink-700">
                     <x-ui.icon name="users" class="size-5"/> سجّلوا فريقكم أو مؤسستكم
                 </a>
             </div>
@@ -124,7 +124,7 @@
 
     <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         <a href="{{ route('events.index') }}" class="card card-hover tone tone-violet items-center gap-3 overflow-hidden p-5 text-center no-underline">
-            <x-ui.scene name="default" tone="#7c5cff" class="-mx-5 -mt-5 h-24 w-[calc(100%+2.5rem)]"/>
+            <x-ui.scene name="default" tone="#3b93e4" class="-mx-5 -mt-5 h-24 w-[calc(100%+2.5rem)]"/>
             <span class="font-bold">جميع الفئات</span>
             <span class="text-sm text-ink-soft">{{ $stats['upcoming'] }} فعالية قادمة</span>
         </a>
@@ -197,7 +197,7 @@
 
 {{-- ═══ دعوة الفرق ═══ --}}
 <section class="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-l from-brand-700 to-brand-500 px-6 py-12 text-center text-white sm:px-12">
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-l from-brand-600 to-pink-500 px-6 py-12 text-center text-white sm:px-12">
         <div class="absolute -top-10 -start-10 size-40 rounded-full bg-white/10"></div>
         <div class="absolute -bottom-12 end-0 size-52 rounded-full bg-white/10"></div>
 

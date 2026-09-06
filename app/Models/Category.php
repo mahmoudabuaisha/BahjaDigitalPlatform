@@ -45,7 +45,7 @@ class Category extends Model
             'danger' => '#f43f5e',
             'info' => '#0ea5e9',
             'success' => '#10b981',
-            default => '#7c5cff',
+            default => '#3b93e4',
         };
     }
 }
