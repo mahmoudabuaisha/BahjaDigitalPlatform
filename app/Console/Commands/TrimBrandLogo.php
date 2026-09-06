@@ -28,10 +28,11 @@ class TrimBrandLogo extends Command
             return self::FAILURE;
         }
 
-        $image = @imagecreatefrompng($path);
+        // الملف قد يكون JPEG أو WebP باسم png — نقرأ أي صيغة ونخرج PNG
+        $image = @imagecreatefromstring((string) file_get_contents($path));
 
         if ($image === false) {
-            $this->error('تعذّرت قراءة الملف — تأكدوا أنه PNG سليم.');
+            $this->error('تعذّرت قراءة الملف — ليس صورة سليمة.');
 
             return self::FAILURE;
         }
