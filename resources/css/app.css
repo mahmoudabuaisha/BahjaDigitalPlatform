@@ -55,7 +55,7 @@
     --color-joy-rose: #ec4899;
     --color-joy-sky: #0ea5e9;
     --color-joy-emerald: #10b981;
-    --color-joy-violet: #8b5cf6;
+    --color-joy-violet: #d946ef; /* فوشيا وردية — بديل البنفسجي */
     --color-joy-orange: #f97316;
 
     /* الحبر والأرضيات */
@@ -230,6 +230,17 @@
     .tone-emerald { --tone: var(--color-joy-emerald); }
     .tone-violet  { --tone: var(--color-joy-violet); }
     .tone-orange  { --tone: var(--color-joy-orange); }
+
+    /* تدرّج العنوان الرئيسي: أزرق ثم وردي بفاصل ضيّق —
+       المزج الطويل بينهما يولّد بنفسجياً موحلاً فنحصره في 16% فقط */
+    .text-joy-gradient {
+        background-image: linear-gradient(to left,
+            var(--color-brand-600) 0%, var(--color-brand-500) 42%,
+            #ec4899 58%, #db2777 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
 
     .badge-tone {
         background: var(--tone-soft);
