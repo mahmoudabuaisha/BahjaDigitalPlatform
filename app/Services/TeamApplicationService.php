@@ -24,7 +24,7 @@ class TeamApplicationService
                 'org_type' => $application->org_type,
                 'area_id' => $application->area_id,
                 'base_location' => $application->base_location,
-                'slug' => $this->uniqueSlug($application->team_name),
+                'slug' => Team::uniqueSlugFromName($application->team_name),
                 'description' => $application->description,
                 'contact_name' => $application->contact_name,
                 'whatsapp_phone' => $application->contact_phone,
@@ -96,18 +96,5 @@ class TeamApplicationService
 
             AuditLog::record('application.reactivated', $team);
         });
-    }
-
-    private function uniqueSlug(string $name): string
-    {
-        $base = Str::slug($name) ?: 'team';
-        $slug = $base;
-        $suffix = 1;
-
-        while (Team::withTrashed()->where('slug', $slug)->exists()) {
-            $slug = $base.'-'.(++$suffix);
-        }
-
-        return $slug;
     }
 }

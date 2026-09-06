@@ -31,12 +31,11 @@ class TeamForm
                                 ->required()
                                 ->maxLength(120),
                             TextInput::make('slug')
-                                ->label('المعرّف اللاتيني (للرابط)')
-                                ->helperText('أحرف إنجليزية صغيرة وأرقام وشرطات فقط، مثال: basmat-amal')
-                                ->required()
+                                ->label('معرّف الرابط (اختياري)')
+                                ->helperText('يُنشأ تلقائياً من اسم الفريق إن تُرك فارغاً — ويمكن كتابته بالعربية، مثال: بسمة-أمل')
                                 ->maxLength(60)
                                 ->unique(ignoreRecord: true)
-                                ->regex('/^[a-z0-9]+(?:-[a-z0-9]+)*$/'),
+                                ->regex('/^[\p{Arabic}a-z0-9]+(?:-[\p{Arabic}a-z0-9]+)*$/u'),
                         ]),
                         Grid::make(3)->schema([
                             Select::make('org_type')

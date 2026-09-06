@@ -25,8 +25,9 @@
                 <a href="{{ route('events.index') }}" class="btn btn-primary">
                     <x-ui.icon name="calendar" class="size-5"/> تصفّحوا الفعاليات
                 </a>
-                <a href="{{ route('teams.join') }}" class="btn btn-outline">
-                    <x-ui.icon name="plus" class="size-5"/> سجّلوا فريقكم
+                <a href="{{ route('teams.join') }}"
+                   class="btn bg-emerald-600 text-white shadow-lg shadow-emerald-600/25 hover:bg-emerald-700">
+                    <x-ui.icon name="users" class="size-5"/> سجّلوا فريقكم أو مؤسستكم
                 </a>
             </div>
 
