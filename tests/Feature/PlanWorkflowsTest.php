@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\EventStatus;
+use App\Enums\OrgType;
 use App\Enums\TeamApplicationStatus;
 use App\Enums\UserRole;
 use App\Models\Area;
@@ -44,15 +45,28 @@ class PlanWorkflowsTest extends TestCase
 
         $this->post(route('teams.join.store'), [
             'team_name' => 'فريق الياسمين',
+            'org_type' => 'volunteer_team',
+            'area_id' => Area::first()->id,
+            'base_location' => 'رفح — حي الجنينة',
             'contact_name' => 'أبو خليل',
             'contact_email' => 'yasmeen@example.com',
             'contact_phone' => '0599111222',
+            'emergency_phone' => '0568222333',
             'description' => 'أنشطة ترفيهية ودعم نفسي في مراكز إيواء رفح.',
-            'geographic_scope' => 'رفح',
+            'geographic_scope' => 'مراكز الإيواء الغربية في رفح',
+            'coverage_areas' => [Area::first()->id],
+            'activities' => ['games', 'storytelling'],
+            'volunteers_count' => 12,
+            'capacity_per_event' => 60,
             'terms' => '1',
         ])->assertSessionHas('application_sent');
 
-        $this->assertSame(TeamApplicationStatus::Pending, TeamApplication::first()->status);
+        $application = TeamApplication::first();
+        $this->assertSame(TeamApplicationStatus::Pending, $application->status);
+        $this->assertSame(OrgType::VolunteerTeam, $application->org_type);
+        $this->assertSame(['games', 'storytelling'], $application->activities);
+        $this->assertSame(12, $application->volunteers_count);
+        $this->assertNotNull($application->pledge_accepted_at);
     }
 
     public function test_the_honeypot_swallows_spam_without_saving(): void
@@ -69,10 +83,15 @@ class PlanWorkflowsTest extends TestCase
     {
         $application = TeamApplication::create([
             'team_name' => 'فريق الياسمين',
+            'org_type' => 'initiative',
             'contact_name' => 'أبو خليل',
             'contact_email' => 'yasmeen@example.com',
             'contact_phone' => '0599111222',
+            'emergency_phone' => '0568222333',
             'description' => 'أنشطة ترفيهية.',
+            'activities' => ['theater', 'music'],
+            'volunteers_count' => 8,
+            'capacity_per_event' => 40,
             'status' => TeamApplicationStatus::Pending,
         ]);
 
@@ -84,6 +103,12 @@ class PlanWorkflowsTest extends TestCase
         $this->assertSame($result['team']->id, $result['manager']->team_id);
         $this->assertSame(TeamApplicationStatus::Approved, $application->fresh()->status);
         $this->assertDatabaseHas('audit_logs', ['action' => 'application.approved']);
+
+        // بيانات الطلب انتقلت كاملة إلى ملف الفريق — لا إعادة إدخال
+        $this->assertSame(OrgType::Initiative, $result['team']->org_type);
+        $this->assertSame(['theater', 'music'], $result['team']->activities);
+        $this->assertSame('0568222333', $result['team']->emergency_phone);
+        $this->assertSame(40, $result['team']->capacity_per_event);
 
         // كلمة المرور المولَّدة تعمل
         $this->post(route('logout'));

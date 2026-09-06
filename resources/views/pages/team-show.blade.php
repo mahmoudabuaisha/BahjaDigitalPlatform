@@ -37,6 +37,14 @@
                 @if($team->description)
                     <p class="mt-2 max-w-2xl leading-relaxed text-ink-soft">{{ $team->description }}</p>
                 @endif
+
+                @if($team->activityLabels())
+                    <div class="mt-3 flex flex-wrap gap-2">
+                        @foreach($team->activityLabels() as $activity)
+                            <span class="rounded-full bg-brand-50 px-3 py-1 text-sm font-medium text-brand-700">{{ $activity }}</span>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </div>
 

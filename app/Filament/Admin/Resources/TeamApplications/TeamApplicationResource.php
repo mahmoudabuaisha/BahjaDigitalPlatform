@@ -15,6 +15,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 use UnitEnum;
 
 /** طلبات انضمام الفرق (القسم 5.3): اعتماد أو رفض بسبب، ولا تشغيل قبل القرار */
@@ -58,15 +59,19 @@ class TeamApplicationResource extends Resource
                     ->weight('bold')
                     ->description(fn (TeamApplication $record): string => $record->contact_name)
                     ->searchable(),
+                TextColumn::make('org_type')
+                    ->label('النوع والمحافظة')
+                    ->badge()
+                    ->formatStateUsing(fn ($state): string => $state?->label() ?? '—')
+                    ->description(fn (TeamApplication $record): ?string => $record->area?->name),
                 TextColumn::make('contact_phone')
-                    ->label('التواصل')
+                    ->label('واتساب')
                     ->description(fn (TeamApplication $record): string => $record->contact_email)
                     ->copyable(),
-                TextColumn::make('description')
-                    ->label('النشاط')
-                    ->limit(50)
-                    ->wrap()
-                    ->description(fn (TeamApplication $record): ?string => $record->geographic_scope),
+                TextColumn::make('volunteers_count')
+                    ->label('القدرات')
+                    ->formatStateUsing(fn (TeamApplication $record): string => ($record->volunteers_count ?? '—').' متطوعاً · '.($record->capacity_per_event ?? '—').' طفلاً/نشاط')
+                    ->description(fn (TeamApplication $record): ?string => implode('، ', array_slice($record->activityLabels(), 0, 3)) ?: null),
                 TextColumn::make('status')
                     ->label('الحالة')
                     ->badge(),
@@ -88,6 +93,43 @@ class TeamApplicationResource extends Resource
                     ->default(TeamApplicationStatus::Pending->value),
             ])
             ->recordActions([
+                Action::make('details')
+                    ->label('الملف الكامل')
+                    ->icon('heroicon-o-identification')
+                    ->color('gray')
+                    ->modalHeading(fn (TeamApplication $record): string => 'طلب «'.$record->team_name.'»')
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('إغلاق')
+                    ->modalContent(function (TeamApplication $record): HtmlString {
+                        $rows = [
+                            'نوع الجهة' => $record->org_type?->label(),
+                            'المحافظة' => $record->area?->name,
+                            'المقر / التواجد' => $record->base_location,
+                            'مسؤول الميدان' => $record->contact_name,
+                            'واتساب' => $record->contact_phone,
+                            'هاتف الطوارئ' => $record->emergency_phone,
+                            'البريد الرسمي' => $record->contact_email,
+                            'وصف النشاط' => $record->description,
+                            'محافظات التغطية' => implode('، ', $record->coverageAreaNames()) ?: null,
+                            'مراكز / مخيمات' => $record->geographic_scope,
+                            'الأنشطة المتقنة' => implode('، ', $record->activityLabels()) ?: null,
+                            'عدد المتطوعين' => $record->volunteers_count,
+                            'الاستيعاب / نشاط' => $record->capacity_per_event ? $record->capacity_per_event.' طفلاً' : null,
+                            'تعهد سلامة الأطفال' => $record->pledge_accepted_at
+                                ? 'مقبول — '.$record->pledge_accepted_at->translatedFormat('j F Y H:i')
+                                : 'الصيغة القديمة للنموذج (قبل إضافة الختم الزمني)',
+                        ];
+
+                        $html = '<table style="width:100%;font-size:.9rem;border-collapse:collapse">';
+
+                        foreach ($rows as $label => $value) {
+                            $html .= '<tr style="border-bottom:1px solid rgba(128,128,128,.15)">'
+                                .'<td style="padding:.5rem .25rem;font-weight:600;white-space:nowrap;vertical-align:top">'.e($label).'</td>'
+                                .'<td style="padding:.5rem .25rem">'.e($value ?? '—').'</td></tr>';
+                        }
+
+                        return new HtmlString($html.'</table>');
+                    }),
                 Action::make('approve')
                     ->label('اعتماد')
                     ->icon('heroicon-o-check-circle')

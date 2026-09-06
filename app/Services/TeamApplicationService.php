@@ -18,12 +18,22 @@ class TeamApplicationService
     public function approve(TeamApplication $application): array
     {
         return DB::transaction(function () use ($application): array {
+            // كل ما جمعه الطلب ينتقل إلى ملف الفريق — لا إعادة إدخال بعد الاعتماد
             $team = Team::create([
                 'name' => $application->team_name,
+                'org_type' => $application->org_type,
+                'area_id' => $application->area_id,
+                'base_location' => $application->base_location,
                 'slug' => $this->uniqueSlug($application->team_name),
                 'description' => $application->description,
                 'contact_name' => $application->contact_name,
                 'whatsapp_phone' => $application->contact_phone,
+                'emergency_phone' => $application->emergency_phone,
+                'coverage_details' => $application->geographic_scope,
+                'coverage_areas' => $application->coverage_areas,
+                'activities' => $application->activities,
+                'volunteers_count' => $application->volunteers_count,
+                'capacity_per_event' => $application->capacity_per_event,
                 'is_active' => true,
             ]);
 
