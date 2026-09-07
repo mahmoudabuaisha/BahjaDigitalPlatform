@@ -415,6 +415,14 @@
 
     .wa-drift .wa-ripple { opacity: 0; }
 
+    /* نبضة وصول العدّاد إلى هدفه */
+    .stat-pop { animation: stat-pop .45s ease; }
+
+    @keyframes stat-pop {
+        0%, 100% { transform: scale(1); }
+        45% { transform: scale(1.14); }
+    }
+
     .wa-bob { will-change: transform; animation: wa-bob 3.2s ease-in-out infinite; }
 
     .wa-float:hover .wa-bob { animation-play-state: paused; }
