@@ -90,6 +90,56 @@ Alpine.data('savedEvents', () => ({
     },
 }));
 
+/**
+ * عدّاد متصاعد لأرقام الإحصاءات: يبدأ حين تدخل البطاقة مجال الرؤية،
+ * يتسارع ثم يتباطأ قرب الهدف (easeOutCubic)، مع تأخير متدرّج بين
+ * البطاقات ونبضة صغيرة عند الوصول. «تقليل الحركة» يعرض الرقم فوراً.
+ */
+Alpine.data('countUp', (target, delay = 0, duration = 1600) => ({
+    shown: 0,
+    done: false,
+
+    init() {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches || target === 0) {
+            this.shown = target;
+            this.done = true;
+
+            return;
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            if (entries.some((entry) => entry.isIntersecting)) {
+                observer.disconnect();
+                setTimeout(() => this.animate(), delay);
+            }
+        }, { threshold: 0.4 });
+
+        observer.observe(this.$el);
+    },
+
+    animate() {
+        const start = performance.now();
+        const easeOutCubic = (progress) => 1 - Math.pow(1 - progress, 3);
+
+        const tick = (now) => {
+            const progress = Math.min(1, (now - start) / duration);
+            this.shown = Math.round(target * easeOutCubic(progress));
+
+            if (progress < 1) {
+                requestAnimationFrame(tick);
+            } else {
+                this.done = true;
+            }
+        };
+
+        requestAnimationFrame(tick);
+    },
+
+    get display() {
+        return this.shown.toLocaleString('en-US');
+    },
+}));
+
 Alpine.start();
 
 /* شريط حالة الشبكة — الانقطاع دائم الظهور، والعودة تومض ثم تختفي.
