@@ -404,10 +404,20 @@
         background: linear-gradient(90deg, var(--color-brand-500), #ec4899);
     }
 
-    /* — واتساب العائم: طفو مستمر ونبضة موجية مزدوجة وتلويحة أيقونة كل بضع ثوانٍ — */
-    .wa-float { will-change: transform; animation: wa-bob 3.2s ease-in-out infinite; }
+    /* — واتساب العائم: طفو مستمر ونبضة موجية مزدوجة وتلويحة أيقونة كل بضع ثوانٍ،
+       وأثناء تمرير الصفحة ينكمش شفافاً نحو زاويته كي لا يحجب المحتوى — */
+    .wa-float {
+        transform-origin: left bottom;
+        transition: transform .35s ease, opacity .35s ease;
+    }
 
-    .wa-float:hover { animation-play-state: paused; }
+    .wa-drift { transform: scale(.68); opacity: .5; }
+
+    .wa-drift .wa-ripple { opacity: 0; }
+
+    .wa-bob { will-change: transform; animation: wa-bob 3.2s ease-in-out infinite; }
+
+    .wa-float:hover .wa-bob { animation-play-state: paused; }
 
     .wa-ripple { animation: wa-ripple 2.6s cubic-bezier(0, .4, .4, 1) infinite; }
     .wa-ripple-2 { animation-delay: 1.3s; }
@@ -433,7 +443,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-        .wa-float, .wa-icon { animation: none; }
+        .wa-bob, .wa-icon { animation: none; }
         .wa-ripple { display: none; }
     }
 
