@@ -230,10 +230,6 @@
                         <li><a href="{{ url('/team') }}" class="no-underline transition hover:text-amber-200">دخول الفرق</a></li>
                         <li><a href="{{ route('feedback.create') }}" class="no-underline transition hover:text-amber-200">رأيكم يهمنا</a></li>
                     </ul>
-
-                    @if($whatsapp = \App\Support\Settings::get('site_whatsapp'))
-                        <p class="mt-4 text-sm text-white/70" dir="ltr">{{ $whatsapp }}</p>
-                    @endif
                 </div>
             </div>
 
@@ -249,21 +245,24 @@
         </div>
     </footer>
 
-    {{-- واتساب الإدارة العائم: ثابت مع التمرير، بنبضة موجية وطفو وتلويحة خفيفة،
-         وتسمية تنبسط عند التمرير — رقم الإعدادات وإلا فرقم الإدارة الافتراضي --}}
+    {{-- واتساب الإدارة العائم: يرافق التمرير وينكمش شفافاً أثناءه كي لا يحجب
+         المحتوى، ثم يعود بكامل حضوره عند التوقف — رقم الإعدادات وإلا فرقم الإدارة --}}
     @php $adminWhatsapp = \App\Support\Settings::get('site_whatsapp') ?: '+970 593 674 330'; @endphp
     <a href="https://wa.me/{{ preg_replace('/\D/', '', $adminWhatsapp) }}?text={{ rawurlencode('مرحباً، أحتاج مساعدة في منصة بهجة 🙏') }}"
        target="_blank" rel="noopener"
+       x-data="{ drift: false, t: null }"
+       @scroll.window.passive="drift = true; clearTimeout(t); t = setTimeout(() => drift = false, 240)"
+       :class="drift ? 'wa-drift' : ''"
        class="wa-float group fixed bottom-5 end-5 z-40 flex items-center no-underline print:hidden"
        aria-label="تواصلوا مع إدارة المنصّة عبر واتساب">
         <span class="pointer-events-none me-3 hidden translate-x-2 whitespace-nowrap rounded-full bg-white px-4 py-2 text-sm font-bold text-emerald-700 opacity-0 shadow-lg ring-1 ring-emerald-100 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100 sm:block">
             راسلونا على واتساب
         </span>
-        <span class="relative block">
+        <span class="wa-bob relative block">
             <span class="wa-ripple absolute inset-0 rounded-full bg-emerald-400" aria-hidden="true"></span>
             <span class="wa-ripple wa-ripple-2 absolute inset-0 rounded-full bg-emerald-400" aria-hidden="true"></span>
-            <span class="relative grid size-14 place-items-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-xl shadow-emerald-600/40 ring-4 ring-white/80 transition-transform duration-300 group-hover:scale-110">
-                <x-ui.icon name="whatsapp" class="wa-icon size-7"/>
+            <span class="relative grid size-12 place-items-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-xl shadow-emerald-600/40 ring-[3px] ring-white/80 transition-transform duration-300 group-hover:scale-110">
+                <x-ui.icon name="whatsapp" class="wa-icon size-6"/>
             </span>
         </span>
     </a>
