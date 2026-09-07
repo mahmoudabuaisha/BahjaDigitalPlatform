@@ -21,12 +21,14 @@
                 في المحافظات الخمس، ونعرضها لكم يوماً بيوم — وتعمل حتى حين تضعف الشبكة.
             </p>
 
-            <div class="mt-6 flex flex-wrap gap-3">
-                <a href="{{ route('events.index') }}" class="btn btn-primary w-full sm:w-auto">
+            {{-- هرمية واضحة: فعل العائلات (تصفّح الفعاليات) هو الأهم فيتصدّر ويكبر،
+                 وتسجيل الفرق فعل ثانوي بحضور وردي هادئ لا ينافسه --}}
+            <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+                <a href="{{ route('events.index') }}"
+                   class="btn btn-primary btn-lg w-full hover:-translate-y-0.5 sm:w-auto">
                     <x-ui.icon name="calendar" class="size-5"/> تصفّحوا الفعاليات
                 </a>
-                <a href="{{ route('teams.join') }}"
-                   class="btn w-full bg-pink-600 text-white shadow-lg shadow-pink-600/25 hover:bg-pink-700 sm:w-auto">
+                <a href="{{ route('teams.join') }}" class="btn btn-outline-pink w-full sm:w-auto">
                     <x-ui.icon name="users" class="size-5"/> سجّلوا فريقكم أو مؤسستكم
                 </a>
             </div>
@@ -38,9 +40,9 @@
                     ['value' => $stats['children'], 'label' => 'طفل حضر'],
                     ['value' => $stats['teams'], 'label' => 'فريق تطوّعي'],
                 ] as $stat)
-                    <div class="rounded-2xl bg-white/70 p-3 text-center shadow-sm">
-                        <dt class="text-2xl font-bold text-brand-700">{{ number_format($stat['value']) }}</dt>
-                        <dd class="text-sm text-ink-soft">{{ $stat['label'] }}</dd>
+                    <div class="rounded-2xl border border-white/70 bg-white/90 p-3 text-center shadow-sm">
+                        <dt class="text-[1.7rem] leading-tight font-extrabold text-brand-800">{{ number_format($stat['value']) }}</dt>
+                        <dd class="mt-0.5 text-[15px] font-semibold text-ink">{{ $stat['label'] }}</dd>
                     </div>
                 @endforeach
             </dl>
