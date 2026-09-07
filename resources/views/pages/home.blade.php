@@ -10,7 +10,7 @@
                 <x-ui.icon name="sparkles" class="size-4 text-brand-500"/> رسالة بَهْجَة
             </span>
 
-            <h1 class="mt-4 text-4xl leading-[1.25] font-bold sm:text-5xl">
+            <h1 class="mt-4 text-[1.9rem] leading-[1.3] font-bold sm:text-4xl sm:leading-[1.25] lg:text-5xl">
                 اكتشفوا وشاركوا في
                 <span class="text-joy-gradient">فعاليات ممتعة وآمنة</span>
                 لأطفالكم
@@ -22,11 +22,11 @@
             </p>
 
             <div class="mt-6 flex flex-wrap gap-3">
-                <a href="{{ route('events.index') }}" class="btn btn-primary">
+                <a href="{{ route('events.index') }}" class="btn btn-primary w-full sm:w-auto">
                     <x-ui.icon name="calendar" class="size-5"/> تصفّحوا الفعاليات
                 </a>
                 <a href="{{ route('teams.join') }}"
-                   class="btn bg-pink-600 text-white shadow-lg shadow-pink-600/25 hover:bg-pink-700">
+                   class="btn w-full bg-pink-600 text-white shadow-lg shadow-pink-600/25 hover:bg-pink-700 sm:w-auto">
                     <x-ui.icon name="users" class="size-5"/> سجّلوا فريقكم أو مؤسستكم
                 </a>
             </div>
@@ -206,8 +206,8 @@
             سجّلوا فريقكم وارفعوا جدول فعالياتكم بأنفسكم — بعد اعتماد الإدارة تصل فعالياتكم لآلاف العائلات.
         </p>
         <div class="relative mt-6 flex flex-wrap justify-center gap-3">
-            <a href="{{ route('teams.join') }}" class="btn bg-white text-brand-700 hover:bg-brand-50">سجّلوا فريقكم الآن</a>
-            <a href="{{ route('organizers') }}" class="btn border-white/50 text-white hover:bg-white/10">تعرّفوا على المنظِّمين</a>
+            <a href="{{ route('teams.join') }}" class="btn w-full bg-white text-brand-700 hover:bg-brand-50 sm:w-auto">سجّلوا فريقكم الآن</a>
+            <a href="{{ route('organizers') }}" class="btn w-full border-white/50 text-white hover:bg-white/10 sm:w-auto">تعرّفوا على المنظِّمين</a>
         </div>
     </div>
 </section>

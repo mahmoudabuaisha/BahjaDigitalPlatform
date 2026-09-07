@@ -38,7 +38,7 @@
             <a href="{{ route('home') }}" class="flex shrink-0 items-center gap-2.5 no-underline">
                 @if(file_exists(public_path('brand/logo.png')))
                     {{-- شعار المنصّة الأصلي — يُفعَّل تلقائياً فور وجود الملف --}}
-                    <img src="{{ asset('brand/logo.png') }}" alt="{{ \App\Support\Settings::get('site_name') }}" class="h-16 w-auto sm:h-20">
+                    <img src="{{ asset('brand/logo.png') }}" alt="{{ \App\Support\Settings::get('site_name') }}" class="h-14 w-auto sm:h-16 lg:h-20">
                 @else
                     <x-brand-mark class="size-11"/>
                     <span class="text-2xl font-bold text-brand-700">{{ \App\Support\Settings::get('site_name') }}</span>

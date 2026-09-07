@@ -277,7 +277,8 @@
         min-height: 46px;
         padding: 10px 16px;
         font: inherit;
-        font-size: 15px;
+        /* 16px حد iOS الأدنى — أي أصغر يقرّب سفاري الصفحة قسراً عند لمس الحقل */
+        font-size: 16px;
         color: var(--color-ink);
         background: #fff;
         border: 1.5px solid var(--color-brand-100);
