@@ -16,7 +16,7 @@ class Settings
     /** القيم الافتراضية عند غياب المفتاح من قاعدة البيانات */
     private const DEFAULTS = [
         'site_name' => 'بَهْجَة',
-        'site_whatsapp' => '',
+        'site_whatsapp' => '+970 593 674 330',
         'about_text' => '',
         'og_default_image' => '',
         'target_children' => 1000,

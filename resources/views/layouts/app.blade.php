@@ -249,15 +249,24 @@
         </div>
     </footer>
 
-    {{-- واتساب الإدارة العائم: أي مشكلة تصل بضغطة — يظهر حين يُضبط الرقم في الإعدادات --}}
-    @if($adminWhatsapp = \App\Support\Settings::get('site_whatsapp'))
-        <a href="https://wa.me/{{ preg_replace('/\D/', '', $adminWhatsapp) }}?text={{ rawurlencode('مرحباً، أحتاج مساعدة في منصة بهجة 🙏') }}"
-           target="_blank" rel="noopener"
-           class="fixed bottom-5 end-5 z-40 grid size-14 place-items-center rounded-full bg-emerald-500 text-white shadow-xl shadow-emerald-600/30 transition hover:scale-105 hover:bg-emerald-600 print:hidden"
-           aria-label="تواصلوا مع إدارة المنصّة عبر واتساب">
-            <x-ui.icon name="whatsapp" class="size-7"/>
-        </a>
-    @endif
+    {{-- واتساب الإدارة العائم: ثابت مع التمرير، بنبضة موجية وطفو وتلويحة خفيفة،
+         وتسمية تنبسط عند التمرير — رقم الإعدادات وإلا فرقم الإدارة الافتراضي --}}
+    @php $adminWhatsapp = \App\Support\Settings::get('site_whatsapp') ?: '+970 593 674 330'; @endphp
+    <a href="https://wa.me/{{ preg_replace('/\D/', '', $adminWhatsapp) }}?text={{ rawurlencode('مرحباً، أحتاج مساعدة في منصة بهجة 🙏') }}"
+       target="_blank" rel="noopener"
+       class="wa-float group fixed bottom-5 end-5 z-40 flex items-center no-underline print:hidden"
+       aria-label="تواصلوا مع إدارة المنصّة عبر واتساب">
+        <span class="pointer-events-none me-3 hidden translate-x-2 whitespace-nowrap rounded-full bg-white px-4 py-2 text-sm font-bold text-emerald-700 opacity-0 shadow-lg ring-1 ring-emerald-100 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100 sm:block">
+            راسلونا على واتساب
+        </span>
+        <span class="relative block">
+            <span class="wa-ripple absolute inset-0 rounded-full bg-emerald-400" aria-hidden="true"></span>
+            <span class="wa-ripple wa-ripple-2 absolute inset-0 rounded-full bg-emerald-400" aria-hidden="true"></span>
+            <span class="relative grid size-14 place-items-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-xl shadow-emerald-600/40 ring-4 ring-white/80 transition-transform duration-300 group-hover:scale-110">
+                <x-ui.icon name="whatsapp" class="wa-icon size-7"/>
+            </span>
+        </span>
+    </a>
 
 </body>
 </html>

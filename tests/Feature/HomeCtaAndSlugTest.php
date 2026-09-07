@@ -62,9 +62,11 @@ class HomeCtaAndSlugTest extends TestCase
             ->assertSee('تواصلوا مع إدارة المنصّة عبر واتساب')
             ->assertSee('wa.me/970599123456', escape: false);
 
+        // بلا إعداد يبقى الزر ظاهراً دائماً برقم الإدارة الافتراضي
         Settings::set('site_whatsapp', '');
 
         $this->get(route('home'))
-            ->assertDontSee('تواصلوا مع إدارة المنصّة عبر واتساب');
+            ->assertSee('تواصلوا مع إدارة المنصّة عبر واتساب')
+            ->assertSee('wa.me/970593674330', escape: false);
     }
 }
