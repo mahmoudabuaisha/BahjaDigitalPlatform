@@ -41,7 +41,10 @@
                     ['value' => $stats['teams'], 'label' => 'فريق تطوّعي'],
                 ] as $stat)
                     <div class="rounded-2xl border border-white/70 bg-white/90 p-3 text-center shadow-sm">
-                        <dt class="text-[1.7rem] leading-tight font-extrabold text-brand-800">{{ number_format($stat['value']) }}</dt>
+                        {{-- عدّاد متصاعد حتى الهدف — يبدأ عند الظهور وبتتابع بين البطاقات --}}
+                        <dt x-data="countUp({{ (int) $stat['value'] }}, {{ $loop->index * 180 }})"
+                            :class="done && 'stat-pop'" x-text="display"
+                            class="text-[1.7rem] leading-tight font-extrabold text-brand-800 tabular-nums">{{ number_format($stat['value']) }}</dt>
                         <dd class="mt-0.5 text-[15px] font-semibold text-ink">{{ $stat['label'] }}</dd>
                     </div>
                 @endforeach

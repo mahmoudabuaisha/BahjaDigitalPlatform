@@ -104,7 +104,14 @@
             <div class="tone {{ $stat['tone'] }} flex items-center gap-3">
                 <span class="icon-tile"><x-ui.icon :name="$stat['icon']"/></span>
                 <div>
-                    <p class="text-2xl leading-tight font-bold">{{ is_int($stat['value']) ? number_format($stat['value']) : $stat['value'] }}</p>
+                    @if(is_int($stat['value']))
+                        {{-- عدّاد متصاعد للأرقام الحقيقية — النسب النصية تُعرض كما هي --}}
+                        <p x-data="countUp({{ $stat['value'] }}, {{ $loop->index * 150 }})"
+                           :class="done && 'stat-pop'" x-text="display"
+                           class="text-2xl leading-tight font-bold tabular-nums">{{ number_format($stat['value']) }}</p>
+                    @else
+                        <p class="text-2xl leading-tight font-bold">{{ $stat['value'] }}</p>
+                    @endif
                     <p class="text-sm text-ink-soft">{{ $stat['label'] }}</p>
                 </div>
             </div>
