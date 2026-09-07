@@ -160,8 +160,11 @@
         </nav>
     </header>
 
-    <main>
-        @yield('content')
+    <main class="relative">
+        <x-brush-strokes/>
+        <div class="relative">
+            @yield('content')
+        </div>
     </main>
 
     {{-- فوتر احتفالي: موجة تُدخل إلى جسم كحلي مزخرف، فموجة وردية، فشريط الحقوق --}}
