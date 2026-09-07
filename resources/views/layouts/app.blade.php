@@ -45,7 +45,7 @@
                 @endif
             </a>
 
-            <nav class="mx-auto hidden items-center gap-7 lg:flex" aria-label="التنقل الرئيسي">
+            <nav class="mx-auto hidden items-center gap-1 lg:flex" aria-label="التنقل الرئيسي">
                 <a href="{{ route('home') }}" class="nav-link" @if(request()->routeIs('home')) aria-current="page" @endif>الرئيسية</a>
                 <a href="{{ route('events.index') }}" class="nav-link" @if(request()->routeIs('events.index')) aria-current="page" @endif>الفعاليات</a>
                 <a href="{{ route('organizers') }}" class="nav-link" @if(request()->routeIs('organizers')) aria-current="page" @endif>المنظِّمون</a>
@@ -53,7 +53,7 @@
                 <a href="{{ route('contact') }}" class="nav-link" @if(request()->routeIs('contact')) aria-current="page" @endif>تواصلوا معنا</a>
             </nav>
 
-            <div class="ms-auto hidden items-center gap-2 lg:flex">
+            <div class="ms-auto hidden items-center gap-2.5 lg:flex">
                 @guest
                     <a href="{{ route('register') }}" class="btn btn-outline btn-sm">إنشاء حساب</a>
                     <a href="{{ route('login') }}" class="btn btn-primary btn-sm">تسجيل دخول</a>
@@ -70,13 +70,14 @@
                     </a>
 
                     <div x-data="{ menu: false }" class="relative">
+                        {{-- زر الحساب: مساحة مريحة وحدود وظل ليقرأ كزر واضح لا كنص --}}
                         <button type="button" @click="menu = ! menu" :aria-expanded="menu ? 'true' : 'false'"
-                                class="btn btn-outline btn-sm">
-                            <span class="grid size-6 place-items-center rounded-full bg-brand-100 text-xs font-bold text-brand-700">
+                                class="flex min-h-[46px] items-center gap-2.5 rounded-full border-[1.5px] border-brand-200 bg-white py-1.5 pe-4 ps-2 text-[15px] font-bold text-ink shadow-sm transition hover:border-brand-400 hover:bg-brand-50">
+                            <span class="grid size-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-sm font-bold text-white">
                                 {{ mb_substr(auth()->user()->name, 0, 1) }}
                             </span>
                             {{ \Illuminate\Support\Str::limit(auth()->user()->name, 14) }}
-                            <x-ui.icon name="chevron-down" class="size-4"/>
+                            <x-ui.icon name="chevron-down" class="size-4 text-brand-500"/>
                         </button>
 
                         <div x-show="menu" x-cloak @click.outside="menu = false" x-transition.opacity
@@ -132,7 +133,7 @@
                 ] as $item)
                     <li>
                         <a href="{{ route($item['route']) }}"
-                           class="flex min-h-[48px] items-center rounded-xl px-3 no-underline {{ request()->routeIs($item['route']) ? 'bg-brand-50 font-bold text-brand-700' : 'text-ink-soft' }}">
+                           class="flex min-h-[48px] items-center rounded-xl px-3 text-base no-underline {{ request()->routeIs($item['route']) ? 'bg-brand-50 font-bold text-brand-700' : 'font-semibold text-ink' }}">
                             {{ $item['label'] }}
                         </a>
                     </li>
