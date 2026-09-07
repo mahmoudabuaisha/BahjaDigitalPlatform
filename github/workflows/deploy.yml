@@ -1,0 +1,16 @@
+name: Deploy to Hostinger
+on:
+  push:
+    branches: [deploy/hostinger]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: تشغيل سكربت التحديث على الاستضافة
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          script: bash ~/update-hostinger.sh
