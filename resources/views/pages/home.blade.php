@@ -76,20 +76,20 @@
     </div>
 </section>
 
-{{-- ═══ شريط البحث ═══ --}}
-<section class="mx-auto -mt-8 max-w-7xl px-4 sm:px-6">
+{{-- ═══ شريط البحث: لوحة بارزة بعناوين ظاهرة وحقول متساوية وزر بمحاذاتها ═══ --}}
+<section class="relative z-10 mx-auto mt-8 max-w-7xl px-4 sm:px-6">
     <form method="GET" action="{{ route('events.index') }}"
-          class="grid gap-3 rounded-3xl border border-brand-100 bg-white p-4 shadow-[0_10px_40px_rgb(31_25_55_/_8%)] md:grid-cols-[1.4fr_1fr_1fr_auto]">
+          class="grid items-end gap-4 rounded-[1.75rem] border border-brand-100 bg-white p-5 shadow-[0_18px_50px_rgb(31_37_57_/_10%)] sm:grid-cols-2 md:grid-cols-[1.4fr_1fr_1fr_auto] sm:p-6">
         <label class="field">
-            <span class="sr-only">ابحثوا عن فعالية</span>
-            <span class="relative block">
+            <span class="!font-bold !text-ink">ابحثوا عن فعالية</span>
+            <span class="relative !mb-0 block">
                 <x-ui.icon name="search" class="absolute top-1/2 start-4 size-5 -translate-y-1/2 text-brand-400"/>
-                <input type="search" name="q" class="input ps-12" placeholder="ابحثوا باسم الفعالية أو المكان">
+                <input type="search" name="q" class="input ps-12" placeholder="اسم الفعالية أو المكان">
             </span>
         </label>
 
         <label class="field">
-            <span class="sr-only">الفئة</span>
+            <span class="!font-bold !text-ink">الفئة</span>
             <select name="cat" class="input">
                 <option value="">جميع الفئات</option>
                 @foreach($categories as $category)
@@ -99,7 +99,7 @@
         </label>
 
         <label class="field">
-            <span class="sr-only">المحافظة</span>
+            <span class="!font-bold !text-ink">المحافظة</span>
             <select name="area" class="input">
                 <option value="">كل المحافظات</option>
                 @foreach($areas as $area)
@@ -108,7 +108,7 @@
             </select>
         </label>
 
-        <button type="submit" class="btn btn-primary md:min-w-32">
+        <button type="submit" class="btn btn-primary min-h-[50px] w-full sm:col-span-2 md:col-span-1 md:w-auto md:min-w-32">
             <x-ui.icon name="search" class="size-5"/> بحث
         </button>
     </form>
@@ -128,16 +128,17 @@
     </div>
 
     <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        <a href="{{ route('events.index') }}" class="card card-hover tone tone-violet items-center gap-3 overflow-hidden p-5 text-center no-underline">
-            <x-ui.scene name="default" tone="#3b93e4" class="-mx-5 -mt-5 h-24 w-[calc(100%+2.5rem)]"/>
+        {{-- نسبة 8/5 تطابق أبعاد المشهد المرسوم فيظهر كاملاً بلا أي قص --}}
+        <a href="{{ route('events.index') }}" class="card card-hover group tone tone-violet items-center gap-3 overflow-hidden p-5 text-center no-underline">
+            <x-ui.scene name="default" tone="#3b93e4" class="-mx-5 -mt-5 aspect-[8/5] h-auto w-[calc(100%+2.5rem)] transition-transform duration-500 group-hover:scale-105"/>
             <span class="font-bold">جميع الفئات</span>
             <span class="text-sm text-ink-soft">{{ $stats['upcoming'] }} فعالية قادمة</span>
         </a>
 
         @foreach($categories as $category)
             <a href="{{ route('events.index', ['cat' => $category->slug]) }}"
-               class="card card-hover {{ $category->toneClass() }} items-center gap-3 overflow-hidden p-5 text-center no-underline">
-                <x-ui.scene :name="$category->slug" :tone="$category->toneHex()" class="-mx-5 -mt-5 h-24 w-[calc(100%+2.5rem)]"/>
+               class="card card-hover group {{ $category->toneClass() }} items-center gap-3 overflow-hidden p-5 text-center no-underline">
+                <x-ui.scene :name="$category->slug" :tone="$category->toneHex()" class="-mx-5 -mt-5 aspect-[8/5] h-auto w-[calc(100%+2.5rem)] transition-transform duration-500 group-hover:scale-105"/>
                 <span class="font-bold">{{ $category->name }}</span>
                 <span class="text-sm text-ink-soft">
                     {{ $category->events_count }} {{ $category->events_count === 1 ? 'فعالية قادمة' : 'فعاليات قادمة' }}
