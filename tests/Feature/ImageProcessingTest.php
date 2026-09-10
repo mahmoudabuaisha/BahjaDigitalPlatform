@@ -64,6 +64,54 @@ class ImageProcessingTest extends TestCase
      * JPEG حقيقي يحمل مقطع EXIF فيه علم اتجاه ومؤشر GPS —
      * مثل أي لقطة جوال لم تُنظَّف.
      */
+    public function test_a_category_image_is_processed_on_upload_and_cleaned_on_replace_and_delete(): void
+    {
+        $disk = Storage::disk('public');
+        $service = app(ImageService::class);
+
+        // التخزين عبر الخدمة (كما يفعل حقل الرفع في اللوحة) يعالج وينشئ البطاقة
+        $first = $service->store(
+            UploadedFile::fake()->createWithContent('cat.jpg', $this->jpegWithExif(1800, 900)),
+            'categories',
+        );
+
+        $category = Category::first();
+        $category->update(['image_path' => $first]);
+
+        $this->assertTrue($disk->exists($first));
+        $this->assertTrue($disk->exists(ImageService::cardPath($first)));
+        $this->assertNotNull($category->imageCardUrl());
+
+        // استبدال الصورة يحذف ملفات السابقة تلقائياً
+        $second = $service->store(
+            UploadedFile::fake()->createWithContent('cat2.jpg', $this->jpegWithExif(900, 600)),
+            'categories',
+        );
+        $category->update(['image_path' => $second]);
+
+        $this->assertFalse($disk->exists($first));
+        $this->assertFalse($disk->exists(ImageService::cardPath($first)));
+        $this->assertTrue($disk->exists($second));
+
+        // إعادة الحفظ دون تغيير (كما تفعل اللوحة بعد نقل الملف) لا تمسّ الملفات
+        $category->update(['image_path' => $second, 'sort_order' => 9]);
+        $this->assertTrue($disk->exists($second));
+
+        // حذف فئة يحذف ملفات صورتها
+        $third = $service->store(
+            UploadedFile::fake()->createWithContent('cat3.jpg', $this->jpegWithExif(800, 500)),
+            'categories',
+        );
+        $temporary = Category::create([
+            'name' => 'فئة مؤقتة', 'slug' => 'temp-cat', 'scene' => 'default',
+            'image_path' => $third, 'color' => 'primary', 'sort_order' => 99,
+        ]);
+        $temporary->delete();
+
+        $this->assertFalse($disk->exists($third));
+        $this->assertFalse($disk->exists(ImageService::cardPath($third)));
+    }
+
     private function jpegWithExif(int $width, int $height, int $orientation = 1): string
     {
         $image = imagecreatetruecolor($width, $height);
