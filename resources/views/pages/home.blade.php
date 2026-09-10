@@ -138,7 +138,13 @@
         @foreach($categories as $category)
             <a href="{{ route('events.index', ['cat' => $category->slug]) }}"
                class="card card-hover group {{ $category->toneClass() }} items-center gap-3 overflow-hidden p-5 text-center no-underline">
-                <x-ui.scene :name="$category->sceneName()" :tone="$category->toneHex()" class="-mx-5 -mt-5 aspect-[8/5] h-auto w-[calc(100%+2.5rem)] transition-transform duration-500 group-hover:scale-105"/>
+                @if($categoryImage = $category->imageCardUrl())
+                    {{-- صورة مخصصة رُفعت من اللوحة — تحل محل الرسمة --}}
+                    <img src="{{ $categoryImage }}" alt="" loading="lazy"
+                         class="-mx-5 -mt-5 aspect-[8/5] h-auto w-[calc(100%+2.5rem)] object-cover transition-transform duration-500 group-hover:scale-105">
+                @else
+                    <x-ui.scene :name="$category->sceneName()" :tone="$category->toneHex()" class="-mx-5 -mt-5 aspect-[8/5] h-auto w-[calc(100%+2.5rem)] transition-transform duration-500 group-hover:scale-105"/>
+                @endif
                 <span class="font-bold">{{ $category->name }}</span>
                 <span class="text-sm text-ink-soft">
                     {{ $category->events_count }} {{ $category->events_count === 1 ? 'فعالية قادمة' : 'فعاليات قادمة' }}
