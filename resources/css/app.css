@@ -250,12 +250,24 @@
     /* تدرّج العنوان الرئيسي: أزرق ثم وردي بفاصل ضيّق —
        المزج الطويل بينهما يولّد بنفسجياً موحلاً فنحصره في 16% فقط */
     .text-joy-gradient {
-        background-image: linear-gradient(to left,
-            var(--color-brand-600) 0%, var(--color-brand-500) 42%,
-            #ec4899 58%, #db2777 100%);
+        background-image:
+            linear-gradient(105deg, transparent 42%, rgb(255 255 255 / 55%) 50%, transparent 58%),
+            linear-gradient(to left,
+                var(--color-brand-600) 0%, var(--color-brand-500) 42%,
+                #ec4899 58%, #db2777 100%);
+        background-size: 260% 100%, 100% 100%;
+        background-position: 130% 0, 0 0;
+        background-repeat: no-repeat;
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
+        /* وميض ضوئي يعبر العنوان كل بضع ثوانٍ */
+        animation: joy-shine 7s ease-in-out infinite;
+    }
+
+    @keyframes joy-shine {
+        0%, 64% { background-position: 130% 0, 0 0; }
+        76%, 100% { background-position: -30% 0, 0 0; }
     }
 
     .badge-tone {
@@ -381,7 +393,8 @@
 
     .input:focus {
         border-color: var(--color-brand-400);
-        box-shadow: 0 0 0 4px var(--color-brand-100);
+        /* توهج يتسع بنعومة حول الحقل عند التركيز */
+        box-shadow: 0 0 0 6px color-mix(in srgb, var(--color-brand-400) 20%, transparent);
         outline: none;
     }
 
@@ -488,6 +501,64 @@
 
     .wa-drift .wa-ripple { opacity: 0; }
 
+    /* — طبقة الحركة: ظهور تدريجي عند التمرير، افتتاحية البطل، وحياة الفوتر —
+       الأصناف تُضاف من app.js فلا يتأثر من عطّل جافاسكربت، و«تقليل الحركة»
+       يوقف كل شيء في نهاية هذا الملف */
+    .reveal {
+        opacity: 0;
+        translate: 0 26px;
+        transition: opacity .7s ease, translate .7s ease;
+    }
+
+    .reveal.revealed { opacity: 1; translate: 0 0; }
+
+    .reveal .reveal-item { opacity: 0; }
+
+    .reveal.revealed .reveal-item {
+        animation: rise-in .6s ease calc(var(--stagger, 0) * 1ms) both;
+    }
+
+    @keyframes rise-in {
+        from { opacity: 0; translate: 0 18px; }
+        to { opacity: 1; translate: 0 0; }
+    }
+
+    /* افتتاحية بطل الرئيسية: العناصر تدخل تباعاً حسب --stagger */
+    .hero-enter { animation: rise-in .65s ease calc(var(--stagger, 0) * 1ms) both; }
+
+    /* طفو بطيء دائم للعناصر الزخرفية */
+    .float-slow { animation: float-slow 6s ease-in-out infinite; }
+    .float-slow-2 { animation: float-slow 7.5s ease-in-out 1.2s infinite; }
+
+    @keyframes float-slow {
+        0%, 100% { translate: 0 0; }
+        50% { translate: 0 -12px; }
+    }
+
+    /* حياة الفوتر: قصاصات تنجرف بإيقاعات متفاوتة وقبعة تتمايل وألعاب تومض */
+    .drift-1 { animation: drift 5s ease-in-out infinite; }
+    .drift-2 { animation: drift 6.5s ease-in-out .8s infinite; }
+    .drift-3 { animation: drift 8s ease-in-out 1.6s infinite; }
+
+    @keyframes drift {
+        0%, 100% { translate: 0 0; }
+        50% { translate: 0 -10px; }
+    }
+
+    .hat-sway { animation: hat-sway 5.5s ease-in-out infinite; }
+
+    @keyframes hat-sway {
+        0%, 100% { rotate: -12deg; }
+        50% { rotate: -4deg; }
+    }
+
+    .twinkle { animation: twinkle 3.5s ease-in-out infinite; }
+
+    @keyframes twinkle {
+        0%, 100% { opacity: .35; }
+        50% { opacity: .7; }
+    }
+
     /* نبضة وصول العدّاد إلى هدفه */
     .stat-pop { animation: stat-pop .45s ease; }
 
@@ -526,6 +597,17 @@
     @media (prefers-reduced-motion: reduce) {
         .wa-bob, .wa-icon { animation: none; }
         .wa-ripple { display: none; }
+
+        .reveal, .reveal .reveal-item {
+            opacity: 1;
+            translate: none;
+            transition: none;
+            animation: none;
+        }
+
+        .hero-enter, .float-slow, .float-slow-2,
+        .drift-1, .drift-2, .drift-3, .hat-sway, .twinkle,
+        .text-joy-gradient { animation: none; }
     }
 
     /* — صورة الغلاف حين لا توجد صورة مرفوعة — */

@@ -142,6 +142,65 @@ Alpine.data('countUp', (target, delay = 0, duration = 1600) => ({
 
 Alpine.start();
 
+/**
+ * حركة الموقع: ظهور تدريجي للأقسام والبطاقات عند دخولها مجال الرؤية،
+ * وإزاحة أبطأ لشحطات الفرشاة مع التمرير فتبدو جدارية خلف الصفحة.
+ * «تقليل الحركة» يعطّل كل شيء، ومن دون جافاسكربت تبقى الصفحة كاملة الظهور.
+ */
+if (! window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const setupMotion = () => {
+        const heroSection = document.querySelector('main section .hero-enter')?.closest('section');
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('revealed');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.08, rootMargin: '0px 0px -6% 0px' });
+
+        document.querySelectorAll('main section, body > footer').forEach((target) => {
+            if (target === heroSection) {
+                return; // للبطل افتتاحيته الخاصة في القالب
+            }
+
+            target.classList.add('reveal');
+
+            target.querySelectorAll(':scope .grid > *').forEach((item, index) => {
+                item.classList.add('reveal-item');
+                item.style.setProperty('--stagger', String(Math.min(index * 70, 490)));
+            });
+
+            observer.observe(target);
+        });
+
+        const strokes = [...document.querySelectorAll('[data-parallax]')];
+
+        if (strokes.length > 0) {
+            let ticking = false;
+
+            const drift = () => {
+                strokes.forEach((stroke) => {
+                    stroke.style.translate = `0 ${window.scrollY * Number(stroke.dataset.parallax)}px`;
+                });
+                ticking = false;
+            };
+
+            window.addEventListener('scroll', () => {
+                if (! ticking) {
+                    ticking = true;
+                    requestAnimationFrame(drift);
+                }
+            }, { passive: true });
+        }
+    };
+
+    document.readyState === 'loading'
+        ? document.addEventListener('DOMContentLoaded', setupMotion)
+        : setupMotion();
+}
+
 /* شريط حالة الشبكة — الانقطاع دائم الظهور، والعودة تومض ثم تختفي.
    عند الأوفلاين يُذكر وقت آخر تحديث، ويُحذَّر بقوة إن تجاوزت النسخة صلاحيتها. */
 const offlineBanner = document.getElementById('offline-banner');
