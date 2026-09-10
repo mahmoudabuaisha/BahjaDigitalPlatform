@@ -6,24 +6,25 @@
 <section class="surface-tint relative overflow-hidden">
     <div class="mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.05fr_.95fr] lg:py-20">
         <div>
-            <span class="badge bg-white shadow-sm">
+            {{-- افتتاحية البطل: العناصر تدخل تباعاً حسب --stagger --}}
+            <span class="badge hero-enter bg-white shadow-sm">
                 <x-ui.icon name="sparkles" class="size-4 text-brand-500"/> رسالة بَهْجَة
             </span>
 
-            <h1 class="mt-4 text-[1.9rem] leading-[1.3] font-bold sm:text-4xl sm:leading-[1.25] lg:text-5xl">
+            <h1 class="hero-enter mt-4 text-[1.9rem] leading-[1.3] font-bold sm:text-4xl sm:leading-[1.25] lg:text-5xl" style="--stagger: 110">
                 اكتشفوا وشاركوا في
                 <span class="text-joy-gradient">فعاليات ممتعة وآمنة</span>
                 لأطفالكم
             </h1>
 
-            <p class="mt-4 max-w-xl text-lg leading-relaxed text-ink-soft">
+            <p class="hero-enter mt-4 max-w-xl text-lg leading-relaxed text-ink-soft" style="--stagger: 220">
                 كل لحظة لعب هي فرصة جديدة للتعلّم والنموّ. نجمع فعاليات الترفيه والدعم النفسي
                 في المحافظات الخمس، ونعرضها لكم يوماً بيوم — وتعمل حتى حين تضعف الشبكة.
             </p>
 
             {{-- هرمية واضحة: فعل العائلات (تصفّح الفعاليات) هو الأهم فيتصدّر ويكبر،
                  وتسجيل الفرق فعل ثانوي بحضور وردي هادئ لا ينافسه --}}
-            <div class="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div class="hero-enter mt-7 flex flex-col gap-3 sm:flex-row sm:items-center" style="--stagger: 330">
                 <a href="{{ route('events.index') }}"
                    class="btn btn-primary btn-lg w-full hover:-translate-y-0.5 sm:w-auto">
                     <x-ui.icon name="calendar" class="size-5"/> تصفّحوا الفعاليات
@@ -33,7 +34,7 @@
                 </a>
             </div>
 
-            <dl class="mt-8 grid max-w-lg grid-cols-2 gap-4 sm:grid-cols-4">
+            <dl class="hero-enter mt-8 grid max-w-lg grid-cols-2 gap-4 sm:grid-cols-4" style="--stagger: 440">
                 @foreach([
                     ['value' => $stats['upcoming'], 'label' => 'فعالية قادمة'],
                     ['value' => $stats['completed'], 'label' => 'فعالية منفَّذة'],
@@ -51,12 +52,12 @@
             </dl>
         </div>
 
-        {{-- لوحة زخرفية: بطاقة فعالية مصغّرة فوق أشكال ملوّنة --}}
-        <div class="relative hidden lg:block" aria-hidden="true">
+        {{-- لوحة زخرفية: بطاقة فعالية مصغّرة تطفو ببطء فوق أشكال ملوّنة --}}
+        <div class="hero-enter relative hidden lg:block" aria-hidden="true" style="--stagger: 260">
             <div class="absolute -top-6 start-6 size-28 rounded-3xl bg-brand-200/70 blur-xl"></div>
             <div class="absolute bottom-0 end-10 size-36 rounded-full bg-pink-200/60 blur-2xl"></div>
 
-            <div class="relative mx-auto mb-14 max-w-sm rotate-2 rounded-3xl bg-white p-5 shadow-[0_20px_60px_rgb(93_60_190_/_18%)]">
+            <div class="float-slow relative mx-auto mb-14 max-w-sm rotate-2 rounded-3xl bg-white p-5 shadow-[0_20px_60px_rgb(93_60_190_/_18%)]">
                 <x-ui.scene name="games" tone="#f59e0b" class="h-40 w-full rounded-2xl"/>
                 <p class="mt-4 text-lg font-bold">يوم ألعاب في ساحة المركز</p>
                 <p class="mt-1 flex items-center gap-2 text-sm text-ink-soft">
@@ -68,7 +69,7 @@
                 </div>
             </div>
 
-            <div class="absolute bottom-0 start-0 flex -rotate-3 items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-lg">
+            <div class="float-slow-2 absolute bottom-0 start-0 flex -rotate-3 items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-lg">
                 <span class="icon-tile tone tone-emerald size-10"><x-ui.icon name="shield-check"/></span>
                 <span class="text-sm font-bold">كل فعالية معتمَدة من الإدارة</span>
             </div>

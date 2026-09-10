@@ -16,7 +16,7 @@
         @php $mirror = $d['lead'] === 'left'; @endphp
 
         {{-- السحبة الكبيرة: جسم عريض بلونين متراكبين وخطوط فرشاة جافة --}}
-        <svg class="absolute {{ $mirror ? '-left-24' : '-right-24' }} h-auto w-80 opacity-75 xl:w-96"
+        <svg data-parallax="0.05" class="absolute {{ $mirror ? '-left-24' : '-right-24' }} h-auto w-80 opacity-75 xl:w-96"
              style="top: {{ $d['top'] }}; transform: rotate({{ $mirror ? '' : '-' }}8deg) {{ $mirror ? 'scaleX(-1)' : '' }};"
              viewBox="0 0 340 110" fill="none">
             <path d="M8 62 Q60 22 140 36 T270 32 Q318 34 332 44 Q294 70 216 66 T64 82 Q22 82 8 62 Z" fill="{{ $d['main'] }}"/>
@@ -27,7 +27,7 @@
         </svg>
 
         {{-- الصدى المقابل: سحبة أصغر بلون ثالث تعادل الكفة --}}
-        <svg class="absolute {{ $mirror ? '-right-16' : '-left-16' }} h-auto w-56 opacity-65 xl:w-64"
+        <svg data-parallax="0.09" class="absolute {{ $mirror ? '-right-16' : '-left-16' }} h-auto w-56 opacity-65 xl:w-64"
              style="top: {{ $d['echoTop'] }}; transform: rotate({{ $mirror ? '-' : '' }}10deg) {{ $mirror ? '' : 'scaleX(-1)' }};"
              viewBox="0 0 220 70" fill="none">
             <path d="M6 40 Q40 14 92 24 T176 22 Q204 24 214 30 Q188 46 138 44 T44 52 Q16 52 6 40 Z" fill="{{ $d['echo'] }}"/>
