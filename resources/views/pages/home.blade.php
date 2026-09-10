@@ -127,27 +127,37 @@
         <a href="{{ route('events.index') }}" class="btn btn-ghost btn-sm">كل الفعاليات ←</a>
     </div>
 
-    <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {{-- نسبة 8/5 تطابق أبعاد المشهد المرسوم فيظهر كاملاً بلا أي قص --}}
-        <a href="{{ route('events.index') }}" class="card card-hover group tone tone-violet items-center gap-3 overflow-hidden p-5 text-center no-underline">
-            <x-ui.scene name="default" tone="#3b93e4" class="-mx-5 -mt-5 aspect-[8/5] h-auto w-[calc(100%+2.5rem)] transition-transform duration-500 group-hover:scale-105"/>
-            <span class="font-bold">جميع الفئات</span>
-            <span class="text-sm text-ink-soft">{{ $stats['upcoming'] }} فعالية قادمة</span>
+    <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 lg:gap-5 xl:grid-cols-5">
+        <a href="{{ route('events.index') }}" class="cat-card cat-card-all group tone">
+            <span class="cat-card-media">
+                <x-ui.scene name="default" tone="#3b93e4" class="aspect-[8/5] h-auto w-full transition-transform duration-500 group-hover:scale-110"/>
+            </span>
+            <span class="cat-card-chip"><x-ui.icon name="grid"/></span>
+            <span class="px-3 pt-2.5 pb-5 text-center">
+                <span class="block text-lg font-extrabold text-white">جميع الفئات</span>
+                <span class="cat-card-count mt-2.5">{{ $stats['upcoming'] }} فعالية قادمة</span>
+            </span>
         </a>
 
         @foreach($categories as $category)
             <a href="{{ route('events.index', ['cat' => $category->slug]) }}"
-               class="card card-hover group {{ $category->toneClass() }} items-center gap-3 overflow-hidden p-5 text-center no-underline">
-                @if($categoryImage = $category->imageCardUrl())
-                    {{-- صورة مخصصة رُفعت من اللوحة — تحل محل الرسمة --}}
-                    <img src="{{ $categoryImage }}" alt="" loading="lazy"
-                         class="-mx-5 -mt-5 aspect-[8/5] h-auto w-[calc(100%+2.5rem)] object-cover transition-transform duration-500 group-hover:scale-105">
-                @else
-                    <x-ui.scene :name="$category->sceneName()" :tone="$category->toneHex()" class="-mx-5 -mt-5 aspect-[8/5] h-auto w-[calc(100%+2.5rem)] transition-transform duration-500 group-hover:scale-105"/>
-                @endif
-                <span class="font-bold">{{ $category->name }}</span>
-                <span class="text-sm text-ink-soft">
-                    {{ $category->events_count }} {{ $category->events_count === 1 ? 'فعالية قادمة' : 'فعاليات قادمة' }}
+               class="cat-card group {{ $category->toneClass() }}">
+                <span class="cat-card-media">
+                    @if($categoryImage = $category->imageCardUrl())
+                        {{-- صورة مخصصة رُفعت من اللوحة — تحل محل الرسمة --}}
+                        <img src="{{ $categoryImage }}" alt="" loading="lazy"
+                             class="aspect-[8/5] h-auto w-full object-cover transition-transform duration-500 group-hover:scale-110">
+                    @else
+                        {{-- نسبة 8/5 تطابق أبعاد المشهد المرسوم فيظهر كاملاً بلا قص --}}
+                        <x-ui.scene :name="$category->sceneName()" :tone="$category->toneHex()" class="aspect-[8/5] h-auto w-full transition-transform duration-500 group-hover:scale-110"/>
+                    @endif
+                </span>
+                <span class="cat-card-chip"><x-ui.icon :name="$category->iconKey()"/></span>
+                <span class="px-3 pt-2.5 pb-5 text-center">
+                    <span class="block text-lg font-extrabold text-ink">{{ $category->name }}</span>
+                    <span class="cat-card-count mt-2.5">
+                        {{ $category->events_count }} {{ $category->events_count === 1 ? 'فعالية قادمة' : 'فعاليات قادمة' }}
+                    </span>
                 </span>
             </a>
         @endforeach
