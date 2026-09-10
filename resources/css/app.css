@@ -278,6 +278,79 @@
     .icon-tile-lg { width: 64px; height: 64px; border-radius: var(--radius-xl); }
     .icon-tile svg { width: 55%; height: 55%; }
 
+    /* — بطاقات الفئات: لوحات بلون كل فئة، صورة بقاعدة منحنية، شريحة أيقونة
+       مائلة تعتدل وتكبر عند المرور، وتوهج ظل بلون الفئة نفسها — */
+    .cat-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        text-decoration: none;
+        background: linear-gradient(180deg, #fff 58%, var(--tone-soft));
+        border: 1.5px solid color-mix(in srgb, var(--tone) 20%, #fff);
+        border-radius: 24px;
+        box-shadow: 0 4px 16px rgb(23 36 57 / 6%);
+        transition: transform .3s, box-shadow .3s, border-color .3s;
+    }
+
+    .cat-card:hover {
+        transform: translateY(-6px);
+        border-color: color-mix(in srgb, var(--tone) 45%, #fff);
+        box-shadow: 0 20px 44px color-mix(in srgb, var(--tone) 26%, transparent);
+    }
+
+    .cat-card-media {
+        position: relative;
+        overflow: hidden;
+        border-radius: 0 0 55% 55% / 0 0 14% 14%;
+    }
+
+    .cat-card-chip {
+        z-index: 1;
+        display: grid;
+        place-items: center;
+        width: 54px;
+        height: 54px;
+        margin: -27px auto 0;
+        color: #fff;
+        background: linear-gradient(140deg, color-mix(in srgb, var(--tone) 78%, #fff), var(--tone));
+        border: 3px solid #fff;
+        border-radius: 18px;
+        rotate: -5deg;
+        box-shadow: 0 8px 18px color-mix(in srgb, var(--tone) 42%, transparent);
+        transition: rotate .3s, scale .3s;
+    }
+
+    .cat-card-chip svg { width: 26px; height: 26px; }
+
+    .cat-card:hover .cat-card-chip { rotate: 5deg; scale: 1.1; }
+
+    .cat-card-count {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        font-size: 13.5px;
+        font-weight: 700;
+        color: var(--tone-ink);
+        background: color-mix(in srgb, var(--tone) 13%, #fff);
+        border-radius: 999px;
+    }
+
+    /* بطاقة «جميع الفئات»: مرساة متدرجة بألوان الهوية ونص أبيض */
+    .cat-card-all {
+        /* أزرق نقي بلا منطقة مزج بنفسجية */
+        background: linear-gradient(165deg, var(--color-brand-500), var(--color-brand-700));
+        border-color: transparent;
+    }
+
+    .cat-card-all:hover {
+        border-color: transparent;
+        box-shadow: 0 20px 44px rgb(38 120 202 / 35%);
+    }
+
+    .cat-card-all .cat-card-chip { color: var(--color-brand-600); background: #fff; }
+    .cat-card-all .cat-card-count { color: #fff; background: rgb(255 255 255 / 22%); }
+
     /* — حقول — */
     .field > label,
     .field > span {
