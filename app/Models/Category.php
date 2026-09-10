@@ -2,12 +2,50 @@
 
 namespace App\Models;
 
+use App\Services\ImageService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Storage;
 
 class Category extends Model
 {
-    protected $fillable = ['name', 'slug', 'icon', 'scene', 'color', 'sort_order'];
+    protected $fillable = ['name', 'slug', 'icon', 'scene', 'image_path', 'color', 'sort_order'];
+
+    // المعالجة نفسها (تصغير + مسح EXIF + نسخة بطاقة) تجري لحظة الرفع
+    // في نموذج اللوحة عبر ImageService::store — هنا تنظيف الملفات فقط
+    protected static function booted(): void
+    {
+        // استبدال الصورة يحذف ملفات القديمة من القرص
+        static::updating(function (Category $category): void {
+            if ($category->isDirty('image_path') && ($old = $category->getOriginal('image_path'))) {
+                app(ImageService::class)->delete($old);
+            }
+        });
+
+        static::deleted(function (Category $category): void {
+            app(ImageService::class)->delete($category->image_path);
+        });
+    }
+
+    /** رابط صورة البطاقة المخصصة إن رُفعت — النسخة الخفيفة أولاً ثم الأصل */
+    public function imageCardUrl(): ?string
+    {
+        if (! $this->image_path) {
+            return null;
+        }
+
+        foreach (['webp', 'jpg'] as $extension) {
+            $card = ImageService::cardPath($this->image_path, $extension);
+
+            if (Storage::disk('public')->exists($card)) {
+                return Storage::disk('public')->url($card);
+            }
+        }
+
+        return Storage::disk('public')->exists($this->image_path)
+            ? Storage::disk('public')->url($this->image_path)
+            : null;
+    }
 
     /** مفاتيح الرسمات المتوفرة في مكوّن <x-ui.scene> بأسمائها العربية */
     public const SCENES = [
