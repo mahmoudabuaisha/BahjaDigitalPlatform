@@ -52,27 +52,62 @@
             </dl>
         </div>
 
-        {{-- لوحة زخرفية: بطاقة فعالية مصغّرة تطفو ببطء فوق أشكال ملوّنة --}}
-        <div class="hero-enter relative hidden lg:block" aria-hidden="true" style="--stagger: 260">
-            <div class="absolute -top-6 start-6 size-28 rounded-3xl bg-brand-200/70 blur-xl"></div>
-            <div class="absolute bottom-0 end-10 size-36 rounded-full bg-pink-200/60 blur-2xl"></div>
+        {{-- لوحة البطل الحية: أقرب فعالية قادمة حقيقية وزرها يفتح صفحتها —
+             وإن لم توجد فعاليات قادمة تظهر بطاقة تعريفية تقود لكل الفعاليات --}}
+        @php $heroEvent = $upcoming->first(); @endphp
+        <div class="hero-enter relative hidden lg:block" style="--stagger: 260">
+            <div class="absolute -top-6 start-6 size-28 rounded-3xl bg-brand-200/70 blur-xl" aria-hidden="true"></div>
+            <div class="absolute bottom-0 end-10 size-36 rounded-full bg-pink-200/60 blur-2xl" aria-hidden="true"></div>
 
             <div class="float-slow relative mx-auto mb-14 max-w-sm rotate-2 rounded-3xl bg-white p-5 shadow-[0_20px_60px_rgb(93_60_190_/_18%)]">
-                <x-ui.scene name="games" tone="#f59e0b" class="h-40 w-full rounded-2xl"/>
-                <p class="mt-4 text-lg font-bold">يوم ألعاب في ساحة المركز</p>
-                <p class="mt-1 flex items-center gap-2 text-sm text-ink-soft">
-                    <x-ui.icon name="map-pin" class="size-4 text-brand-400"/> مركز الإيواء — الساحة الشمالية
-                </p>
-                <div class="mt-4 flex items-center justify-between">
-                    <span class="badge tone tone-amber badge-tone"><x-ui.icon name="cake" class="size-4"/> من 4 إلى 10 سنوات</span>
-                    <span class="btn btn-primary btn-sm">عرض التفاصيل</span>
-                </div>
+                @if($heroEvent)
+                    @if($heroImage = $heroEvent->imageCardUrl())
+                        <img src="{{ $heroImage }}" alt="" class="h-40 w-full rounded-2xl object-cover">
+                    @else
+                        <x-ui.scene :name="$heroEvent->category?->sceneName() ?? 'default'"
+                                    :tone="$heroEvent->category?->toneHex() ?? '#3b93e4'" class="h-40 w-full rounded-2xl"/>
+                    @endif
+                    <p class="mt-4 text-lg font-bold">
+                        <a href="{{ route('events.show', $heroEvent) }}" class="no-underline hover:text-brand-700">{{ $heroEvent->title }}</a>
+                    </p>
+                    <p class="mt-1 flex items-center gap-2 text-sm text-ink-soft">
+                        <x-ui.icon name="calendar" class="size-4 shrink-0 text-brand-400"/>
+                        {{ $heroEvent->start_date->translatedFormat('l j F') }} — {{ substr($heroEvent->start_time, 0, 5) }}
+                    </p>
+                    @if($heroPlace = $heroEvent->publicPlaceName())
+                        <p class="mt-1 flex items-center gap-2 text-sm text-ink-soft">
+                            <x-ui.icon name="map-pin" class="size-4 shrink-0 text-brand-400"/>
+                            <span class="line-clamp-1">{{ $heroPlace }}</span>
+                        </p>
+                    @endif
+                    <div class="mt-4 flex items-center justify-between gap-2">
+                        @if($heroEvent->ageLabel())
+                            <span class="badge badge-tone {{ $heroEvent->category?->toneClass() ?? 'tone tone-amber' }}">
+                                <x-ui.icon name="cake" class="size-4"/> {{ $heroEvent->ageLabel() }}
+                            </span>
+                        @else
+                            <span class="badge tone tone-amber badge-tone"><x-ui.icon name="sparkles" class="size-4"/> لكل الأعمار</span>
+                        @endif
+                        <a href="{{ route('events.show', $heroEvent) }}" class="btn btn-primary btn-sm">عرض التفاصيل</a>
+                    </div>
+                @else
+                    <x-ui.scene name="games" tone="#f59e0b" class="h-40 w-full rounded-2xl"/>
+                    <p class="mt-4 text-lg font-bold">فعاليات جديدة تُنشر تباعاً</p>
+                    <p class="mt-1 flex items-center gap-2 text-sm text-ink-soft">
+                        <x-ui.icon name="map-pin" class="size-4 text-brand-400"/> في المحافظات الخمس ومراكز الإيواء
+                    </p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <span class="badge tone tone-amber badge-tone"><x-ui.icon name="cake" class="size-4"/> لكل الأعمار</span>
+                        <a href="{{ route('events.index') }}" class="btn btn-primary btn-sm">عرض التفاصيل</a>
+                    </div>
+                @endif
             </div>
 
-            <div class="float-slow-2 absolute bottom-0 start-0 flex -rotate-3 items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-lg">
+            <a href="{{ route('about') }}"
+               class="float-slow-2 absolute bottom-0 start-0 flex -rotate-3 items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-lg no-underline transition-shadow hover:shadow-xl">
                 <span class="icon-tile tone tone-emerald size-10"><x-ui.icon name="shield-check"/></span>
-                <span class="text-sm font-bold">كل فعالية معتمَدة من الإدارة</span>
-            </div>
+                <span class="text-sm font-bold text-ink">كل فعالية معتمَدة من الإدارة</span>
+            </a>
         </div>
     </div>
 </section>
