@@ -21,7 +21,7 @@
                  class="size-full object-cover transition duration-300 hover:scale-105" width="640" height="400">
         @else
             {{-- لا صورة مرفوعة: رسمة الفئة بدل مربّع رمادي فارغ --}}
-            <x-ui.scene :name="$event->category?->slug ?? 'default'"
+            <x-ui.scene :name="$event->category?->sceneName() ?? 'default'"
                         :tone="$event->category?->toneHex() ?? '#3b93e4'"
                         class="size-full transition duration-300 hover:scale-105"/>
         @endif
