@@ -7,7 +7,33 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Category extends Model
 {
-    protected $fillable = ['name', 'slug', 'icon', 'color', 'sort_order'];
+    protected $fillable = ['name', 'slug', 'icon', 'scene', 'color', 'sort_order'];
+
+    /** مفاتيح الرسمات المتوفرة في مكوّن <x-ui.scene> بأسمائها العربية */
+    public const SCENES = [
+        'games' => 'ألعاب ومكعبات',
+        'psychosocial' => 'دعم نفسي',
+        'arts-crafts' => 'رسم وأشغال',
+        'theatre' => 'مسرح ودمى',
+        'music' => 'أناشيد وموسيقى',
+        'sports' => 'رياضة وحركة',
+        'stories' => 'حكايات وقصص',
+        'special' => 'مناسبات خاصة',
+        'default' => 'المشهد العام',
+    ];
+
+    /**
+     * مفتاح رسمة الفئة: الحقل المستقل أولاً، ثم المعرّف إن كان مفتاحاً
+     * معروفاً (توافقاً مع البيانات القديمة)، وإلا المشهد العام.
+     */
+    public function sceneName(): string
+    {
+        if ($this->scene && array_key_exists($this->scene, self::SCENES)) {
+            return $this->scene;
+        }
+
+        return array_key_exists((string) $this->slug, self::SCENES) ? $this->slug : 'default';
+    }
 
     public function events(): HasMany
     {
