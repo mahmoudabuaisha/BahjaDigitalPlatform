@@ -53,22 +53,69 @@
             </select>
         </label>
 
-        <label class="field">
-            <span>المحافظة</span>
-            <select name="area_id" class="input">
-                <option value="">—</option>
-                @foreach($areas as $area)
-                    <option value="{{ $area->id }}" @selected((int) old('area_id', $user->area_id) === $area->id)>{{ $area->name }}</option>
-                @endforeach
-            </select>
-        </label>
-
         <label class="field sm:col-span-2">
             <span>العنوان</span>
             <input type="text" name="address" value="{{ old('address', $user->address) }}" maxlength="200" class="input"
                    placeholder="مثال: مركز إيواء مدرسة الشاطئ — خيمة 12">
         </label>
     </div>
+
+    {{-- ── مرساة المكان: بها نرتّب «الأقرب إليكم» ── --}}
+    @php
+        $selectedArea = (int) old('area_id', $user->area_id);
+        $selectedCenter = (int) old('shelter_center_id', $user->shelter_center_id);
+    @endphp
+
+    <section class="tone tone-sky mt-2 flex flex-col gap-4 rounded-2xl border border-brand-100 bg-brand-50/40 p-5">
+        <div class="flex items-start gap-3">
+            <span class="icon-tile size-11 shrink-0"><x-ui.icon name="map-pin"/></span>
+            <div>
+                <h3 class="text-lg font-bold">أين أنتم الآن؟</h3>
+                <p class="mt-1 text-sm leading-relaxed text-ink-soft">
+                    نرتّب لكم الفعاليات بالأقرب إلى مكانكم. لا نطلب موقعكم الدقيق ولا يظهر لأحد —
+                    اختيار من قائمة فقط، وتغيّرونه بضغطة إن انتقلتم.
+                </p>
+            </div>
+        </div>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+            <label class="field">
+                <span>المحافظة</span>
+                <select name="area_id" class="input">
+                    <option value="">اختاروا المحافظة…</option>
+                    @foreach($areas as $area)
+                        <option value="{{ $area->id }}" @selected($selectedArea === $area->id)>{{ $area->name }}</option>
+                    @endforeach
+                </select>
+            </label>
+
+            <label class="field">
+                <span>أقرب مكان تعرفونه</span>
+                {{-- الأماكن مجمَّعة بمحافظتها في قائمة واحدة: تعمل على أبسط
+                     متصفّح وبلا جافاسكربت، والخادم يتجاهل اختياراً لا يتبع المحافظة --}}
+                <select name="shelter_center_id" class="input">
+                    <option value="">— بلا تحديد —</option>
+                    @foreach($areas as $area)
+                        @if($centersByArea->has($area->id))
+                            <optgroup label="{{ $area->name }}">
+                                @foreach($centersByArea[$area->id] as $center)
+                                    <option value="{{ $center->id }}" @selected($selectedCenter === $center->id)>{{ $center->name }}</option>
+                                @endforeach
+                            </optgroup>
+                        @endif
+                    @endforeach
+                </select>
+                <span class="mt-1 block text-xs text-ink-soft">مركز إيواء أو مدرسة أو مخيّم قريب — يزيد دقة الترتيب.</span>
+            </label>
+        </div>
+
+        @if($user->locationLabel())
+            <p class="flex items-center gap-2 text-sm font-semibold text-brand-700">
+                <x-ui.icon name="check" class="size-4 shrink-0"/>
+                مكانكم الحالي: {{ $user->locationLabel() }}
+            </p>
+        @endif
+    </section>
 
     <button type="submit" class="btn btn-primary self-start">
         <x-ui.icon name="check" class="size-5"/> حفظ التغييرات

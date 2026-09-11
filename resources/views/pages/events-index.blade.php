@@ -111,9 +111,31 @@
                 @if($filters['q'] !== '') — نتائج البحث عن «{{ $filters['q'] }}» @endif
             </p>
 
-            @if(array_filter($filters))
-                <a href="{{ route('events.index') }}" class="btn btn-ghost btn-sm">مسح التصفية</a>
-            @endif
+            <div class="flex flex-wrap items-center gap-2">
+                {{-- مبدّل الترتيب: بالموعد أو بالأقرب إلى مكان العائلة --}}
+                @if($viewer?->hasLocationAnchor())
+                    @php $base = array_filter(['q' => $filters['q'], 'cat' => $filters['cat'], 'area' => $filters['area'], 'age' => $filters['age'], 'when' => $filters['when']]); @endphp
+                    <span class="flex rounded-full border border-brand-100 bg-white p-1">
+                        <a href="{{ route('events.index', $base) }}"
+                           class="rounded-full px-3.5 py-1.5 text-sm font-bold no-underline transition {{ $filters['sort'] === 'near' ? 'text-ink-soft hover:bg-brand-50' : 'bg-brand-600 text-white' }}">
+                            الأقرب موعداً
+                        </a>
+                        <a href="{{ route('events.index', $base + ['sort' => 'near']) }}"
+                           class="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-sm font-bold no-underline transition {{ $filters['sort'] === 'near' ? 'bg-emerald-600 text-white' : 'text-ink-soft hover:bg-brand-50' }}">
+                            <x-ui.icon name="map-pin" class="size-4"/> الأقرب إليكم
+                        </a>
+                    </span>
+                @elseif($viewer?->isFamily())
+                    <a href="{{ route('account.profile') }}"
+                       class="flex items-center gap-1.5 rounded-full bg-emerald-50 px-3.5 py-1.5 text-sm font-bold text-emerald-700 no-underline transition hover:bg-emerald-100">
+                        <x-ui.icon name="map-pin" class="size-4"/> حدّدوا مكانكم لترتيب الأقرب
+                    </a>
+                @endif
+
+                @if(array_filter($filters))
+                    <a href="{{ route('events.index') }}" class="btn btn-ghost btn-sm">مسح التصفية</a>
+                @endif
+            </div>
         </div>
 
         @if($events->isEmpty())
@@ -126,7 +148,7 @@
         @else
             <div class="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 @foreach($events as $event)
-                    <x-event-card :event="$event"/>
+                    <x-event-card :event="$event" :viewer="$viewer"/>
                 @endforeach
             </div>
 

@@ -29,7 +29,9 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         'birth_date',
         'gender',
         'area_id',
+        'shelter_center_id',
         'address',
+        'location_set_at',
         'password',
         'role',
         'is_active',
@@ -46,6 +48,7 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
         return [
             'email_verified_at' => 'datetime',
             'birth_date' => 'date',
+            'location_set_at' => 'datetime',
             'password' => 'hashed',
             'role' => UserRole::class,
             'is_active' => 'boolean',
@@ -116,6 +119,30 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
     public function area(): BelongsTo
     {
         return $this->belongsTo(Area::class);
+    }
+
+    /** أقرب معلم تعرفه العائلة — مرساة حساب القرب */
+    public function shelterCenter(): BelongsTo
+    {
+        return $this->belongsTo(ShelterCenter::class);
+    }
+
+    /** هل ضبطت العائلة مكانها؟ المحافظة وحدها تكفي، والمعلم يزيد الدقة */
+    public function hasLocationAnchor(): bool
+    {
+        return $this->area_id !== null;
+    }
+
+    /** وصف مكان العائلة كما تقرؤه هي */
+    public function locationLabel(): ?string
+    {
+        if (! $this->hasLocationAnchor()) {
+            return null;
+        }
+
+        return $this->shelterCenter?->name
+            ? $this->shelterCenter->name.' — '.$this->area?->name
+            : $this->area?->name;
     }
 
     public function unreadNotificationsCount(): int
