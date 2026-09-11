@@ -182,6 +182,54 @@
                 @endif
             </div>
 
+            {{-- ═══ كيف تصلون؟ ═══
+                 الوصول بالمعالم ودقائق المشي — لا إحداثيات ولا خرائط،
+                 حفاظاً على سلامة الأطفال في مكان التجمّع. --}}
+            @php
+                $nearness = $event->proximityLabel($viewer ?? null);
+                $needsAnchor = ($viewer?->isFamily() ?? false) && ! $viewer->hasLocationAnchor();
+            @endphp
+
+            @if($event->directions || $nearness || $needsAnchor)
+                <div class="card overflow-hidden p-0">
+                    <div class="flex items-center gap-3 bg-gradient-to-l from-emerald-600 to-emerald-500 px-6 py-4">
+                        <span class="grid size-10 shrink-0 place-items-center rounded-xl bg-white/20 text-white">
+                            <x-ui.icon name="route" class="size-5"/>
+                        </span>
+                        <div>
+                            <h2 class="text-lg font-bold text-white">كيف تصلون؟</h2>
+                            <p class="text-sm text-emerald-50">الطريق بالمعالم التي تعرفونها</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-4 p-6">
+                        @if($nearness)
+                            <p class="flex items-center gap-2.5 rounded-2xl bg-emerald-50 px-4 py-3 font-bold text-emerald-800">
+                                <x-ui.icon name="map-pin" class="size-5 shrink-0"/>
+                                <span>{{ $nearness }}</span>
+                            </p>
+                        @endif
+
+                        @if($event->directions)
+                            <p class="whitespace-pre-line leading-relaxed text-ink">{{ $event->directions }}</p>
+                        @endif
+
+                        @if($needsAnchor)
+                            <a href="{{ route('account.profile') }}"
+                               class="flex items-center gap-2 rounded-2xl border border-dashed border-emerald-300 bg-emerald-50/60 px-4 py-3 font-bold text-emerald-700 no-underline transition hover:bg-emerald-50">
+                                <x-ui.icon name="map-pin" class="size-5 shrink-0"/>
+                                حدّدوا مكانكم لنخبركم كم تبعد عنكم
+                            </a>
+                        @endif
+
+                        <p class="text-xs text-ink-soft">
+                            لا نعرض مواقع دقيقة على خريطة حفاظاً على سلامة الأطفال.
+                            للاستفسار عن الطريق تواصلوا مع {{ $event->team->name }}.
+                        </p>
+                    </div>
+                </div>
+            @endif
+
             {{-- ═══ حجز مقعد ═══ --}}
             @php
                 $remaining = $event->seatsRemaining();

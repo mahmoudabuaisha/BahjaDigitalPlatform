@@ -20,6 +20,7 @@ class EventObserver
         'title',
         'description',
         'location_details',
+        'directions',
         'start_date',
         'start_time',
         'end_time',

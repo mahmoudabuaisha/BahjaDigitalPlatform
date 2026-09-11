@@ -49,6 +49,10 @@ class EventInfolist
                                 ->label('تفاصيل الموقع')
                                 ->placeholder('—'),
                         ]),
+                        TextEntry::make('directions')
+                            ->label('كيف تصلون؟')
+                            ->placeholder('—')
+                            ->columnSpanFull(),
                         Grid::make(3)->schema([
                             TextEntry::make('start_date')->label('التاريخ')->date('Y/m/d'),
                             TextEntry::make('start_time')

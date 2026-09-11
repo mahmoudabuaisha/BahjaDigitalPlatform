@@ -87,6 +87,12 @@ class EventForm
                             ->placeholder('مثال: الساحة الغربية قرب البوابة الرئيسية')
                             ->maxLength(255)
                             ->columnSpanFull(),
+                        TextInput::make('directions')
+                            ->label('كيف تصلون؟')
+                            ->placeholder('مثال: من دوّار الكتيبة اتّجهوا غرباً خمس دقائق — المدرسة على يمينكم')
+                            ->helperText('بالمعالم لا بالإحداثيات — كما يصفها أهل المكان')
+                            ->maxLength(300)
+                            ->columnSpanFull(),
                         Grid::make(3)->schema([
                             DatePicker::make('start_date')
                                 ->label('التاريخ')
