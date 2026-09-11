@@ -230,7 +230,7 @@
                     <h2 class="text-base font-bold text-amber-300">للفرق التطوعية</h2>
                     <ul class="mt-3.5 flex flex-col gap-2.5 text-[15px] text-white/80">
                         <li><a href="{{ route('teams.join') }}" class="no-underline transition hover:text-amber-200">سجّلوا فريقكم</a></li>
-                        <li><a href="{{ route('login') }}" class="no-underline transition hover:text-amber-200">دخول الفرق</a></li>
+                        <li><a href="{{ url('/team') }}" class="no-underline transition hover:text-amber-200">دخول الفرق</a></li>
                         <li><a href="{{ route('feedback.create') }}" class="no-underline transition hover:text-amber-200">رأيكم يهمنا</a></li>
                     </ul>
                 </div>

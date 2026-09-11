@@ -134,9 +134,11 @@ class User extends Authenticatable implements FilamentUser, HasAppAuthentication
             return false;
         }
 
-        // لوحة الفرق صارت Blade خفيفة على /organizer — لم تبقَ إلا لوحة الإدارة
         return match ($panel->getId()) {
             'admin' => $this->role->isAdministrative(),
+            'team' => $this->role === UserRole::TeamManager
+                && $this->team !== null
+                && $this->team->is_active,
             default => false,
         };
     }

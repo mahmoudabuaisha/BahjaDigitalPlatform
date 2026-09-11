@@ -8,7 +8,7 @@
         ['route' => 'organizer.dashboard', 'icon' => 'grid', 'label' => 'لوحة التحكّم', 'url' => null],
         ['route' => 'organizer.events', 'icon' => 'calendar', 'label' => 'فعالياتي', 'url' => null],
         ['route' => 'organizer.events.create', 'icon' => 'plus', 'label' => 'إضافة فعالية', 'url' => null],
-        ['route' => 'organizer.profile', 'icon' => 'users', 'label' => 'ملف الفريق', 'url' => null],
+        ['route' => null, 'icon' => 'chart', 'label' => 'التقارير', 'url' => url('/team')],
         ['route' => 'notifications', 'icon' => 'megaphone', 'label' => 'الرسائل', 'url' => null],
         ['route' => 'account.profile', 'icon' => 'cog', 'label' => 'الإعدادات', 'url' => null],
     ];
@@ -23,7 +23,7 @@
                 {{ mb_substr(auth()->user()->team?->name ?? auth()->user()->name, 0, 1) }}
             </span>
             <p class="font-bold">{{ auth()->user()->name }}</p>
-            <p class="text-sm text-ink-soft">لوحة فريق {{ auth()->user()->team?->name }}</p>
+            <p class="text-sm text-ink-soft">منظِّم فعاليات — {{ auth()->user()->team?->name }}</p>
         </div>
 
         <div class="card mt-3 gap-1 p-3">
