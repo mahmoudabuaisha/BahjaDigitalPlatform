@@ -253,19 +253,97 @@
     </div>
 </section>
 
-{{-- ═══ دعوة الفرق ═══ --}}
+{{-- ═══ دعوة الفرق: لوحة كاملة برحلة انضمام واضحة ═══ --}}
 <section class="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
-    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-l from-brand-600 to-pink-500 px-6 py-12 text-center text-white sm:px-12">
-        <div class="absolute -top-10 -start-10 size-40 rounded-full bg-white/10"></div>
-        <div class="absolute -bottom-12 end-0 size-52 rounded-full bg-white/10"></div>
+    <div class="relative overflow-hidden rounded-[2rem] bg-gradient-to-bl from-brand-600 via-brand-700 to-[#17335a] px-6 py-12 text-white sm:rounded-[2.5rem] sm:px-10 lg:px-14 lg:py-16">
 
-        <h2 class="relative text-3xl font-bold text-white">عندكم فريق ترفيهي؟</h2>
-        <p class="relative mx-auto mt-3 max-w-xl leading-relaxed text-brand-50">
-            سجّلوا فريقكم وارفعوا جدول فعالياتكم بأنفسكم — بعد اعتماد الإدارة تصل فعالياتكم لآلاف العائلات.
-        </p>
-        <div class="relative mt-6 flex flex-wrap justify-center gap-3">
-            <a href="{{ route('teams.join') }}" class="btn w-full bg-white text-brand-700 hover:bg-brand-50 sm:w-auto">سجّلوا فريقكم الآن</a>
-            <a href="{{ route('organizers') }}" class="btn w-full border-white/50 text-white hover:bg-white/10 sm:w-auto">تعرّفوا على المنظِّمين</a>
+        {{-- زخارف احتفالية خلف المحتوى --}}
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <div class="absolute -top-16 -start-16 size-56 rounded-full bg-white/10 blur-2xl"></div>
+            <div class="absolute -bottom-20 end-0 size-72 rounded-full bg-pink-400/20 blur-3xl"></div>
+            <svg class="absolute -end-10 top-10 hidden h-16 w-56 -rotate-6 opacity-30 lg:block" viewBox="0 0 200 40" fill="none">
+                <path d="M4 24 Q30 8 60 18 T120 16 T196 20 Q160 34 100 30 T4 24 Z" fill="#f9a8d4"/>
+            </svg>
+            <span class="drift-1 absolute left-[12%] top-8 size-2.5 rounded-full bg-amber-300/70"></span>
+            <span class="drift-2 absolute left-[26%] bottom-10 size-2 rounded-full bg-pink-300/70"></span>
+            <span class="drift-3 absolute right-[18%] bottom-16 size-2 rotate-45 bg-sky-200/60"></span>
+        </div>
+
+        <div class="relative grid items-center gap-10 lg:grid-cols-[1.05fr_.95fr] lg:gap-14">
+
+            {{-- الرسالة والدعوة --}}
+            <div>
+                <span class="badge bg-white/15 text-white ring-1 ring-white/25">
+                    <x-ui.icon name="users" class="size-4"/> للفرق التطوّعية والمؤسسات
+                </span>
+
+                <h2 class="mt-4 text-[1.9rem] leading-[1.25] font-extrabold text-white sm:text-4xl lg:text-[2.6rem]">
+                    فريقكم يستحقّ أن يُرى
+                </h2>
+
+                <p class="mt-4 max-w-xl text-lg leading-relaxed text-brand-50">
+                    أنتم من يصنع الفرح في المراكز والمخيّمات — ونحن نوصله للعائلات.
+                    سجّلوا فريقكم مرة واحدة، ثم ارفعوا فعالياتكم بأنفسكم متى شئتم.
+                </p>
+
+                {{-- ما يكسبه الفريق --}}
+                <ul class="mt-6 flex flex-col gap-2.5">
+                    @foreach([
+                        ['icon' => 'eye', 'text' => 'صفحة خاصة بفريقكم يراها الأهالي'],
+                        ['icon' => 'grid', 'text' => 'لوحة تحكّم ترفعون منها فعالياتكم وصورها'],
+                        ['icon' => 'megaphone', 'text' => 'فعالياتكم تصل عائلات المحافظات الخمس'],
+                    ] as $perk)
+                        <li class="flex items-center gap-3">
+                            <span class="grid size-9 shrink-0 place-items-center rounded-xl bg-white/15 text-white ring-1 ring-white/20">
+                                <x-ui.icon :name="$perk['icon']" class="size-[18px]"/>
+                            </span>
+                            <span class="font-semibold text-white/95">{{ $perk['text'] }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+
+                <div class="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <a href="{{ route('teams.join') }}"
+                       class="btn btn-lg w-full bg-white font-extrabold text-brand-700 shadow-xl shadow-black/20 transition hover:-translate-y-0.5 hover:bg-brand-50 sm:w-auto">
+                        <x-ui.icon name="plus" class="size-5"/> سجّلوا فريقكم الآن
+                    </a>
+                    <a href="{{ route('organizers') }}"
+                       class="btn w-full border-white/45 text-white hover:bg-white/10 sm:w-auto">
+                        تعرّفوا على الفرق الشريكة
+                    </a>
+                </div>
+
+                @if($stats['teams'])
+                    {{-- الجملة في span واحد كي لا تتقطّع كلماتها على الجوال --}}
+                    <p class="mt-5 flex items-start gap-2 text-sm leading-relaxed text-brand-100">
+                        <x-ui.icon name="shield-check" class="mt-0.5 size-4 shrink-0"/>
+                        <span>انضم إلينا <span class="font-extrabold text-white">{{ number_format($stats['teams']) }}</span>
+                            {{ $stats['teams'] === 1 ? 'فريق تطوّعي' : 'فريقاً تطوّعياً' }} — والتسجيل مجاني بالكامل.</span>
+                    </p>
+                @endif
+            </div>
+
+            {{-- رحلة الانضمام: ثلاث خطوات حقيقية كما تجري فعلاً --}}
+            <ol class="relative flex flex-col gap-3">
+                @foreach([
+                    ['n' => '١', 'icon' => 'users', 'title' => 'قدّموا طلب الانضمام', 'text' => 'نموذج واحد: بيانات الفريق ومسؤول الميدان وأنشطتكم ومناطق وصولكم.'],
+                    ['n' => '٢', 'icon' => 'shield-check', 'title' => 'تراجعه الإدارة', 'text' => 'مراجعة سريعة لسلامة الأطفال، ثم يصلكم بريد فيه بيانات دخول لوحتكم.'],
+                    ['n' => '٣', 'icon' => 'calendar', 'title' => 'ارفعوا فعالياتكم', 'text' => 'من لوحتكم: الموعد والمكان والصور وحجوزات العائلات — كلها بيدكم.'],
+                ] as $step)
+                    <li class="flex items-start gap-4 rounded-2xl bg-white/10 p-5 ring-1 ring-white/15 backdrop-blur-sm transition hover:bg-white/15">
+                        <span class="grid size-11 shrink-0 place-items-center rounded-2xl bg-white text-lg font-extrabold text-brand-700 shadow-lg">
+                            {{ $step['n'] }}
+                        </span>
+                        <span class="block">
+                            <span class="flex items-center gap-2 text-[17px] font-bold text-white">
+                                <x-ui.icon :name="$step['icon']" class="size-[18px] text-brand-100"/>
+                                {{ $step['title'] }}
+                            </span>
+                            <span class="mt-1 block text-sm leading-relaxed text-brand-50/90">{{ $step['text'] }}</span>
+                        </span>
+                    </li>
+                @endforeach
+            </ol>
         </div>
     </div>
 </section>
