@@ -13,4 +13,17 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
-          script: bash ~/update-hostinger.sh
+          script: |
+            cd ~/bahja
+            git fetch --all --prune
+            git reset --hard origin/deploy/hostinger
+            # حذف ملف صنف من المستودع يترك خريطة composer تشير إلى ملف مفقود،
+            # فيفشل إقلاع artisan قبل أن يمسح الذاكرة — التوليد أولاً يكسر هذه الحلقة
+            composer install --no-dev --no-interaction --no-scripts --optimize-autoloader
+            composer dump-autoload --optimize --no-interaction
+            php artisan package:discover --ansi
+            php artisan migrate --force
+            rm -f public/storage && ln -s ~/bahja/storage/app/public ~/bahja/public/storage || true
+            php artisan optimize:clear
+            php artisan optimize
+            git log -1 --oneline
