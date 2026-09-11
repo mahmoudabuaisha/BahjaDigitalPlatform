@@ -169,7 +169,7 @@
                     <select name="area_id" required class="input @error('area_id') border-rose-300 @enderror">
                         <option value="">اختاروا المحافظة</option>
                         @foreach($areas as $area)
-                            <option value="{{ $area->id }}" @selected(old('area_id', $event->area_id ?? '') == $area->id)>
+                            <option value="{{ $area->id }}" @selected(old('area_id', $event->area_id ?? ($suggestedAreaId ?? '')) == $area->id)>
                                 {{ $area->name }}
                             </option>
                         @endforeach
@@ -183,7 +183,7 @@
                         <option value="">بلا مركز محدَّد</option>
                         @foreach($centers as $center)
                             <option value="{{ $center->id }}"
-                                @selected(old('shelter_center_id', $event->shelter_center_id ?? '') == $center->id)>
+                                @selected(old('shelter_center_id', $event->shelter_center_id ?? ($suggestedCenterId ?? '')) == $center->id)>
                                 {{ $center->name }}
                             </option>
                         @endforeach

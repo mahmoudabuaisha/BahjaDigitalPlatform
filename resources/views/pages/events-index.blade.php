@@ -153,6 +153,10 @@
                 <p class="mt-1 text-ink-soft">جرّبوا محافظة أخرى أو وسّعوا الفئة العمرية.</p>
                 <a href="{{ route('events.index') }}" class="btn btn-primary mt-4">اعرضوا كل الفعاليات</a>
             </div>
+
+            {{-- لا شيء يطابق: فرصة لترفع العائلة يدها بدل أن تغادر خالية --}}
+            <x-neighbourhood-call :user="$viewer" :standing="$standingCall" :companions="$callCompanions"
+                                  class="mt-6"/>
         @else
             <div class="mt-5 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 @foreach($events as $event)

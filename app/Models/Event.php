@@ -37,6 +37,9 @@ class Event extends Model
 
     public const PROXIMITY_UNKNOWN = 3;
 
+    /** أبعد مشي يُعدّ «قرب مكانكم» حين يعبر حدود المحافظة */
+    public const NEARBY_WALK_MINUTES = 25;
+
     protected $fillable = [
         'public_id',
         'team_id',
@@ -333,6 +336,30 @@ class Event extends Model
      *
      * @param  Builder<Event>  $query
      */
+    /**
+     * قصر النتائج على ما هو قريب فعلاً: مكان العائلة نفسه، أو مكان
+     * يُمشى إليه، أو محافظتها. ترتيبٌ وحده لا يكفي — «قرب مكانكم»
+     * يجب ألّا تعرض فعالية في الطرف الآخر من القطاع.
+     *
+     * @param  Builder<Event>  $query
+     */
+    public function scopeNearTo(Builder $query, ?User $user): void
+    {
+        if ($user === null || ! $user->hasLocationAnchor()) {
+            return;
+        }
+
+        $walkable = PlaceLink::withinWalk($user->shelter_center_id, self::NEARBY_WALK_MINUTES);
+
+        $query->where(function (Builder $inner) use ($user, $walkable): void {
+            $inner->where('events.area_id', $user->area_id);
+
+            if ($walkable !== []) {
+                $inner->orWhereIn('events.shelter_center_id', $walkable);
+            }
+        });
+    }
+
     public function scopeNearestTo(Builder $query, ?User $user): void
     {
         if ($user === null || ! $user->hasLocationAnchor()) {

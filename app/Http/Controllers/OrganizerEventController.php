@@ -36,9 +36,13 @@ class OrganizerEventController extends Controller
 
     public function __construct(private readonly ImageService $images) {}
 
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('pages.organizer.event-form', $this->formData());
+        // قادمون من «أين ينتظركم الأطفال»: المكان مُعبّأ سلفاً
+        return view('pages.organizer.event-form', $this->formData() + [
+            'suggestedAreaId' => $request->integer('area_id') ?: null,
+            'suggestedCenterId' => $request->integer('shelter_center_id') ?: null,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

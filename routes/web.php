@@ -12,6 +12,7 @@ use App\Http\Controllers\EventQrController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NeighbourhoodCallController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizerAttendanceController;
 use App\Http\Controllers\OrganizerController;
@@ -100,6 +101,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/account/children', [ChildController::class, 'store'])->name('children.store');
     Route::put('/account/children/{child}', [ChildController::class, 'update'])->name('children.update');
     Route::delete('/account/children/{child}', [ChildController::class, 'destroy'])->name('children.destroy');
+
+    // نداء الحيّ: «لا نجد فعالية قريبة منّا»
+    Route::post('/account/call', [NeighbourhoodCallController::class, 'store'])
+        ->middleware('throttle:feedback')->name('calls.store');
+    Route::delete('/account/call', [NeighbourhoodCallController::class, 'destroy'])->name('calls.destroy');
 
     Route::get('/account/notifications', [NotificationController::class, 'index'])->name('notifications');
     Route::post('/account/notifications/read', [NotificationController::class, 'markAllRead'])->name('notifications.read');

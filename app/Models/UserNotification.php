@@ -30,7 +30,7 @@ class UserNotification extends Model
     /** تصنيف الإشعار — تبويبات صفحة الإشعارات تُبنى عليه */
     public const GROUPS = [
         'registrations' => ['registration_submitted', 'registration_accepted', 'registration_rejected', 'registration_received'],
-        'events' => ['event_new', 'event_changed', 'event_cancelled', 'event_reminder'],
+        'events' => ['event_new', 'event_changed', 'event_cancelled', 'event_reminder', 'call_answered'],
         'messages' => ['admin_message'],
     ];
 
