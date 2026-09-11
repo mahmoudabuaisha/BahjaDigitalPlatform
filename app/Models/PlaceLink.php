@@ -56,6 +56,29 @@ class PlaceLink extends Model
             ->orWhere('to_center_id', $centerId));
     }
 
+    /**
+     * الأماكن التي يُمشى إليها من هذا المكان خلال المدّة المعطاة — ومعها هو.
+     *
+     * @return array<int, int>
+     */
+    public static function withinWalk(?int $centerId, int $maxMinutes): array
+    {
+        if ($centerId === null) {
+            return [];
+        }
+
+        $linked = static::query()
+            ->touching($centerId)
+            ->where('walk_minutes', '<=', $maxMinutes)
+            ->get(['from_center_id', 'to_center_id'])
+            ->map(fn (self $link): int => $link->from_center_id === $centerId
+                ? $link->to_center_id
+                : $link->from_center_id)
+            ->all();
+
+        return array_values(array_unique([$centerId, ...$linked]));
+    }
+
     /** صيغة العدد العربية: المفرد والمثنّى وجمع القلّة ثم التمييز المفرد */
     public static function minutesLabel(int $minutes): string
     {

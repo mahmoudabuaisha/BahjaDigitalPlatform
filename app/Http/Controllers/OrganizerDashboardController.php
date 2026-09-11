@@ -6,6 +6,7 @@ use App\Enums\EventStatus;
 use App\Enums\RegistrationStatus;
 use App\Models\Event;
 use App\Models\Registration;
+use App\Services\NeighbourhoodDemandService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,6 +19,8 @@ use Illuminate\View\View;
  */
 class OrganizerDashboardController extends Controller
 {
+    public function __construct(private readonly NeighbourhoodDemandService $demand) {}
+
     public function dashboard(): View
     {
         $team = Auth::user()->team;
@@ -43,6 +46,8 @@ class OrganizerDashboardController extends Controller
                 ->orderByDesc('start_date')
                 ->limit(5)
                 ->get(),
+            // أين ينتظركم الأطفال: نداءات مجمَّعة بلغت عتبة العرض
+            'demand' => $this->demand->byPlace(forTeams: true, limit: 5),
         ]);
     }
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Area;
 use App\Models\Category;
 use App\Models\Event;
+use App\Services\NeighbourhoodDemandService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -17,6 +18,8 @@ class EventIndexController extends Controller
         '6-9' => 'من 6 إلى 9 سنوات',
         '10-14' => 'من 10 إلى 14 سنة',
     ];
+
+    public function __construct(private readonly NeighbourhoodDemandService $demand) {}
 
     public function __invoke(Request $request): View
     {
@@ -79,6 +82,9 @@ class EventIndexController extends Controller
                 ->withCount(['events' => fn ($query) => $query->publiclyVisible()->upcoming()])
                 ->get(),
             'ageBuckets' => self::AGE_BUCKETS,
+            // نداء الحيّ: يُعرض حين تعود التصفية بلا نتيجة
+            'standingCall' => $viewer?->isFamily() ? $this->demand->standingCallOf($viewer) : null,
+            'callCompanions' => $viewer?->isFamily() ? $this->demand->companionsFor($viewer) : 0,
         ]);
     }
 }

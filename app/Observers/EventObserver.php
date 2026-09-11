@@ -8,6 +8,7 @@ use App\Enums\UserRole;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Services\NeighbourhoodDemandService;
 use Illuminate\Support\Facades\Cache;
 
 class EventObserver
@@ -149,10 +150,15 @@ class EventObserver
     /** بث «فعالية جديدة» لعائلات المحافظة — يُستدعى أيضاً لحظة النشر المجدول */
     public function announceToArea(Event $event): void
     {
+        // من نادى يسمع جواباً أدقّ: «سمعنا نداءكم» بدل إعلان المحافظة،
+        // فلا يصله إشعاران عن الفعالية نفسها
+        $answered = app(NeighbourhoodDemandService::class)->answerWith($event);
+
         User::query()
             ->where('role', UserRole::Family)
             ->where('is_active', true)
             ->where('area_id', $event->area_id)
+            ->whereNotIn('id', $answered)
             ->pluck('id')
             ->each(fn (int $userId) => UserNotification::send(
                 $userId,

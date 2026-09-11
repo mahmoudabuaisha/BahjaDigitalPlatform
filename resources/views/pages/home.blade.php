@@ -229,15 +229,9 @@
                 </div>
 
             @elseif($nearby !== null)
-                {{-- ضبطت مكانها لكن لا فعاليات قريبة بعد --}}
-                <div class="card tone tone-sky items-center gap-3 p-8 text-center">
-                    <span class="icon-tile size-14"><x-ui.icon name="map-pin"/></span>
-                    <p class="text-lg font-bold">لا فعاليات قريبة من {{ $family->locationLabel() }} بعد</p>
-                    <p class="max-w-lg text-ink-soft">
-                        نُعلمكم فور إعلان فعالية قرب مكانكم. وحتى ذلك الحين تصفّحوا فعاليات المحافظات الأخرى.
-                    </p>
-                    <a href="{{ route('events.index') }}" class="btn btn-primary mt-1">تصفّحوا كل الفعاليات</a>
-                </div>
+                {{-- ضبطت مكانها لكن لا فعاليات قريبة بعد: هنا يُرفع نداء الحيّ --}}
+                <x-neighbourhood-call :user="$family" :standing="$standingCall" :companions="$callCompanions"
+                                      class="mx-auto max-w-3xl"/>
 
             @else
                 {{-- لم تضبط مكانها: دعوة لطيفة بلا إلحاح --}}
