@@ -15,18 +15,21 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             set +e
-            echo "════════ محتوى سكربت النشر على الاستضافة ════════"
-            cat ~/update-hostinger.sh
+            cd ~/bahja || exit 1
 
-            echo "════════ تشغيل النشر (بتتبّع كل أمر) ════════"
+            # تحصين قبل النشر: سحب الكود ثم إعادة توليد خريطة أصناف composer
+            # ومسح ذاكرة Laravel بـ rm مباشرة. هذا يكسر الطوق الذي أوقع الموقع
+            # سابقاً: حذف ملف صنف يجعل artisan يعجز عن الإقلاع، فتفشل
+            # optimize:clear قبل أن تمسح الذاكرة القديمة.
+            echo "════ تحصين ما قبل النشر ════"
+            git fetch --all --prune && git reset --hard origin/deploy/hostinger
+            composer dump-autoload --optimize --no-interaction --no-scripts
+            rm -f bootstrap/cache/*.php
+            rm -rf bootstrap/cache/filament
+
+            echo "════ تشغيل النشر ════"
             bash -x ~/update-hostinger.sh 2>&1 | tail -70
             DEPLOY_CODE=${PIPESTATUS[0]}
-            echo "════════ رمز خروج سكربت النشر: $DEPLOY_CODE ════════"
-
-            cd ~/bahja 2>/dev/null && {
-              echo "── محاولة إصلاح الذاكرة (اختيارية) ──"
-              php artisan optimize:clear 2>&1 | tail -12 || echo "تخطّي: مسح الذاكرة"
-              php artisan optimize 2>&1 | tail -12 || echo "تخطّي: بناء الذاكرة"
-            }
+            echo "════ رمز خروج سكربت النشر: $DEPLOY_CODE ════"
 
             exit $DEPLOY_CODE
