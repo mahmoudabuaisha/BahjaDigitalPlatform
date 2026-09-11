@@ -1,9 +1,11 @@
-@props(['event'])
+@props(['event', 'viewer' => null])
 
 @php
     $tone = $event->category?->toneClass() ?? 'tone tone-violet';
     $isToday = $event->start_date->isToday();
     $place = $event->publicPlaceName();
+    // شارة القرب تظهر فقط لعائلة ضبطت مكانها — الترتيب بالجيرة لا بالمسافة
+    $proximity = $event->proximityLabel($viewer ?? auth()->user());
 @endphp
 
 <article {{ $attributes->class(['card card-hover '.$tone]) }}
@@ -36,6 +38,12 @@
 
             @if($isToday)
                 <span class="badge bg-brand-600 text-white">اليوم</span>
+            @endif
+
+            @if($proximity)
+                <span class="badge bg-emerald-600 text-white">
+                    <x-ui.icon name="map-pin" class="size-4"/> {{ $proximity }}
+                </span>
             @endif
         </span>
     </a>
