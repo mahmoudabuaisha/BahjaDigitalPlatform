@@ -99,6 +99,14 @@
                     </a>
                 @endforeach
             </div>
+
+            {{-- خريطة المحافظات: تصفية بلمحة بصر، وتُخفى على الشاشات الضيقة
+                 حيث تكفي قائمة المحافظة أعلاه --}}
+            <div class="card hidden gap-3 p-5 lg:flex">
+                <h2 class="text-base font-bold">الفعاليات على الخريطة</h2>
+                <x-gaza-map :areas="$areas" :active="$filters['area'] ?: null"
+                            :home-area-id="$viewer?->area_id" class="mx-auto"/>
+            </div>
         </form>
     </aside>
 

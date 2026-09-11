@@ -288,6 +288,51 @@
     </div>
 </section>
 
+{{-- ═══ أين الفعاليات؟ خريطة المحافظات المرسومة ═══ --}}
+<section class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+    <div class="grid items-center gap-10 lg:grid-cols-[.85fr_1.15fr]">
+
+        <div class="order-2 mx-auto lg:order-1">
+            <x-gaza-map :areas="$areas" :home-area-id="auth()->user()?->area_id"/>
+        </div>
+
+        <div class="order-1 lg:order-2">
+            <h2 class="section-title">
+                <span class="icon-tile tone tone-sky size-11"><x-ui.icon name="map-pin"/></span>
+                أين الفعاليات؟
+            </h2>
+            <p class="mt-2 max-w-xl text-lg leading-relaxed text-ink-soft">
+                اضغطوا محافظتكم على الخريطة لتروا فعالياتها. كلما غمُق لون المحافظة
+                زادت الفعاليات القادمة فيها.
+            </p>
+
+            {{-- قائمة المحافظات: بديل نصّي للخريطة يعمل لقارئ الشاشة ولمن يفضّل القوائم --}}
+            <ul class="mt-6 grid gap-2.5 sm:grid-cols-2">
+                @foreach($areas->sortByDesc('events_count') as $mapArea)
+                    <li>
+                        <a href="{{ route('events.index', ['area' => $mapArea->slug]) }}"
+                           class="flex items-center justify-between gap-3 rounded-2xl border border-brand-100 bg-white px-4 py-3 no-underline transition hover:border-brand-300 hover:bg-brand-50">
+                            <span class="flex items-center gap-2 font-bold text-ink">
+                                @if(auth()->user()?->area_id === $mapArea->id)
+                                    <x-ui.icon name="map-pin" class="size-4 text-emerald-600"/>
+                                @endif
+                                {{ $mapArea->name }}
+                            </span>
+                            <span class="badge {{ $mapArea->events_count ? 'bg-brand-600 text-white' : 'bg-brand-50 text-ink-soft' }}">
+                                {{ $mapArea->events_count ?: 'لا فعاليات' }}
+                            </span>
+                        </a>
+                    </li>
+                @endforeach
+            </ul>
+
+            <p class="mt-4 text-sm text-ink-soft">
+                الخريطة رسم توضيحي للمحافظات لا خريطة جغرافية — لا نعرض مواقع دقيقة حفاظاً على سلامة الأطفال.
+            </p>
+        </div>
+    </div>
+</section>
+
 {{-- ═══ لماذا بَهْجَة ═══ --}}
 <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
     <h2 class="section-title justify-center text-center">لماذا بَهْجَة؟</h2>
