@@ -48,7 +48,9 @@ class HomeController extends Controller
             'nearby' => $nearby,
             'family' => $family,
             'categories' => $categories,
-            'areas' => Area::orderBy('sort_order')->get(),
+            'areas' => Area::orderBy('sort_order')
+                ->withCount(['events' => fn ($query) => $query->publiclyVisible()->upcoming()])
+                ->get(),
             'stats' => [
                 'upcoming' => Event::publiclyVisible()->upcoming()->count(),
                 'completed' => Event::where('status', EventStatus::Completed)->count(),

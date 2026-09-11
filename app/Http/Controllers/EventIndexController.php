@@ -75,7 +75,9 @@ class EventIndexController extends Controller
             'categories' => Category::orderBy('sort_order')
                 ->withCount(['events' => fn ($query) => $query->publiclyVisible()->upcoming()])
                 ->get(),
-            'areas' => Area::orderBy('sort_order')->get(),
+            'areas' => Area::orderBy('sort_order')
+                ->withCount(['events' => fn ($query) => $query->publiclyVisible()->upcoming()])
+                ->get(),
             'ageBuckets' => self::AGE_BUCKETS,
         ]);
     }

@@ -565,6 +565,34 @@
         body:has(.qr-card) .qr-card { border: 1px solid #e5e7eb; }
     }
 
+    /* — خريطة المحافظات المرسومة: كل مقطع رابط يرتفع عند لمسه — */
+    .gaza-seg {
+        cursor: pointer;
+        transform-box: fill-box;
+        transform-origin: center;
+        transition: transform .25s ease, filter .25s ease;
+    }
+
+    .gaza-seg:hover,
+    .gaza-seg:focus-visible {
+        transform: scale(1.035);
+        filter: brightness(1.08);
+    }
+
+    .gaza-seg:focus-visible { outline: none; }
+
+    .gaza-seg:focus-visible polygon {
+        stroke: var(--color-brand-700);
+        stroke-width: 4;
+    }
+
+    .gaza-seg text { pointer-events: none; }
+
+    @media (prefers-reduced-motion: reduce) {
+        .gaza-seg { transition: none; }
+        .gaza-seg:hover, .gaza-seg:focus-visible { transform: none; }
+    }
+
     /* نبضة وصول العدّاد إلى هدفه */
     .stat-pop { animation: stat-pop .45s ease; }
 
