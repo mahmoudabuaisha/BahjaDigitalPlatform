@@ -13,4 +13,17 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
-          script: bash ~/update-hostinger.sh
+          script: |
+            # سكربت الاستضافة يسحب الكود ويثبّت الحزم ويشغّل الهجرات.
+            # لكن حذف ملف صنف من المستودع يترك خريطة أصناف composer تشير إلى
+            # ملف مفقود، فيفشل إقلاع artisan قبل أن يمسح الذاكرة — وتبقى
+            # الاستضافة على ذاكرة قديمة فترد 500. لذلك نتابع السكربت دائماً
+            # بإعادة توليد الخريطة ثم إعادة بناء الذاكرة.
+            bash ~/update-hostinger.sh || echo "السكربت انتهى بخطأ — نتابع بخطوات الإصلاح"
+            set -e
+            cd ~/bahja
+            composer dump-autoload --optimize --no-interaction
+            php artisan migrate --force
+            php artisan optimize:clear
+            php artisan optimize
+            git log -1 --oneline
