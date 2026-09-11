@@ -161,10 +161,8 @@ if (! window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         }, { threshold: 0.08, rootMargin: '0px 0px -6% 0px' });
 
         document.querySelectorAll('main section, body > footer').forEach((target) => {
-            // البطل له افتتاحيته الخاصة، وأقسام النماذج تبقى ظاهرة دائماً
-            // كي لا يبدو حقل مخفياً على من يملأ استمارة طويلة
-            if (target === heroSection || target.closest('form')) {
-                return;
+            if (target === heroSection) {
+                return; // للبطل افتتاحيته الخاصة في القالب
             }
 
             target.classList.add('reveal');
