@@ -559,6 +559,12 @@
         50% { opacity: .7; }
     }
 
+    /* طباعة كرت QR وحده: الصفحة خلفه تُخفى فيخرج الكرت في ورقة نظيفة */
+    @media print {
+        body:has(.qr-card) > *:not(:has(.qr-card)) { display: none !important; }
+        body:has(.qr-card) .qr-card { border: 1px solid #e5e7eb; }
+    }
+
     /* نبضة وصول العدّاد إلى هدفه */
     .stat-pop { animation: stat-pop .45s ease; }
 
