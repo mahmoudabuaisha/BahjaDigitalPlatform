@@ -14,16 +14,19 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
-            # سكربت الاستضافة يسحب الكود ويثبّت الحزم ويشغّل الهجرات.
-            # لكن حذف ملف صنف من المستودع يترك خريطة أصناف composer تشير إلى
-            # ملف مفقود، فيفشل إقلاع artisan قبل أن يمسح الذاكرة — وتبقى
-            # الاستضافة على ذاكرة قديمة فترد 500. لذلك نتابع السكربت دائماً
-            # بإعادة توليد الخريطة ثم إعادة بناء الذاكرة.
-            bash ~/update-hostinger.sh || echo "السكربت انتهى بخطأ — نتابع بخطوات الإصلاح"
-            set -e
-            cd ~/bahja
-            composer dump-autoload --optimize --no-interaction
-            php artisan migrate --force
-            php artisan optimize:clear
-            php artisan optimize
-            git log -1 --oneline
+            # النشر الحقيقي: سحب الكود وتثبيت الحزم والهجرات وبناء الذاكرة.
+            # نجاحه وحده يحدّد لون التشغيل.
+            bash ~/update-hostinger.sh || DEPLOY_FAILED=1
+
+            # خطوات سلامة اختيارية بعده: حذف ملف صنف من المستودع قد يترك
+            # خريطة أصناف composer تشير إلى ملف مفقود فيعجز artisan عن
+            # الإقلاع. هذه محاولة إصلاح — فشلها لا يصبغ النشر بالأحمر.
+            echo "── خطوات السلامة ──"
+            cd ~/bahja 2>/dev/null && {
+              composer dump-autoload --optimize --no-interaction --no-scripts || echo "تخطّي: تعذّرت إعادة توليد خريطة الأصناف"
+              php artisan optimize:clear || echo "تخطّي: تعذّر مسح الذاكرة"
+              php artisan optimize || echo "تخطّي: تعذّرت إعادة بناء الذاكرة"
+              php artisan about --only=environment || true
+            }
+
+            exit ${DEPLOY_FAILED:-0}
