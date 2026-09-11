@@ -2,17 +2,15 @@
 
 namespace Tests\Feature;
 
-use App\Filament\Team\Resources\Events\Pages\ListEvents;
 use App\Models\Event;
 use App\Models\Team;
 use App\Models\User;
-use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
- * الاختبار الحرج: عزل بيانات الفرق عن بعضها وعن لوحة الإدارة.
+ * الاختبار الحرج: عزل بيانات الفرق عن بعضها وعن لوحة الإدارة،
+ * وأن مسار الفرق موحَّد على لوحة واحدة (/organizer).
  */
 class TeamPanelScopingTest extends TestCase
 {
@@ -36,17 +34,31 @@ class TeamPanelScopingTest extends TestCase
         $this->managerA = User::factory()->managerOf($this->teamA)->create();
     }
 
-    public function test_manager_sees_only_own_team_events_in_panel_table(): void
+    public function test_manager_sees_only_own_team_events_in_dashboard(): void
     {
-        $ownEvents = Event::factory()->count(2)->approved()->create(['team_id' => $this->teamA->id]);
-        $foreignEvents = Event::factory()->count(3)->approved()->create(['team_id' => $this->teamB->id]);
+        $own = Event::factory()->approved()->create([
+            'team_id' => $this->teamA->id,
+            'title' => 'يوم ألعاب فريقنا',
+        ]);
+        $foreign = Event::factory()->approved()->create([
+            'team_id' => $this->teamB->id,
+            'title' => 'فعالية فريق آخر',
+        ]);
 
-        Filament::setCurrentPanel('team');
+        $this->actingAs($this->managerA)
+            ->get(route('organizer.events'))
+            ->assertOk()
+            ->assertSee($own->title)
+            ->assertDontSee($foreign->title);
+    }
 
-        Livewire::actingAs($this->managerA)
-            ->test(ListEvents::class)
-            ->assertCanSeeTableRecords($ownEvents)
-            ->assertCanNotSeeTableRecords($foreignEvents);
+    public function test_manager_cannot_open_foreign_team_registrations(): void
+    {
+        $foreign = Event::factory()->approved()->create(['team_id' => $this->teamB->id]);
+
+        $this->actingAs($this->managerA)
+            ->get(route('organizer.events.registrations', $foreign))
+            ->assertForbidden();
     }
 
     public function test_manager_cannot_access_admin_panel(): void
@@ -56,22 +68,22 @@ class TeamPanelScopingTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_admin_cannot_access_team_panel(): void
+    public function test_admin_cannot_access_team_dashboard(): void
     {
         $admin = User::factory()->admin()->create();
 
         $this->actingAs($admin)
-            ->get('/team')
+            ->get(route('organizer.dashboard'))
             ->assertForbidden();
     }
 
-    public function test_manager_of_inactive_team_cannot_access_team_panel(): void
+    public function test_manager_of_inactive_team_cannot_access_team_dashboard(): void
     {
         $pendingTeam = Team::factory()->pending()->create();
         $manager = User::factory()->managerOf($pendingTeam)->create();
 
         $this->actingAs($manager)
-            ->get('/team')
+            ->get(route('organizer.dashboard'))
             ->assertForbidden();
     }
 
@@ -83,11 +95,24 @@ class TeamPanelScopingTest extends TestCase
         $this->assertFalse($this->managerA->can('view', $foreignEvent));
     }
 
-    public function test_team_registration_page_renders_for_guests(): void
+    public function test_the_old_self_registration_path_leads_to_the_application_form(): void
     {
-        $this->get('/team/register')
+        // لا تسجيل ذاتي بعد اليوم — كل فريق يمرّ بنموذج الانضمام واعتماد الإدارة
+        $this->get('/team/register')->assertRedirect('/join-team');
+
+        $this->get('/join-team')
             ->assertOk()
-            ->assertSee('انضمام فريق جديد')
             ->assertSee('بيانات الفريق');
+    }
+
+    public function test_the_old_team_panel_path_redirects_to_the_single_dashboard(): void
+    {
+        $this->actingAs($this->managerA)
+            ->get('/team')
+            ->assertRedirect(route('organizer.dashboard'));
+
+        $this->actingAs($this->managerA)
+            ->get('/team/events/5/edit')
+            ->assertRedirect(route('organizer.dashboard'));
     }
 }
