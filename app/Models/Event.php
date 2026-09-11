@@ -28,6 +28,15 @@ class Event extends Model
     /** @use HasFactory<EventFactory> */
     use HasFactory, SoftDeletes;
 
+    /** درجات القرب من مرساة مكان العائلة — الأصغر أقرب */
+    public const PROXIMITY_SAME_PLACE = 0;
+
+    public const PROXIMITY_SAME_AREA = 1;
+
+    public const PROXIMITY_FAR = 2;
+
+    public const PROXIMITY_UNKNOWN = 3;
+
     protected $fillable = [
         'public_id',
         'team_id',
@@ -317,6 +326,56 @@ class Event extends Model
      * اسم المكان كما يجوز نشره (القسم 15.6): مركز مخفيّ الظهور
      * تُعرض محافظته فقط، حمايةً ميدانية.
      */
+    /**
+     * ترتيب النتائج بالأقرب إلى مرساة مكان العائلة ثم بالأسبق موعداً.
+     * بلا مرساة يبقى الترتيب الزمني كما هو.
+     *
+     * @param  Builder<Event>  $query
+     */
+    public function scopeNearestTo(Builder $query, ?User $user): void
+    {
+        if ($user === null || ! $user->hasLocationAnchor()) {
+            return;
+        }
+
+        if ($user->shelter_center_id) {
+            $query->orderByRaw('case when shelter_center_id = ? then 0 when area_id = ? then 1 else 2 end',
+                [$user->shelter_center_id, $user->area_id]);
+        } else {
+            $query->orderByRaw('case when area_id = ? then 0 else 1 end', [$user->area_id]);
+        }
+    }
+
+    /**
+     * درجة قرب الفعالية من مرساة مكان العائلة — كلما صغرت كانت أقرب.
+     * القرب هنا جيرة لا مسافة: لا إحداثيات ولا GPS، بل «نفس المكان الذي
+     * تعرفه العائلة» ثم «نفس المحافظة» ثم ما بَعُد.
+     */
+    public function proximityRank(?User $user): int
+    {
+        if ($user === null || ! $user->hasLocationAnchor()) {
+            return self::PROXIMITY_UNKNOWN;
+        }
+
+        if ($user->shelter_center_id && $this->shelter_center_id === $user->shelter_center_id) {
+            return self::PROXIMITY_SAME_PLACE;
+        }
+
+        return $this->area_id === $user->area_id
+            ? self::PROXIMITY_SAME_AREA
+            : self::PROXIMITY_FAR;
+    }
+
+    /** عبارة القرب كما تُقرأ على البطاقة */
+    public function proximityLabel(?User $user): ?string
+    {
+        return match ($this->proximityRank($user)) {
+            self::PROXIMITY_SAME_PLACE => 'في مكانكم نفسه',
+            self::PROXIMITY_SAME_AREA => 'في محافظتكم',
+            default => null,
+        };
+    }
+
     public function publicPlaceName(): string
     {
         $visibility = $this->shelterCenter?->visibility;

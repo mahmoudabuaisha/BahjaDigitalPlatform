@@ -28,8 +28,25 @@ class HomeController extends Controller
             ->withCount(['events' => fn ($query) => $query->publiclyVisible()->upcoming()])
             ->get();
 
+        // فعاليات قرب مكان العائلة — تُرتَّب بالجيرة ثم بالأسبق موعداً
+        $family = auth()->user();
+
+        $nearby = $family?->hasLocationAnchor()
+            ? Event::query()
+                ->publiclyVisible()
+                ->upcoming()
+                ->with(['team:id,name,slug', 'category', 'area:id,name,slug', 'shelterCenter:id,name'])
+                ->nearestTo($family)
+                ->orderBy('start_date')
+                ->orderBy('start_time')
+                ->limit(3)
+                ->get()
+            : null;
+
         return view('pages.home', [
             'upcoming' => $upcoming,
+            'nearby' => $nearby,
+            'family' => $family,
             'categories' => $categories,
             'areas' => Area::orderBy('sort_order')->get(),
             'stats' => [

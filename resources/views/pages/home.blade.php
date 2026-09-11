@@ -200,6 +200,64 @@
     </div>
 </section>
 
+{{-- ═══ قرب مكانكم: يظهر للعائلة التي ضبطت مرساة مكانها ═══ --}}
+@auth
+    @if($family?->isFamily())
+        <section class="mx-auto max-w-7xl px-4 pt-14 sm:px-6">
+            @if($nearby !== null && $nearby->isNotEmpty())
+                <div class="flex flex-wrap items-end justify-between gap-3">
+                    <div>
+                        <h2 class="section-title">
+                            <span class="icon-tile tone tone-emerald size-11"><x-ui.icon name="map-pin"/></span>
+                            قرب مكانكم
+                        </h2>
+                        <p class="mt-1 flex flex-wrap items-center gap-x-2 text-ink-soft">
+                            الأقرب إلى
+                            <span class="font-bold text-ink">{{ $family->locationLabel() }}</span>
+                            <a href="{{ route('account.profile') }}" class="text-sm font-semibold text-brand-600 no-underline hover:underline">تغيير المكان</a>
+                        </p>
+                    </div>
+                    <a href="{{ route('events.index', ['area' => $family->area?->slug]) }}" class="btn btn-outline btn-sm">
+                        كل فعاليات محافظتكم
+                    </a>
+                </div>
+
+                <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                    @foreach($nearby as $nearbyEvent)
+                        <x-event-card :event="$nearbyEvent" :viewer="$family"/>
+                    @endforeach
+                </div>
+
+            @elseif($nearby !== null)
+                {{-- ضبطت مكانها لكن لا فعاليات قريبة بعد --}}
+                <div class="card tone tone-sky items-center gap-3 p-8 text-center">
+                    <span class="icon-tile size-14"><x-ui.icon name="map-pin"/></span>
+                    <p class="text-lg font-bold">لا فعاليات قريبة من {{ $family->locationLabel() }} بعد</p>
+                    <p class="max-w-lg text-ink-soft">
+                        نُعلمكم فور إعلان فعالية قرب مكانكم. وحتى ذلك الحين تصفّحوا فعاليات المحافظات الأخرى.
+                    </p>
+                    <a href="{{ route('events.index') }}" class="btn btn-primary mt-1">تصفّحوا كل الفعاليات</a>
+                </div>
+
+            @else
+                {{-- لم تضبط مكانها: دعوة لطيفة بلا إلحاح --}}
+                <div class="card tone tone-emerald flex-row flex-wrap items-center gap-4 p-6">
+                    <span class="icon-tile size-12 shrink-0"><x-ui.icon name="map-pin"/></span>
+                    <div class="min-w-[14rem] flex-1">
+                        <p class="text-lg font-bold">أين أنتم الآن؟</p>
+                        <p class="mt-1 text-ink-soft">
+                            حدّدوا مكانكم مرة واحدة فنرتّب لكم الفعاليات بالأقرب إليكم — بلا موقع دقيق ولا يظهر لأحد.
+                        </p>
+                    </div>
+                    <a href="{{ route('account.profile') }}" class="btn btn-primary w-full sm:w-auto">
+                        <x-ui.icon name="map-pin" class="size-5"/> حدّدوا مكانكم
+                    </a>
+                </div>
+            @endif
+        </section>
+    @endif
+@endauth
+
 {{-- ═══ الفعاليات القادمة ═══ --}}
 <section class="surface-tint py-14">
     <div class="mx-auto max-w-7xl px-4 sm:px-6">

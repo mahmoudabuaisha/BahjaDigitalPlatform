@@ -20,12 +20,16 @@ class EventIndexController extends Controller
 
     public function __invoke(Request $request): View
     {
+        $viewer = $request->user();
+
         $filters = [
             'q' => trim((string) $request->query('q', '')),
             'cat' => (string) $request->query('cat', ''),
             'area' => (string) $request->query('area', ''),
             'age' => (string) $request->query('age', ''),
             'when' => (string) $request->query('when', ''),
+            // الترتيب: 'near' يقدّم الأقرب لمرساة مكان العائلة، وإلا فالأسبق موعداً
+            'sort' => $request->query('sort') === 'near' ? 'near' : '',
         ];
 
         $events = Event::query()
@@ -58,6 +62,7 @@ class EventIndexController extends Controller
                     ->where('age_min', '<=', $to)
                     ->where('age_max', '>=', $from);
             })
+            ->when($filters['sort'] === 'near', fn ($query) => $query->nearestTo($viewer))
             ->orderBy('start_date')
             ->orderBy('start_time')
             ->paginate(9)
@@ -65,6 +70,7 @@ class EventIndexController extends Controller
 
         return view('pages.events-index', [
             'events' => $events,
+            'viewer' => $viewer,
             'filters' => $filters,
             'categories' => Category::orderBy('sort_order')
                 ->withCount(['events' => fn ($query) => $query->publiclyVisible()->upcoming()])

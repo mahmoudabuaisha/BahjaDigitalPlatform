@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\RegistrationStatus;
 use App\Models\Area;
+use App\Models\ShelterCenter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -42,9 +43,14 @@ class AccountController extends Controller
     public function profile(): View
     {
         return view('pages.account.profile', [
-            'user' => Auth::user()->load('area'),
+            'user' => Auth::user()->load(['area', 'shelterCenter']),
             'children' => Auth::user()->children()->orderBy('birth_date')->get(),
             'areas' => Area::orderBy('sort_order')->get(),
+            // المعالم مجمَّعة بمحافظتها كي يصفّيها المتصفّح بلا طلب شبكة
+            'centersByArea' => ShelterCenter::where('is_active', true)
+                ->orderBy('name')
+                ->get(['id', 'area_id', 'name'])
+                ->groupBy('area_id'),
         ]);
     }
 
@@ -59,8 +65,25 @@ class AccountController extends Controller
             'birth_date' => ['nullable', 'date', 'before:today'],
             'gender' => ['nullable', 'in:male,female'],
             'area_id' => ['nullable', 'exists:areas,id'],
+            'shelter_center_id' => ['nullable', 'exists:shelter_centers,id'],
             'address' => ['nullable', 'string', 'max:200'],
         ]);
+
+        // المعلم يتبع محافظته: تغيير المحافظة يلغي معلماً لا ينتمي إليها
+        if ($data['shelter_center_id'] ?? null) {
+            $belongs = ShelterCenter::whereKey($data['shelter_center_id'])
+                ->where('area_id', $data['area_id'] ?? 0)
+                ->exists();
+
+            if (! $belongs) {
+                $data['shelter_center_id'] = null;
+            }
+        }
+
+        if (($data['area_id'] ?? null) !== $user->area_id
+            || ($data['shelter_center_id'] ?? null) !== $user->shelter_center_id) {
+            $data['location_set_at'] = now();
+        }
 
         $user->update($data);
 
