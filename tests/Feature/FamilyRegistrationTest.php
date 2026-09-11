@@ -68,7 +68,7 @@ class FamilyRegistrationTest extends TestCase
         $this->actingAs($this->family());
 
         $this->get('/admin')->assertForbidden();
-        $this->get('/team')->assertForbidden();
+        $this->get(route('organizer.dashboard'))->assertForbidden();
     }
 
     public function test_guest_is_sent_to_login_before_booking(): void
@@ -214,7 +214,7 @@ class FamilyRegistrationTest extends TestCase
         $this->assertSame('أم أحمد', $family->fresh()->name);
     }
 
-    public function test_event_page_in_both_panels_loads_with_the_registrations_tab(): void
+    public function test_the_event_registrations_screen_loads_for_admin_and_for_its_team(): void
     {
         $event = $this->upcomingEvent();
 
@@ -225,7 +225,12 @@ class FamilyRegistrationTest extends TestCase
             'role' => UserRole::TeamManager,
             'team_id' => $event->team_id,
         ]);
-        $this->actingAs($manager)->get('/team/events/'.$event->id.'/edit')->assertOk();
+
+        // الفريق يدير حجوزات فعاليته من لوحته الموحَّدة
+        $this->actingAs($manager)
+            ->get(route('organizer.events.registrations', $event))
+            ->assertOk()
+            ->assertSee('تسجيلات');
     }
 
     public function test_organizer_pages_are_limited_to_active_team_managers(): void
