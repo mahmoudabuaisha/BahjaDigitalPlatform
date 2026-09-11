@@ -198,6 +198,17 @@
                        class="input" placeholder="أدخلوا العنوان التفصيلي للمكان">
             </label>
 
+            {{-- الوصول بالمعالم: أدقّ ما يملكه أهل المكان، ولا يكشف إحداثيات --}}
+            <label class="field block">
+                <span>كيف تصلون؟ <span class="font-normal text-ink-soft">(اختياري)</span></span>
+                <input type="text" name="directions" maxlength="300"
+                       value="{{ old('directions', $event->directions ?? '') }}"
+                       class="input" placeholder="مثال: من دوّار الكتيبة غرباً خمس دقائق — المدرسة على يمينكم">
+                <span class="text-sm text-ink-soft">
+                    اكتبوها بالمعالم التي يعرفها الناس — لا بالإحداثيات.
+                </span>
+            </label>
+
             @unless($editing)
                 {{-- التكرار الأسبوعي: سلسلة مواعيد مستقلة حتى 8 أسابيع --}}
                 <div x-data="{ repeat: {{ old('repeat_weekly') ? 'true' : 'false' }} }"

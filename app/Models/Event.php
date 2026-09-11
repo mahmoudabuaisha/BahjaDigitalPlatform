@@ -49,6 +49,7 @@ class Event extends Model
         'description',
         'terms',
         'location_details',
+        'directions',
         'start_date',
         'start_time',
         'end_time',
@@ -338,12 +339,27 @@ class Event extends Model
             return;
         }
 
-        if ($user->shelter_center_id) {
-            $query->orderByRaw('case when shelter_center_id = ? then 0 when area_id = ? then 1 else 2 end',
-                [$user->shelter_center_id, $user->area_id]);
-        } else {
+        if (! $user->shelter_center_id) {
             $query->orderByRaw('case when area_id = ? then 0 else 1 end', [$user->area_id]);
+
+            return;
         }
+
+        // دقائق المشي المسجَّلة تتقدّم على مجرّد «نفس المحافظة»:
+        // مكانكم نفسه، ثم الأماكن الموصولة بالأقرب زمناً، ثم المحافظة، ثم ما بَعُد
+        $minutes = PlaceLink::query()
+            ->selectRaw('case when from_center_id = ? then to_center_id else from_center_id end as linked_id, walk_minutes', [$user->shelter_center_id])
+            ->touching($user->shelter_center_id);
+
+        $query
+            ->leftJoinSub($minutes, 'near', 'near.linked_id', '=', 'events.shelter_center_id')
+            ->select('events.*')
+            ->orderByRaw('case
+                    when events.shelter_center_id = ? then 0
+                    when near.walk_minutes is not null then 1
+                    when events.area_id = ? then 2
+                    else 3 end', [$user->shelter_center_id, $user->area_id])
+            ->orderByRaw('coalesce(near.walk_minutes, 9999)');
     }
 
     /**
@@ -366,14 +382,27 @@ class Event extends Model
             : self::PROXIMITY_FAR;
     }
 
-    /** عبارة القرب كما تُقرأ على البطاقة */
+    /**
+     * عبارة القرب كما تُقرأ على البطاقة. العائلات تقيس بالدقائق مشياً لا
+     * بالكيلومترات، فإن سُجّلت صلة مشي بين المكانين قُدِّمت على الوصف العام.
+     */
     public function proximityLabel(?User $user): ?string
     {
-        return match ($this->proximityRank($user)) {
-            self::PROXIMITY_SAME_PLACE => 'في مكانكم نفسه',
-            self::PROXIMITY_SAME_AREA => 'في محافظتكم',
-            default => null,
-        };
+        if ($user === null || ! $user->hasLocationAnchor()) {
+            return null;
+        }
+
+        if ($this->proximityRank($user) === self::PROXIMITY_SAME_PLACE) {
+            return 'في مكانكم نفسه';
+        }
+
+        $minutes = PlaceLink::minutesBetween($user->shelter_center_id, $this->shelter_center_id);
+
+        if ($minutes !== null && $minutes > 0) {
+            return 'على بُعد '.PlaceLink::minutesLabel($minutes).' مشياً';
+        }
+
+        return $this->proximityRank($user) === self::PROXIMITY_SAME_AREA ? 'في محافظتكم' : null;
     }
 
     public function publicPlaceName(): string

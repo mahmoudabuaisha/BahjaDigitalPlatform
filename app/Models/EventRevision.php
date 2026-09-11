@@ -37,7 +37,7 @@ class EventRevision extends Model
     public const REVISABLE = [
         'title', 'category_id', 'audience', 'description', 'terms',
         'start_date', 'start_time', 'end_time',
-        'area_id', 'shelter_center_id', 'location_details',
+        'area_id', 'shelter_center_id', 'location_details', 'directions',
         'age_min', 'age_max', 'expected_children', 'fee',
         'registration_mode', 'image_path',
     ];

@@ -48,6 +48,7 @@ class RevisionReview extends Page implements HasTable
         'title' => 'اسم الفعالية',
         'description' => 'الوصف',
         'location_details' => 'العنوان التفصيلي',
+        'directions' => 'كيف تصلون؟',
         'start_date' => 'التاريخ',
         'start_time' => 'وقت البداية',
         'end_time' => 'وقت النهاية',

@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class EventController extends Controller
 {
-    public function show(Event $event): View
+    public function show(Request $request, Event $event): View
     {
         abort_unless($event->status->isPubliclyVisible(), 404);
 
@@ -28,6 +29,7 @@ class EventController extends Controller
         return view('pages.event-show', [
             'event' => $event,
             'related' => $related,
+            'viewer' => $request->user(),
         ]);
     }
 
