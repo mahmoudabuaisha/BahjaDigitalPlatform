@@ -17,6 +17,8 @@ use App\Http\Controllers\OrganizerAttendanceController;
 use App\Http\Controllers\OrganizerController;
 use App\Http\Controllers\OrganizerDashboardController;
 use App\Http\Controllers\OrganizerEventController;
+use App\Http\Controllers\OrganizerRegistrationController;
+use App\Http\Controllers\OrganizerTeamProfileController;
 use App\Http\Controllers\PwaController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\SitemapController;
@@ -24,6 +26,7 @@ use App\Http\Controllers\TeamApplicationController;
 use App\Http\Controllers\TeamPublicController;
 use App\Http\Controllers\TrackController;
 use App\Http\Middleware\EnsureTeamManager;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', HomeController::class)->name('home');
@@ -38,6 +41,12 @@ Route::post('/events/{event}/feedback', [FeedbackController::class, 'storeForEve
     ->name('events.feedback');
 
 Route::get('/organizers', OrganizerController::class)->name('organizers');
+// لوحة الفرق صارت واحدة (/organizer): أي وصول للمسار القديم يُحوَّل إليها،
+// والتسجيل الذاتي القديم يُحوَّل إلى نموذج الانضمام كي يمرّ كل فريق باعتماد الإدارة
+Route::redirect('/team/register', '/join-team');
+Route::get('/team/{any?}', fn (): RedirectResponse => redirect()->route('organizer.dashboard'))
+    ->where('any', '.*');
+
 Route::get('/join-team', [TeamApplicationController::class, 'create'])->name('teams.join');
 Route::post('/join-team', [TeamApplicationController::class, 'store'])
     ->middleware('throttle:feedback')
@@ -109,6 +118,15 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/organizer/events/{event}/attendance', [OrganizerAttendanceController::class, 'create'])->name('organizer.events.attendance');
         Route::post('/organizer/events/{event}/attendance', [OrganizerAttendanceController::class, 'store'])->name('organizer.events.attendance.store');
+
+        // تسجيلات العائلات: الفريق يقبل أو يعتذر بنفسه
+        Route::get('/organizer/events/{event}/registrations', [OrganizerRegistrationController::class, 'index'])->name('organizer.events.registrations');
+        Route::post('/organizer/events/{event}/registrations/{registration}/accept', [OrganizerRegistrationController::class, 'accept'])->name('organizer.registrations.accept');
+        Route::post('/organizer/events/{event}/registrations/{registration}/reject', [OrganizerRegistrationController::class, 'reject'])->name('organizer.registrations.reject');
+
+        // ملف الفريق: بيانات الفريق وشعاره كما تراها العائلات
+        Route::get('/organizer/profile', [OrganizerTeamProfileController::class, 'edit'])->name('organizer.profile');
+        Route::put('/organizer/profile', [OrganizerTeamProfileController::class, 'update'])->name('organizer.profile.update');
     });
 
     Route::get('/my-events', [RegistrationController::class, 'index'])->name('my-events');
