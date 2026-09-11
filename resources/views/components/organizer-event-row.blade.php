@@ -55,7 +55,7 @@
                     <x-ui.icon name="check" class="size-4 text-emerald-600"/> تسجيل الحضور
                 </a>
             @endif
-            <a href="{{ url('/team/events/'.$event->id.'/edit') }}" class="flex min-h-[40px] items-center gap-2 rounded-xl px-3 no-underline hover:bg-brand-50">
+            <a href="{{ route('organizer.events.registrations', $event) }}" class="flex min-h-[40px] items-center gap-2 rounded-xl px-3 no-underline hover:bg-brand-50">
                 <x-ui.icon name="users" class="size-4 text-brand-500"/> حجوزات العائلات
             </a>
             @if($event->status->isPubliclyVisible())

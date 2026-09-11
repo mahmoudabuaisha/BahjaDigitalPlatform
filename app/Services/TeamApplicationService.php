@@ -4,11 +4,13 @@ namespace App\Services;
 
 use App\Enums\TeamApplicationStatus;
 use App\Enums\UserRole;
+use App\Mail\TeamApprovedMail;
 use App\Models\AuditLog;
 use App\Models\Team;
 use App\Models\TeamApplication;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 /** اعتماد طلب فريق: يُنشأ الفريق وحساب مديره بكلمة سرّ تُسلَّم يدوياً */
@@ -60,6 +62,12 @@ class TeamApplicationService
             ]);
 
             AuditLog::record('application.approved', $application, after: ['team_id' => $team->id]);
+
+            // بريد الترحيب يحمل بيانات الدخول — فشل الإرسال لا يُبطل الاعتماد
+            rescue(
+                fn () => Mail::to($manager->email)->queue(new TeamApprovedMail($team, $manager, $password)),
+                report: true,
+            );
 
             return ['team' => $team, 'manager' => $manager, 'password' => $password];
         });
