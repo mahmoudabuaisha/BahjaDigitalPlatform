@@ -14,19 +14,19 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
-            # النشر الحقيقي: سحب الكود وتثبيت الحزم والهجرات وبناء الذاكرة.
-            # نجاحه وحده يحدّد لون التشغيل.
-            bash ~/update-hostinger.sh || DEPLOY_FAILED=1
+            set +e
+            echo "════════ محتوى سكربت النشر على الاستضافة ════════"
+            cat ~/update-hostinger.sh
 
-            # خطوات سلامة اختيارية بعده: حذف ملف صنف من المستودع قد يترك
-            # خريطة أصناف composer تشير إلى ملف مفقود فيعجز artisan عن
-            # الإقلاع. هذه محاولة إصلاح — فشلها لا يصبغ النشر بالأحمر.
-            echo "── خطوات السلامة ──"
+            echo "════════ تشغيل النشر (بتتبّع كل أمر) ════════"
+            bash -x ~/update-hostinger.sh 2>&1 | tail -70
+            DEPLOY_CODE=${PIPESTATUS[0]}
+            echo "════════ رمز خروج سكربت النشر: $DEPLOY_CODE ════════"
+
             cd ~/bahja 2>/dev/null && {
-              composer dump-autoload --optimize --no-interaction --no-scripts || echo "تخطّي: تعذّرت إعادة توليد خريطة الأصناف"
-              php artisan optimize:clear || echo "تخطّي: تعذّر مسح الذاكرة"
-              php artisan optimize || echo "تخطّي: تعذّرت إعادة بناء الذاكرة"
-              php artisan about --only=environment || true
+              echo "── محاولة إصلاح الذاكرة (اختيارية) ──"
+              php artisan optimize:clear 2>&1 | tail -12 || echo "تخطّي: مسح الذاكرة"
+              php artisan optimize 2>&1 | tail -12 || echo "تخطّي: بناء الذاكرة"
             }
 
-            exit ${DEPLOY_FAILED:-0}
+            exit $DEPLOY_CODE
