@@ -11,6 +11,9 @@ Schedule::command('events:release-scheduled')->everyMinute();
 // كل صباح: تذكير من حجز مقعداً في فعالية الغد
 Schedule::command('registrations:remind')->dailyAt('09:00');
 
+// كل مساء: «غداً في حيّكم» — الوعد الأساسي للمنصّة يصل الهاتف قبل النوم
+Schedule::command('push:tomorrow')->dailyAt('18:30');
+
 // الاستضافة المشتركة بلا عامل طابور دائم: رسائل البريد المُنتظرة تُصرَّف
 // كل دقيقة ضمن نفس كرون schedule:run ثم يتوقف العامل فوراً
 Schedule::command('queue:work --stop-when-empty --tries=3 --max-time=45')

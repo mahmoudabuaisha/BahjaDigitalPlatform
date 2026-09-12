@@ -92,7 +92,7 @@ class PwaInstallTest extends TestCase
             ->assertSee('بَهْجَة في جيبكم')
             ->assertSee('إضافة إلى الشاشة الرئيسية')   // خطوات iOS
             ->assertSee('ثبّتوا التطبيق الآن')          // زر أندرويد
-            ->assertSee('اختصارات بضغطة مطوّلة');
+            ->assertSee('الضغط المطوّل على أيقونة بَهْجَة');
     }
 
     public function test_the_footer_points_families_to_the_app_page(): void

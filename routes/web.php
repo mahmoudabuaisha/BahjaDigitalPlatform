@@ -20,6 +20,7 @@ use App\Http\Controllers\OrganizerDashboardController;
 use App\Http\Controllers\OrganizerEventController;
 use App\Http\Controllers\OrganizerRegistrationController;
 use App\Http\Controllers\OrganizerTeamProfileController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\PwaController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\SitemapController;
@@ -106,6 +107,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/account/call', [NeighbourhoodCallController::class, 'store'])
         ->middleware('throttle:feedback')->name('calls.store');
     Route::delete('/account/call', [NeighbourhoodCallController::class, 'destroy'])->name('calls.destroy');
+
+    // اشتراك الجهاز في إشعارات الدفع
+    Route::post('/account/push', [PushSubscriptionController::class, 'store'])->name('push.store');
+    Route::post('/account/push/remove', [PushSubscriptionController::class, 'destroy'])->name('push.destroy');
+    Route::post('/account/push/test', [PushSubscriptionController::class, 'test'])
+        ->middleware('throttle:6,1')->name('push.test');
 
     Route::get('/account/notifications', [NotificationController::class, 'index'])->name('notifications');
     Route::post('/account/notifications/read', [NotificationController::class, 'markAllRead'])->name('notifications.read');

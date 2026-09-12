@@ -2,6 +2,7 @@ import Alpine from 'alpinejs';
 import './offline-queue';
 import { loadSnapshot, snapshotStatus } from './snapshot';
 import { registerPwa, syncAppBadge, watchForUpdates } from './pwa';
+import { registerPush } from './push';
 
 window.Alpine = Alpine;
 
@@ -12,8 +13,9 @@ const arabicDate = new Intl.DateTimeFormat('ar-u-nu-latn', {
     month: 'long',
 });
 
-// تثبيت التطبيق وتحديثه — منطقه في وحدة مستقلة لطوله
+// تثبيت التطبيق وتحديثه وإشعاراته — منطقها في وحدات مستقلة لطولها
 registerPwa(Alpine);
+registerPush(Alpine);
 
 /**
  * الفعاليات المحفوظة على الجهاز — تُقرأ من تغذية الـ Service Worker،

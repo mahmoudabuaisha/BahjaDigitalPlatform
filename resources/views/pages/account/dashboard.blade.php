@@ -37,6 +37,8 @@
     @endforeach
 </div>
 
+<x-push-settings :user="auth()->user()" class="mt-8"/>
+
 <section class="mt-8">
     <div class="flex items-center justify-between gap-3">
         <h2 class="text-xl font-bold">حجوزاتكم القادمة</h2>
