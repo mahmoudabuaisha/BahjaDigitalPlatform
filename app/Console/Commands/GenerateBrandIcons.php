@@ -9,8 +9,8 @@ use Illuminate\Console\Command;
  * يولّد طقم أيقونات التطبيق من ملف الشعار نفسه، فتبقى الأيقونات
  * مشتقّة من مصدر واحد لا ملفات غامضة لا يُعرف كيف صُنعت.
  *
- * التصميم المعتمد: الشعار كاملاً (الكلمة والوجه) بلا البالونات — حذفها
- * يقرّب الشعار من المربّع فتكبر الكلمة وتبقى مقروءة على الشاشة.
+ * التصميم المعتمد: الشعار كاملاً كما هو، لا يُقصّ منه شيء. حرف الباء هو
+ * نفسه اليد التي تمسك البالونات، فأي قصٍّ لإبعادها يقطع الحرف معها.
  *
  * التشغيل: php artisan brand:icons
  */
@@ -25,8 +25,15 @@ class GenerateBrandIcons extends Command
 
     private const BRAND_BOTTOM = [31, 98, 167];
 
-    /** نسبة عرض الرسم داخل المربّع العادي */
-    private const FILL = 0.94;
+    /**
+     * نسبة عرض الرسم داخل المربّع العادي. تُترك هوامش معتبرة لأن الأنظمة
+     * ترسم الأيقونة داخل شكل مستدير الأطراف، فالرسم الملاصق للحافة يبدو
+     * مقصوصاً حتى لو لم يُقصّ فعلاً.
+     */
+    private const FILL = 0.86;
+
+    /** iOS يقصّ بشكل أقرب إلى الدائرة من أندرويد، فالهامش عنده أوسع */
+    private const APPLE_FILL = 0.80;
 
     /**
      * النسخة القابلة للقصّ: أندرويد قد يقصّ الأيقونة دائرةً قطرها 80%
@@ -55,7 +62,7 @@ class GenerateBrandIcons extends Command
         imagepalettetotruecolor($logo);
         imagesavealpha($logo, true);
 
-        $art = $this->trim($this->withoutBalloons($logo));
+        $art = $this->trim($logo);
 
         $written = [
             'icons/icon-512.png' => $this->compose($art, 512, self::FILL, true),
@@ -63,7 +70,7 @@ class GenerateBrandIcons extends Command
             'icons/icon-512-maskable.png' => $this->compose($art, 512, self::MASKABLE_FILL, true),
             'icons/icon-192-maskable.png' => $this->compose($art, 192, self::MASKABLE_FILL, true),
             // سفاري يرسم الشفافية سوداء: أيقونة iOS معتمة إجباراً
-            'icons/apple-touch-icon.png' => $this->compose($art, 180, self::FILL, true),
+            'icons/apple-touch-icon.png' => $this->compose($art, 180, self::APPLE_FILL, true),
             // شارة شريط الحالة: أندرويد يقرأ قناة الشفافية فقط ويرسمها
             // لوناً واحداً — فالشعار الملوّن يظهر بقعةً، والظلّ الأبيض يظهر شكلاً
             'icons/badge-96.png' => $this->silhouette($art, 96),
@@ -83,32 +90,48 @@ class GenerateBrandIcons extends Command
     }
 
     /**
-     * البالونات تُمدّ الشعار عرضاً فتصغر الكلمة داخل المربّع.
-     * تُقصّ من اليسار بنسبة ثابتة من عرض الشعار.
+     * يقصّ الصورة على حدود الرسم المرئي فعلاً.
+     *
+     * imagecropauto لا تُعوَّل عليها هنا: أي بكسل شبه شفاف يبقيه فتبقى
+     * هوامش غير متساوية، فيتمركز الملفُّ لا الرسمُ وتنزاح الكلمة جانباً.
      */
-    private function withoutBalloons(GdImage $logo): GdImage
+    private function trim(GdImage $image): GdImage
     {
-        $width = (int) round(imagesx($logo) * 0.78);
-        $height = imagesy($logo);
+        $w = imagesx($image);
+        $h = imagesy($image);
+        $left = $w;
+        $right = -1;
+        $top = $h;
+        $bottom = -1;
 
-        $cropped = imagecreatetruecolor($width, $height);
+        for ($y = 0; $y < $h; $y++) {
+            for ($x = 0; $x < $w; $x++) {
+                // 127 = شفاف تماماً؛ نتجاهل ما يكاد يكون شفافاً أيضاً
+                if (((imagecolorat($image, $x, $y) >> 24) & 0x7F) > 120) {
+                    continue;
+                }
+
+                $left = min($left, $x);
+                $right = max($right, $x);
+                $top = min($top, $y);
+                $bottom = max($bottom, $y);
+            }
+        }
+
+        if ($right < 0) {
+            return $image;
+        }
+
+        $cropped = imagecreatetruecolor($right - $left + 1, $bottom - $top + 1);
         imagealphablending($cropped, false);
         imagesavealpha($cropped, true);
         imagefill($cropped, 0, 0, imagecolorallocatealpha($cropped, 0, 0, 0, 127));
         imagealphablending($cropped, true);
 
-        imagecopy($cropped, $logo, 0, 0, 0, 0, $width, $height);
+        imagecopy($cropped, $image, 0, 0, $left, $top, $right - $left + 1, $bottom - $top + 1);
         imagealphablending($cropped, false);
 
         return $cropped;
-    }
-
-    /** يزيل الهوامش الشفافة كي يملأ الرسم المربّع فعلاً */
-    private function trim(GdImage $image): GdImage
-    {
-        $box = imagecropauto($image, IMG_CROP_TRANSPARENT);
-
-        return $box === false ? $image : $box;
     }
 
     /** ظلّ أبيض على شفاف: كل بكسل غير شفاف يصير أبيض بدرجة شفافيته */
