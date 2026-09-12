@@ -12,7 +12,26 @@
 
     <link rel="manifest" href="{{ route('pwa.manifest') }}">
     <link rel="icon" href="/icons/icon-192.png" type="image/png">
-    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+    {{-- iOS لا يقرأ المانيفست: الاسم والأيقونة وشريط الحالة تُقال له هنا،
+         والأيقونة معتمة لأن سفاري يرسم الشفافية سوداء. --}}
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="{{ \App\Support\Settings::get('site_name') }}">
+    <meta name="application-name" content="{{ \App\Support\Settings::get('site_name') }}">
+
+    {{-- تُعرف النسخة المثبَّتة قبل أول رسم، فلا تومض دعوة التثبيت داخلها --}}
+    <script>
+        try {
+            if (matchMedia('(display-mode: standalone)').matches
+                || matchMedia('(display-mode: minimal-ui)').matches
+                || navigator.standalone) {
+                document.documentElement.classList.add('is-installed');
+            }
+        } catch (e) {}
+    </script>
 
     <link rel="preload" href="/fonts/tajawal-arabic-400-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/tajawal-arabic-700-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -23,7 +42,20 @@
         <style>[x-cloak]{display:revert !important}</style>
     </noscript>
 </head>
-<body class="min-h-screen bg-white font-sans text-ink antialiased">
+<body class="min-h-screen bg-white font-sans text-ink antialiased"
+      data-unread="{{ auth()->check() ? auth()->user()->unreadNotificationsCount() : 0 }}">
+
+    {{-- نسخة جديدة جاهزة: تنتظر ضغطة، فلا تُسحب الصفحة من تحت يد أحد --}}
+    <div id="update-banner" class="hidden bg-brand-800 px-4 py-2 text-center text-sm text-white">
+        نسخة جديدة من بَهْجَة جاهزة على جهازكم.
+        <button type="button" id="update-now" class="ms-2 rounded-lg bg-white/20 px-3 py-1 font-bold hover:bg-white/30">
+            حدّثوا الآن
+        </button>
+    </div>
+
+    @unless(request()->routeIs('install'))
+        <x-install-invite/>
+    @endunless
 
     {{-- شريط حالة الشبكة --}}
     <div id="offline-banner" class="hidden bg-brand-900 px-4 py-2 text-center text-sm text-white">
@@ -205,6 +237,7 @@
                         <li><a href="{{ route('home') }}" class="no-underline transition hover:text-amber-200">الرئيسية</a></li>
                         <li><a href="{{ route('events.index') }}" class="no-underline transition hover:text-amber-200">الفعاليات</a></li>
                         <li><a href="{{ route('organizers') }}" class="no-underline transition hover:text-amber-200">المنظِّمون</a></li>
+                        <li><a href="{{ route('install') }}" class="no-underline transition hover:text-amber-200">تطبيق بَهْجَة على هاتفكم</a></li>
                         <li><a href="{{ route('guide') }}" class="no-underline transition hover:text-amber-200">دليل الاستخدام</a></li>
                         <li><a href="{{ route('faq') }}" class="no-underline transition hover:text-amber-200">الأسئلة الشائعة</a></li>
                         <li><a href="{{ route('privacy') }}" class="no-underline transition hover:text-amber-200">سياسة الخصوصية</a></li>

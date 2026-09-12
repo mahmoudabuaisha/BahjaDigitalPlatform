@@ -13,6 +13,7 @@ class SitemapController extends Controller
         $urls = [
             ['loc' => route('home'), 'priority' => '1.0'],
             ['loc' => route('guide'), 'priority' => '0.5'],
+            ['loc' => route('install'), 'priority' => '0.5'],
             ['loc' => route('feedback.create'), 'priority' => '0.3'],
         ];
 

@@ -11,6 +11,14 @@ const FEED_URL = '/api/v1/events';
 const NETWORK_TIMEOUT_MS = 3500;
 const MAX_UPLOAD_ENTRIES = 60;
 
+// صفحات تخصّ شخصاً بعينه: لا تُخزَّن أبداً. الهاتف في غزة يتشاركه أكثر
+// من فرد، وصفحة حساب محفوظة قد تُعرض لمن سجّل دخوله بعده.
+const PRIVATE_PATHS = ['/account', '/organizer', '/notifications'];
+
+function isPrivate(pathname) {
+    return PRIVATE_PATHS.some((prefix) => pathname === prefix || pathname.startsWith(prefix + '/'));
+}
+
 // قائمة التخزين المسبق: هيكل التطبيق + الأصول المبنية (تُحقن من السيرفر)
 const PRECACHE = [
     '/',
@@ -19,11 +27,13 @@ const PRECACHE = [
     '/contact',
     '/guide',
     '/feedback',
+    '/app',
     OFFLINE_URL,
     '/manifest.webmanifest',
     '/fonts/tajawal-arabic-400-normal.woff2',
     '/fonts/tajawal-arabic-500-normal.woff2',
     '/fonts/tajawal-arabic-700-normal.woff2',
+    '/brand/logo.png',
     '/icons/icon-192.png',
     '/icons/icon-512.png',
     '/images/og-default.png',
@@ -33,22 +43,45 @@ const PRECACHE = [
 @endforeach
 ];
 
+/**
+ * تخزين مسبق متسامح: cache.addAll تسقط كلها إن سقط ملف واحد، فيفشل
+ * تثبيت الـ Service Worker ويبقى الموقع بلا أوفلاين. نخزّن ملفاً ملفاً
+ * ونمضي — ما نقص اليوم يُجلب عند أول طلب له.
+ */
+async function precache() {
+    const cache = await caches.open(STATIC_CACHE);
+
+    await Promise.all(PRECACHE.map((url) => cache.add(new Request(url, { cache: 'reload' }))
+        .catch(() => null)));
+}
+
 self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(STATIC_CACHE)
-            .then((cache) => cache.addAll(PRECACHE))
-            .then(() => self.skipWaiting())
-    );
+    // بلا skipWaiting: النسخة الجديدة تنتظر إذن المستخدم في الصفحة
+    event.waitUntil(precache());
 });
 
 self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys()
-            .then((keys) => Promise.all(
-                keys.filter((key) => ! key.endsWith(VERSION)).map((key) => caches.delete(key))
-            ))
-            .then(() => self.clients.claim())
-    );
+    event.waitUntil((async () => {
+        // التحميل المسبق للتنقّل: المتصفّح يبدأ الطلب قبل أن نستيقظ
+        if (self.registration.navigationPreload) {
+            await self.registration.navigationPreload.enable().catch(() => {});
+        }
+
+        const keys = await caches.keys();
+
+        await Promise.all(
+            keys.filter((key) => ! key.endsWith(VERSION)).map((key) => caches.delete(key))
+        );
+
+        await self.clients.claim();
+    })());
+});
+
+// الصفحة وحدها تقرّر متى تحلّ النسخة الجديدة محلّ القديمة
+self.addEventListener('message', (event) => {
+    if (event.data?.type === 'skip-waiting') {
+        self.skipWaiting();
+    }
 });
 
 /** جلب مع مهلة — شبكات غزة قد "تعلق" طويلاً، لا ننتظر أكثر من 3.5 ثانية */
@@ -64,13 +97,14 @@ function fetchWithTimeout(request, timeoutMs) {
 }
 
 /** التنقلات: الشبكة أولاً بمهلة ← الكاش ← صفحة "دون اتصال" */
-async function handleNavigation(request) {
+async function handleNavigation(request, preloadResponse) {
     const cache = await caches.open(PAGES_CACHE);
+    const cacheable = ! isPrivate(new URL(request.url).pathname);
 
     try {
-        const response = await fetchWithTimeout(request, NETWORK_TIMEOUT_MS);
+        const response = (await preloadResponse) || await fetchWithTimeout(request, NETWORK_TIMEOUT_MS);
 
-        if (response && response.ok) {
+        if (response && response.ok && cacheable) {
             cache.put(request, response.clone());
         }
 
@@ -273,7 +307,7 @@ self.addEventListener('fetch', (event) => {
     }
 
     if (request.mode === 'navigate') {
-        event.respondWith(handleNavigation(request));
+        event.respondWith(handleNavigation(request, event.preloadResponse));
 
         return;
     }
