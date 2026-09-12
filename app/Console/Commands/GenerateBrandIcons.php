@@ -36,6 +36,12 @@ class GenerateBrandIcons extends Command
     private const APPLE_FILL = 0.80;
 
     /**
+     * أيقونة نتائج البحث تُعرض داخل دائرة صغيرة جداً، فتُملأ أكثر من
+     * أيقونة التطبيق كي يبقى للشعار حجمٌ يُرى.
+     */
+    private const FAVICON_FILL = 0.92;
+
+    /**
      * النسخة القابلة للقصّ: أندرويد قد يقصّ الأيقونة دائرةً قطرها 80%
      * من الضلع، فالرسم كلّه يجب أن يقع داخل تلك الدائرة.
      */
@@ -74,19 +80,62 @@ class GenerateBrandIcons extends Command
             // شارة شريط الحالة: أندرويد يقرأ قناة الشفافية فقط ويرسمها
             // لوناً واحداً — فالشعار الملوّن يظهر بقعةً، والظلّ الأبيض يظهر شكلاً
             'icons/badge-96.png' => $this->silhouette($art, 96),
+            // أيقونة نتائج البحث: جوجل يفضّل مربّعاً من مضاعفات 48
+            'icons/favicon-48.png' => $this->compose($art, 48, self::FAVICON_FILL, true),
+            'icons/favicon-96.png' => $this->compose($art, 96, self::FAVICON_FILL, true),
+            'icons/favicon-192.png' => $this->compose($art, 192, self::FAVICON_FILL, true),
         ];
 
         foreach ($written as $file => $image) {
             imagepng($image, public_path($file), 9);
         }
 
-        $this->info('Generated '.count($written).' app icons from public/brand/logo.png');
+        // favicon.ico: المتصفّحات وزاحف جوجل يطلبونه من جذر الموقع بحكم
+        // العُرف حتى مع وجود وسم <link>. ملفٌ فارغ هناك يعني أيقونة عامّة.
+        $this->writeIco(public_path('favicon.ico'), $art, [16, 32, 48]);
+
+        $this->info('Generated '.(count($written) + 1).' icons from public/brand/logo.png');
 
         foreach (array_keys($written) as $file) {
             $this->line('  public/'.$file);
         }
 
+        $this->line('  public/favicon.ico  (16 + 32 + 48)');
+
         return self::SUCCESS;
+    }
+
+    /**
+     * يكتب ملف ICO يحوي عدّة مقاسات مرمَّزة PNG.
+     *
+     * GD لا تكتب ICO، والصيغة بسيطة: ترويسة ثم فهرس بمدخل لكل مقاس ثم
+     * الصور. المتصفّحات الحديثة وزاحف جوجل تقبل PNG داخل ICO.
+     *
+     * @param  array<int, int>  $sizes
+     */
+    private function writeIco(string $path, GdImage $art, array $sizes): void
+    {
+        $images = [];
+
+        foreach ($sizes as $size) {
+            ob_start();
+            imagepng($this->compose($art, $size, self::FAVICON_FILL, true), null, 9);
+            $images[$size] = (string) ob_get_clean();
+        }
+
+        // ICONDIR: محجوز(2) + النوع(2)=1 للأيقونة + العدد(2)
+        $ico = pack('vvv', 0, 1, count($images));
+
+        // الصور تبدأ بعد الترويسة والفهرس
+        $offset = 6 + 16 * count($images);
+
+        foreach ($images as $size => $data) {
+            // العرض والارتفاع بايت واحد لكلٍّ (0 تعني 256)
+            $ico .= pack('CCCCvvVV', $size, $size, 0, 0, 1, 32, strlen($data), $offset);
+            $offset += strlen($data);
+        }
+
+        file_put_contents($path, $ico.implode('', $images));
     }
 
     /**

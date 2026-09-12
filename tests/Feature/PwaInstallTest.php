@@ -71,6 +71,31 @@ class PwaInstallTest extends TestCase
             ->assertSee('apple-mobile-web-app-capable', false);
     }
 
+    public function test_the_search_engine_finds_a_real_favicon(): void
+    {
+        // كان هذا الملف صفر بايت، فعرض جوجل أيقونة عامّة بدل شعار المنصّة
+        $ico = public_path('favicon.ico');
+
+        $this->assertFileExists($ico);
+        $this->assertGreaterThan(500, filesize($ico), 'favicon.ico فارغ أو ناقص');
+
+        // ترويسة ICO: محجوز 0، النوع 1، ثم عدد المقاسات
+        $header = unpack('vreserved/vtype/vcount', (string) file_get_contents($ico, length: 6));
+
+        $this->assertSame(0, $header['reserved']);
+        $this->assertSame(1, $header['type']);
+        $this->assertGreaterThanOrEqual(3, $header['count']);
+
+        foreach (['48', '96', '192'] as $size) {
+            $this->assertFileExists(public_path("icons/favicon-{$size}.png"));
+        }
+
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('rel="icon" href="/favicon.ico"', false)
+            ->assertSee('sizes="48x48"', false);
+    }
+
     public function test_the_service_worker_is_served_uncached_and_versioned(): void
     {
         $response = $this->get('/sw.js')->assertOk();
