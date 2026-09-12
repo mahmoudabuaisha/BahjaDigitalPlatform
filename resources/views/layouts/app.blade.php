@@ -12,7 +12,13 @@
     @yield('og', View::make('partials.og'))
 
     <link rel="manifest" href="{{ route('pwa.manifest') }}">
-    <link rel="icon" href="/icons/icon-192.png" type="image/png">
+    {{-- أيقونة الموقع في التبويب وفي نتائج البحث. جوجل يفضّل مربّعاً من
+         مضاعفات 48، ويطلب /favicon.ico من الجذر بحكم العُرف — فيُقدَّم
+         الاثنان معاً. --}}
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/icons/favicon-48.png" type="image/png" sizes="48x48">
+    <link rel="icon" href="/icons/favicon-96.png" type="image/png" sizes="96x96">
+    <link rel="icon" href="/icons/favicon-192.png" type="image/png" sizes="192x192">
 
     {{-- iOS لا يقرأ المانيفست: الاسم والأيقونة وشريط الحالة تُقال له هنا،
          والأيقونة معتمة لأن سفاري يرسم الشفافية سوداء. --}}
