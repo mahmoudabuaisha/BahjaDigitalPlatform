@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\SendPushNotification;
 use App\Mail\UserNotificationMail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -54,6 +55,18 @@ class UserNotification extends Model
         return $query->whereIn('type', self::GROUPS[$group] ?? []);
     }
 
+    /**
+     * الأنواع التي تستحق أن توقظ الهاتف. ما عداها يبقى داخل الموقع
+     * والبريد — الإشعار الذي يكثر يُطفَأ.
+     */
+    public const PUSHABLE = [
+        'event_new', 'call_answered', 'event_changed',
+        'event_cancelled', 'event_reminder', 'registration_accepted',
+    ];
+
+    /** إلغاء فعالية خبر عاجل: يصل ولو كان البيت نائماً */
+    private const IGNORES_QUIET_HOURS = ['event_cancelled', 'event_changed'];
+
     /** إنشاء إشعار — نقطة واحدة كي تبقى الصياغة والروابط متسقة */
     public static function send(User|int $user, string $type, string $title, ?string $body = null, ?string $url = null): self
     {
@@ -65,6 +78,8 @@ class UserNotification extends Model
             'url' => $url,
         ]);
 
+        $notification->pushToDevices();
+
         // الصورة البريدية للإشعار نفسه — وتعثّر البريد لا يُفشِل العملية الأصلية
         rescue(function () use ($user, $notification): void {
             $recipient = $user instanceof User ? $user : User::find($user);
@@ -75,5 +90,41 @@ class UserNotification extends Model
         }, report: true);
 
         return $notification;
+    }
+
+    /** صدى الإشعار على الهاتف — يصل وبَهْجَة مغلقة */
+    private function pushToDevices(): void
+    {
+        if (! in_array($this->type, self::PUSHABLE, true)) {
+            return;
+        }
+
+        if ($this->isQuietHour() && ! in_array($this->type, self::IGNORES_QUIET_HOURS, true)) {
+            return;
+        }
+
+        // إعلان فعالية يُشعر كل عائلات المحافظة: بلا هذا الفحص يمتلئ
+        // الطابور بمهامّ لأجهزة لا وجود لها على استضافة مشتركة ضيّقة
+        if (! PushSubscription::where('user_id', $this->user_id)->exists()) {
+            return;
+        }
+
+        rescue(fn () => SendPushNotification::dispatch($this->user_id, [
+            'title' => $this->title,
+            'body' => $this->body ?? '',
+            'url' => $this->url ?? route('notifications'),
+            'tag' => 'bahja-'.$this->type,
+        ]), report: false);
+    }
+
+    private function isQuietHour(): bool
+    {
+        $hour = (int) now()->format('G');
+        $from = (int) config('push.quiet_from', 22);
+        $until = (int) config('push.quiet_until', 7);
+
+        return $from > $until
+            ? ($hour >= $from || $hour < $until)   // الليل يعبر منتصفه
+            : ($hour >= $from && $hour < $until);
     }
 }

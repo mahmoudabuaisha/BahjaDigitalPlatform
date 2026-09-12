@@ -278,6 +278,66 @@ self.addEventListener('sync', (event) => {
     }
 });
 
+/* ── إشعارات الدفع ──
+   تصل والهاتف في الجيب وبَهْجَة مغلقة. النقر عليها يفتح الفعالية نفسها
+   لا الصفحة الرئيسية، ويُركّز نافذة مفتوحة بدل فتح أخرى. */
+
+self.addEventListener('push', (event) => {
+    let data = {};
+
+    try {
+        data = event.data ? event.data.json() : {};
+    } catch (error) {
+        data = { title: 'بَهْجَة', body: event.data ? event.data.text() : '' };
+    }
+
+    const title = data.title || 'بَهْجَة';
+
+    event.waitUntil(self.registration.showNotification(title, {
+        body: data.body || '',
+        icon: '/icons/icon-192.png',
+        badge: '/icons/icon-192-maskable.png',
+        lang: 'ar',
+        dir: 'rtl',
+        tag: data.tag || 'bahja',
+        renotify: Boolean(data.tag),
+        data: { url: data.url || '/' },
+    }));
+});
+
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+
+    const target = new URL(event.notification.data?.url || '/', self.location.origin);
+
+    event.waitUntil((async () => {
+        const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+
+        for (const client of clients) {
+            if (new URL(client.url).origin === target.origin && 'focus' in client) {
+                await client.focus();
+
+                if ('navigate' in client) {
+                    await client.navigate(target.href).catch(() => {});
+                }
+
+                return;
+            }
+        }
+
+        await self.clients.openWindow(target.href);
+    })());
+});
+
+/* الاشتراك ينتهي أحياناً بقرار المتصفّح: نُعلم الصفحات كي تجدّده */
+self.addEventListener('pushsubscriptionchange', (event) => {
+    event.waitUntil((async () => {
+        const clients = await self.clients.matchAll({ includeUncontrolled: true });
+
+        clients.forEach((client) => client.postMessage({ type: 'push-resubscribe' }));
+    })());
+});
+
 self.addEventListener('fetch', (event) => {
     const request = event.request;
 
