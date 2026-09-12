@@ -109,6 +109,9 @@
     }
 
     [x-cloak] { display: none !important; }
+
+    /* داخل النسخة المثبَّتة لا معنى لدعوة التثبيت — تُحجب قبل أول رسم */
+    .is-installed .install-only { display: none !important; }
 }
 
 @layer components {

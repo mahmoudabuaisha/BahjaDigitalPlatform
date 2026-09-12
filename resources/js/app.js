@@ -1,6 +1,7 @@
 import Alpine from 'alpinejs';
 import './offline-queue';
 import { loadSnapshot, snapshotStatus } from './snapshot';
+import { registerPwa, syncAppBadge, watchForUpdates } from './pwa';
 
 window.Alpine = Alpine;
 
@@ -11,45 +12,8 @@ const arabicDate = new Intl.DateTimeFormat('ar-u-nu-latn', {
     month: 'long',
 });
 
-/**
- * دعوة تثبيت التطبيق — لا تظهر إلا إذا عرضها المتصفح فعلاً،
- * والرفض يُحفظ في الجهاز كي لا نزعج الأهالي مرة أخرى.
- */
-Alpine.data('installPrompt', () => ({
-    available: false,
-    deferred: null,
-
-    init() {
-        if (localStorage.getItem('bahja_install_dismissed') === '1') {
-            return;
-        }
-
-        window.addEventListener('beforeinstallprompt', (event) => {
-            event.preventDefault();
-            this.deferred = event;
-            this.available = true;
-        });
-
-        window.addEventListener('appinstalled', () => {
-            this.available = false;
-            localStorage.setItem('bahja_install_dismissed', '1');
-        });
-    },
-
-    async install() {
-        if (! this.deferred) return;
-
-        this.available = false;
-        this.deferred.prompt();
-        await this.deferred.userChoice;
-        this.deferred = null;
-    },
-
-    dismiss() {
-        this.available = false;
-        localStorage.setItem('bahja_install_dismissed', '1');
-    },
-}));
+// تثبيت التطبيق وتحديثه — منطقه في وحدة مستقلة لطوله
+registerPwa(Alpine);
 
 /**
  * الفعاليات المحفوظة على الجهاز — تُقرأ من تغذية الـ Service Worker،
@@ -249,11 +213,20 @@ if (trackEl && navigator.sendBeacon) {
     navigator.sendBeacon(`/t/e/${trackEl.dataset.trackEvent}`);
 }
 
-/* تسجيل الـ Service Worker */
+/* تسجيل الـ Service Worker ومراقبة التحديثات */
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {
-            // الوضع المحلي بدون بناء أصول — تجاهل بصمت
-        });
+        navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+                watchForUpdates(registration);
+
+                // النسخة المثبَّتة قد تبقى مفتوحة أياماً: نسأل عن جديد بين حين وآخر
+                setInterval(() => registration.update().catch(() => {}), 60 * 60 * 1000);
+            })
+            .catch(() => {
+                // الوضع المحلي بدون بناء أصول — تجاهل بصمت
+            });
     });
+
+    syncAppBadge();
 }

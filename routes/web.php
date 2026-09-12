@@ -150,6 +150,7 @@ Route::get('/api/v1/events', FeedController::class)->name('api.events');
 Route::post('/t/e/{event}', [TrackController::class, 'event'])->name('track.event');
 
 Route::view('/offline', 'pages.offline')->name('offline');
+Route::view('/app', 'pages.install')->name('install');
 Route::get('/manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');
 Route::get('/sw.js', [PwaController::class, 'serviceWorker'])->name('pwa.sw');
 
