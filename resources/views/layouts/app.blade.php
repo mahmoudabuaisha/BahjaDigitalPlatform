@@ -15,14 +15,14 @@
     {{-- أيقونة الموقع في التبويب وفي نتائج البحث. جوجل يفضّل مربّعاً من
          مضاعفات 48، ويطلب /favicon.ico من الجذر بحكم العُرف — فيُقدَّم
          الاثنان معاً. --}}
-    <link rel="icon" href="/favicon.ico" sizes="any">
-    <link rel="icon" href="/icons/favicon-48.png" type="image/png" sizes="48x48">
-    <link rel="icon" href="/icons/favicon-96.png" type="image/png" sizes="96x96">
-    <link rel="icon" href="/icons/favicon-192.png" type="image/png" sizes="192x192">
+    <link rel="icon" href="{{ \App\Support\AssetVersion::url('favicon.ico') }}" sizes="any">
+    <link rel="icon" href="{{ \App\Support\AssetVersion::url('icons/favicon-48.png') }}" type="image/png" sizes="48x48">
+    <link rel="icon" href="{{ \App\Support\AssetVersion::url('icons/favicon-96.png') }}" type="image/png" sizes="96x96">
+    <link rel="icon" href="{{ \App\Support\AssetVersion::url('icons/favicon-192.png') }}" type="image/png" sizes="192x192">
 
     {{-- iOS لا يقرأ المانيفست: الاسم والأيقونة وشريط الحالة تُقال له هنا،
          والأيقونة معتمة لأن سفاري يرسم الشفافية سوداء. --}}
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="apple-touch-icon" href="{{ \App\Support\AssetVersion::url('icons/apple-touch-icon.png') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">

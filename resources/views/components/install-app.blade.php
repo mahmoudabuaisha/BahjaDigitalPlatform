@@ -6,7 +6,7 @@
     {{-- الواجهة: الطلسم على تدرّج الهوية، كما ستبدو الأيقونة على الشاشة --}}
     <div class="relative flex items-center gap-5 overflow-hidden bg-gradient-to-l from-brand-700 to-brand-500 px-6 py-6">
         <span class="grid size-20 shrink-0 place-items-center overflow-hidden rounded-[1.4rem] bg-white/15 shadow-lg ring-1 ring-white/25">
-            <img src="/icons/icon-192.png" alt="" width="80" height="80" class="size-20 rounded-[1.4rem]">
+            <img src="{{ \App\Support\AssetVersion::url('icons/icon-192.png') }}" alt="" width="80" height="80" class="size-20 rounded-[1.4rem]">
         </span>
 
         <div class="min-w-0">

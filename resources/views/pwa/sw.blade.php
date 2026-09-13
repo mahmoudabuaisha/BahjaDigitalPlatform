@@ -34,8 +34,10 @@ const PRECACHE = [
     '/fonts/tajawal-arabic-500-normal.woff2',
     '/fonts/tajawal-arabic-700-normal.woff2',
     '/brand/logo.png',
-    '/icons/icon-192.png',
-    '/icons/icon-512.png',
+    // بالبصمة نفسها التي تطلبها الصفحة: مفتاح الكاش يشمل الاستعلام،
+    // فلو خزّنّاها بلا بصمة لَما وافقت الطلب وجُلبت من الشبكة بلا داعٍ
+    '{{ \App\Support\AssetVersion::url('icons/icon-192.png') }}',
+    '{{ \App\Support\AssetVersion::url('icons/icon-512.png') }}',
     '/images/og-default.png',
     '/images/team-placeholder.svg',
 @foreach($buildAssets as $asset)
@@ -295,8 +297,8 @@ self.addEventListener('push', (event) => {
 
     event.waitUntil(self.registration.showNotification(title, {
         body: data.body || '',
-        icon: '/icons/icon-192.png',
-        badge: '/icons/badge-96.png',
+        icon: '{{ \App\Support\AssetVersion::url('icons/icon-192.png') }}',
+        badge: '{{ \App\Support\AssetVersion::url('icons/badge-96.png') }}',
         lang: 'ar',
         dir: 'rtl',
         tag: data.tag || 'bahja',
