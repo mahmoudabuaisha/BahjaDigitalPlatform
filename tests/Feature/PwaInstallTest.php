@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Support\AssetVersion;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -53,8 +54,24 @@ class PwaInstallTest extends TestCase
         $promised = array_merge($promised, array_column($manifest['screenshots'], 'src'));
 
         foreach ($promised as $src) {
-            $this->assertFileExists(public_path(ltrim($src, '/')), "الأيقونة {$src} مفقودة");
+            // كل عنوان يحمل بصمة نسخة حتى لا تعلق أيقونة قديمة في الكاش
+            $this->assertMatchesRegularExpression('/\?v=[0-9a-f]{8}$/', $src, "العنوان {$src} بلا بصمة");
+
+            $path = (string) parse_url($src, PHP_URL_PATH);
+
+            $this->assertFileExists(public_path(ltrim($path, '/')), "الأيقونة {$path} مفقودة");
         }
+    }
+
+    public function test_icon_stamps_change_only_when_the_file_changes(): void
+    {
+        $first = AssetVersion::url('icons/icon-192.png');
+
+        $this->assertSame($first, AssetVersion::url('/icons/icon-192.png'));
+        $this->assertStringStartsWith('/icons/icon-192.png?v=', $first);
+
+        // ملف غير موجود لا يُلفَّق له عنوان بديل
+        $this->assertSame('/icons/nope.png', AssetVersion::url('icons/nope.png'));
     }
 
     public function test_ios_gets_an_opaque_icon_and_its_own_meta(): void
@@ -92,7 +109,7 @@ class PwaInstallTest extends TestCase
 
         $this->get('/')
             ->assertOk()
-            ->assertSee('rel="icon" href="/favicon.ico"', false)
+            ->assertSee('rel="icon" href="/favicon.ico?v=', false)
             ->assertSee('sizes="48x48"', false);
     }
 

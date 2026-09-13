@@ -5,7 +5,7 @@
      class="install-only border-b border-brand-100 bg-gradient-to-l from-brand-50 to-white">
     <div class="mx-auto flex max-w-7xl flex-wrap items-center gap-3 px-4 py-2.5 sm:px-6">
 
-        <img src="/icons/icon-192.png" alt="" width="36" height="36" class="size-9 shrink-0 rounded-xl">
+        <img src="{{ \App\Support\AssetVersion::url('icons/icon-192.png') }}" alt="" width="36" height="36" class="size-9 shrink-0 rounded-xl">
 
         <p class="min-w-[9rem] flex-1 text-sm leading-snug">
             <span class="block font-bold">ثبّتوا بَهْجَة على هاتفكم</span>

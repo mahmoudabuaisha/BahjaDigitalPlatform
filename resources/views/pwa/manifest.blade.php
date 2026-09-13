@@ -1,4 +1,8 @@
-@php $name = \App\Support\Settings::get('site_name'); @endphp
+@php
+    $name = \App\Support\Settings::get('site_name');
+    // بصمة لكل أيقونة: تغييرها يغيّر العنوان فيجلبها النظام جديدة
+    $icon = fn (string $path): string => \App\Support\AssetVersion::url($path);
+@endphp
 {
     "id": "/?src=pwa",
     "name": "{{ $name }} — روزنامة فعاليات الأطفال",
@@ -19,25 +23,25 @@
     },
     "icons": [
         {
-            "src": "/icons/icon-192.png",
+            "src": "{{ $icon('icons/icon-192.png') }}",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "any"
         },
         {
-            "src": "/icons/icon-512.png",
+            "src": "{{ $icon('icons/icon-512.png') }}",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any"
         },
         {
-            "src": "/icons/icon-192-maskable.png",
+            "src": "{{ $icon('icons/icon-192-maskable.png') }}",
             "sizes": "192x192",
             "type": "image/png",
             "purpose": "maskable"
         },
         {
-            "src": "/icons/icon-512-maskable.png",
+            "src": "{{ $icon('icons/icon-512-maskable.png') }}",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
@@ -49,40 +53,40 @@
             "short_name": "الفعاليات",
             "description": "كل الفعاليات المعتمدة مرتّبة بالأقرب موعداً",
             "url": "/events?src=shortcut",
-            "icons": [{ "src": "/icons/shortcut-events.png", "sizes": "96x96", "type": "image/png" }]
+            "icons": [{ "src": "{{ $icon('icons/shortcut-events.png') }}", "sizes": "96x96", "type": "image/png" }]
         },
         {
             "name": "الأقرب إلى مكانكم",
             "short_name": "قربكم",
             "description": "الفعاليات مرتّبة بدقائق المشي من مكانكم",
             "url": "/events?sort=near&src=shortcut",
-            "icons": [{ "src": "/icons/shortcut-nearby.png", "sizes": "96x96", "type": "image/png" }]
+            "icons": [{ "src": "{{ $icon('icons/shortcut-nearby.png') }}", "sizes": "96x96", "type": "image/png" }]
         },
         {
             "name": "حسابي وحجوزات أطفالي",
             "short_name": "حسابي",
             "description": "أطفالكم وحجوزاتكم وإشعاراتكم",
             "url": "/account?src=shortcut",
-            "icons": [{ "src": "/icons/shortcut-account.png", "sizes": "96x96", "type": "image/png" }]
+            "icons": [{ "src": "{{ $icon('icons/shortcut-account.png') }}", "sizes": "96x96", "type": "image/png" }]
         }
     ],
     "screenshots": [
         {
-            "src": "/icons/screenshot-mobile-home.png",
+            "src": "{{ $icon('icons/screenshot-mobile-home.png') }}",
             "sizes": "1080x1920",
             "type": "image/png",
             "form_factor": "narrow",
             "label": "الروزنامة: أقرب الفعاليات إلى مكانكم"
         },
         {
-            "src": "/icons/screenshot-mobile-events.png",
+            "src": "{{ $icon('icons/screenshot-mobile-events.png') }}",
             "sizes": "1080x1920",
             "type": "image/png",
             "form_factor": "narrow",
             "label": "الفعاليات مرتّبة بدقائق المشي"
         },
         {
-            "src": "/icons/screenshot-desktop.png",
+            "src": "{{ $icon('icons/screenshot-desktop.png') }}",
             "sizes": "1280x800",
             "type": "image/png",
             "form_factor": "wide",
