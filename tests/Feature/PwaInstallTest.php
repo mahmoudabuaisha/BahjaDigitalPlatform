@@ -88,6 +88,21 @@ class PwaInstallTest extends TestCase
             ->assertSee('apple-mobile-web-app-capable', false);
     }
 
+    public function test_the_install_sheet_stands_at_the_bottom_of_every_page(): void
+    {
+        // الرسالة لا تُفيد إن لم تُرَ: مكانها أسفل الشاشة حيث الإبهام
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('installSheet', false)
+            ->assertSee('ثبّتوا بَهْجَة على شاشتكم')
+            ->assertSee('fixed inset-x-0 bottom-0', false)
+            // خطوات سفاري داخل اللوح نفسه، فلا يغادر أحد الصفحة ليقرأها
+            ->assertSee('اضغطوا زرّ المشاركة', false);
+
+        // وفي صفحة شرح التثبيت لا معنى لدعوة إلى الصفحة نفسها
+        $this->get(route('install'))->assertOk()->assertDontSee('installSheet', false);
+    }
+
     public function test_the_search_engine_finds_a_real_favicon(): void
     {
         // كان هذا الملف صفر بايت، فعرض جوجل أيقونة عامّة بدل شعار المنصّة

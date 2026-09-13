@@ -1,60 +1,16 @@
 import Alpine from 'alpinejs';
 import './offline-queue';
 import { loadSnapshot, snapshotStatus } from './snapshot';
+import { registerOfflineViews } from './offline-views';
 import { registerPwa, syncAppBadge, watchForUpdates } from './pwa';
 import { registerPush } from './push';
 
 window.Alpine = Alpine;
 
-/** تنسيق التواريخ بالعربية مع أرقام لاتينية — كما في التصميم */
-const arabicDate = new Intl.DateTimeFormat('ar-u-nu-latn', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-});
-
-// تثبيت التطبيق وتحديثه وإشعاراته — منطقها في وحدات مستقلة لطولها
+// تثبيت التطبيق وتحديثه وإشعاراته وشاشاته دون إنترنت — في وحدات مستقلة لطولها
 registerPwa(Alpine);
 registerPush(Alpine);
-
-/**
- * الفعاليات المحفوظة على الجهاز — تُقرأ من تغذية الـ Service Worker،
- * فتعمل صفحة "دون اتصال" على ما خُزّن في آخر زيارة.
- */
-Alpine.data('savedEvents', () => ({
-    events: [],
-    loaded: false,
-
-    async init() {
-        try {
-            const feed = (await loadSnapshot()) ?? { events: [] };
-
-            const centers = new Map((feed.centers ?? []).map((c) => [c.id, c.n]));
-            const areas = new Map((feed.areas ?? []).map((a) => [a.id, a.n]));
-            const cats = new Map((feed.cats ?? []).map((c) => [c.id, c.n]));
-            const today = new Date().toISOString().slice(0, 10);
-
-            this.events = (feed.events ?? [])
-                .filter((event) => event.d >= today)
-                .slice(0, 12)
-                .map((event) => ({
-                    id: event.id,
-                    title: event.t,
-                    time: event.s,
-                    category: cats.get(event.c) ?? '',
-                    place: [centers.get(event.sc) ?? areas.get(event.a) ?? '', event.loc]
-                        .filter(Boolean)
-                        .join(' — '),
-                    // بلا فاصلة بين اليوم والتاريخ — كما تُطبع في بقية الصفحات
-                    dateLabel: arabicDate.format(new Date(`${event.d}T00:00:00`)).replace('،', ''),
-                }));
-        } catch (error) {
-            this.events = [];
-        }
-
-        this.loaded = true;
-    },
-}));
+registerOfflineViews(Alpine);
 
 /**
  * عدّاد متصاعد لأرقام الإحصاءات: يبدأ حين تدخل البطاقة مجال الرؤية،

@@ -112,6 +112,13 @@
 
     /* داخل النسخة المثبَّتة لا معنى لدعوة التثبيت — تُحجب قبل أول رسم */
     .is-installed .install-only { display: none !important; }
+
+    /* لوح التثبيت يقف فوق أسفل الصفحة، فتُفسح له الصفحةُ مكاناً بقدر
+       ارتفاعه — وإلا حجب آخر سطر في الفوتر عمّن وصل إلى نهايتها */
+    body {
+        padding-bottom: var(--install-sheet-h, 0px);
+        transition: padding-bottom .3s ease;
+    }
 }
 
 @layer components {
@@ -497,7 +504,17 @@
        وأثناء تمرير الصفحة ينكمش شفافاً نحو زاويته كي لا يحجب المحتوى — */
     .wa-float {
         transform-origin: left bottom;
-        transition: transform .35s ease, opacity .35s ease;
+        transition: transform .35s ease, opacity .35s ease, margin-bottom .3s ease;
+        /* لوح التثبيت يحجز أسفل الشاشة حين يظهر، فيرتفع زرّ واتساب فوقه
+           بدل أن يختفي تحته — المتغيّر يكتبه اللوح بارتفاعه الفعلي */
+        margin-bottom: var(--install-sheet-h, 0px);
+    }
+
+    /* خطوات التثبيت مفتوحة: اللوح أطول من أن يُرفع الزرّ فوقه بلا أن
+       يقف في وسط الشاشة، فينسحب حتى تُغلق الخطوات */
+    .install-sheet-open .wa-float {
+        opacity: 0;
+        pointer-events: none;
     }
 
     .wa-drift { transform: scale(.68); opacity: .5; }

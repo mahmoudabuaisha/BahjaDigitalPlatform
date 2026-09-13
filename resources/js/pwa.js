@@ -7,9 +7,10 @@
  */
 
 const SNOOZE_KEY = 'bahja_install_snoozed_until';
-const VISITS_KEY = 'bahja_visits';
-const SNOOZE_DAYS = 21;
-const VISITS_BEFORE_INVITE = 2;
+const SNOOZE_DAYS = 14;
+
+/** تأخير قبل الظهور: تُترك الصفحة تستقرّ أمام العين أولاً */
+const SHEET_DELAY_MS = 2500;
 
 /** الوعد المؤجَّل من المتصفّح — يصل مرة واحدة وقد يسبق تركيب Alpine */
 let deferredPrompt = null;
@@ -112,12 +113,21 @@ export function registerPwa(Alpine) {
     }));
 
     /**
-     * الدعوة العابرة أعلى الصفحة: لا تظهر للزائر أول مرة، ولا تعود
-     * قبل ثلاثة أسابيع إن رفضها — الإلحاح يطرد الناس ولا يجلبهم.
+     * لوح التثبيت الملتصق بأسفل الشاشة.
+     *
+     * الرسالة لا تُفيد إن لم تُرَ، فمكانها أسفل الشاشة حيث الإبهام لا أعلاها
+     * حيث يمرّ النظر. ولأن كل منصّة تُثبَّت بطريقة، يقود اللوحُ كلَّ مستخدم
+     * إلى طريقه هو: زرّ حقيقي حيث يمنحنا المتصفّح واحداً، وخطوات سفاري
+     * داخل اللوح نفسه على iOS، ونسخُ الرابط لمن هو في متصفّح لا يُثبِّت.
+     * ويُغلق بضغطة فلا يعود أسبوعين — الإلحاح يطرد الناس ولا يجلبهم.
      */
-    Alpine.data('installInvite', () => ({
+    Alpine.data('installSheet', () => ({
         visible: false,
+        expanded: false,
         platform: 'desktop',
+        canPrompt: false,
+        busy: false,
+        copied: false,
 
         init() {
             if (isStandalone()) {
@@ -125,39 +135,83 @@ export function registerPwa(Alpine) {
             }
 
             this.platform = detectPlatform();
+            this.canPrompt = deferredPrompt !== null;
 
-            if (this.platform === 'ios-other-browser') {
-                return; // لا حيلة لنا في هذه المتصفّحات: لا نعد بما لا يكون
-            }
+            promptListeners.add(() => { this.canPrompt = deferredPrompt !== null; });
 
-            const memory = store();
-            const snoozedUntil = Number(memory?.getItem(SNOOZE_KEY) ?? 0);
+            const snoozedUntil = Number(store()?.getItem(SNOOZE_KEY) ?? 0);
 
             if (snoozedUntil > Date.now()) {
                 return;
             }
 
-            const visits = Number(memory?.getItem(VISITS_KEY) ?? 0) + 1;
-            memory?.setItem(VISITS_KEY, String(visits));
+            setTimeout(() => { this.visible = true; }, SHEET_DELAY_MS);
 
-            if (visits < VISITS_BEFORE_INVITE) {
-                return;
+            window.addEventListener('appinstalled', () => {
+                this.visible = false;
+                this.canPrompt = false;
+            });
+        },
+
+        /** نصّ الزرّ الرئيسي: وعدٌ بما سيحدث فعلاً عند الضغط */
+        get action() {
+            if (this.canPrompt) {
+                return this.busy ? 'جارٍ التثبيت…' : 'ثبّتوا التطبيق';
             }
 
-            // أندرويد: لا ندعو قبل أن يؤكّد المتصفّح أن التثبيت ممكن
-            if (this.platform === 'android' && deferredPrompt === null) {
-                promptListeners.add(() => { this.visible = true; });
-
-                return;
+            if (this.platform === 'ios-other-browser') {
+                return this.copied ? 'نُسخ الرابط ✓' : 'انسخوا الرابط لسفاري';
             }
 
-            this.visible = true;
+            return this.expanded ? 'إخفاء الخطوات' : 'كيف أثبّتها؟';
+        },
 
-            window.addEventListener('appinstalled', () => { this.visible = false; });
+        async act() {
+            if (this.canPrompt) {
+                return this.install();
+            }
+
+            if (this.platform === 'ios-other-browser') {
+                return this.copyLink();
+            }
+
+            this.expanded = ! this.expanded;
+        },
+
+        async install() {
+            this.busy = true;
+
+            try {
+                deferredPrompt.prompt();
+                const choice = await deferredPrompt.userChoice;
+
+                if (choice?.outcome !== 'accepted') {
+                    this.snooze(); // رفض النافذة: لا نعيدها عليه غداً
+                }
+            } catch (error) {
+                this.expanded = true; // رفض المتصفّح فتح النافذة: نشرح يدوياً
+            }
+
+            deferredPrompt = null;
+            this.canPrompt = false;
+            this.busy = false;
+        },
+
+        async copyLink() {
+            try {
+                await navigator.clipboard.writeText(window.location.origin);
+                this.copied = true;
+            } catch (error) {
+                this.expanded = true; // لا حافظة: نعرض العنوان ليُكتب يدوياً
+            }
         },
 
         dismiss() {
             this.visible = false;
+            this.snooze();
+        },
+
+        snooze() {
             store()?.setItem(SNOOZE_KEY, String(Date.now() + SNOOZE_DAYS * 86400000));
         },
     }));

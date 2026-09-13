@@ -1,2 +1,6 @@
 User-agent: *
-Disallow:
+# كل شيء مسموح عدا هيكل الأوفلاين: صفحة فارغة يملؤها الجهاز من نسخته
+# المحفوظة، فلا محتوى فيها لمحرّك بحث
+Disallow: /offline/event
+
+Sitemap: https://bahjagaza.com/sitemap.xml

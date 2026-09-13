@@ -10,7 +10,7 @@ const DB_NAME = 'bahja-offline';
 const DB_VERSION = 2;
 const STORE = 'snapshot';
 const KEY = 'current';
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 const FEED_URL = '/api/v1/events';
 
 function openDatabase() {
@@ -113,6 +113,80 @@ export async function loadSnapshot() {
     } catch (error) {
         return stored; // الشبكة خذلتنا — آخر نسخة سليمة خير من لا شيء
     }
+}
+
+/* ── من المفاتيح المختصرة إلى نصّ يُقرأ ──
+   التغذية تُكتب بأحرف مفردة كي تخفّ على الشبكة، والقراءة تحتاج أسماء
+   وتواريخ عربية. هذه الدالة هي المترجم الوحيد بين الشكلين، فلا يتكرّر
+   فكّ الترميز في كل صفحة. */
+
+const dayFormat = new Intl.DateTimeFormat('ar-u-nu-latn', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+});
+
+const fullDayFormat = new Intl.DateTimeFormat('ar-u-nu-latn', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+});
+
+function dayOf(date) {
+    return new Date(`${date}T00:00:00`);
+}
+
+/**
+ * يفكّ تغذية محفوظة إلى فعاليات مقروءة، مرتّبة بالأقرب موعداً.
+ * الفعاليات الملغاة تُعلَّم ولا تُحذف: من قرأ عنها أمس يستحق أن يعرف
+ * أنها أُلغيت، لا أن تختفي بلا تفسير.
+ */
+export function hydrate(feed) {
+    if (! feed || ! Array.isArray(feed.events)) {
+        return [];
+    }
+
+    const centers = new Map((feed.centers ?? []).map((c) => [c.id, c.n]));
+    const areas = new Map((feed.areas ?? []).map((a) => [a.id, a.n]));
+    const cats = new Map((feed.cats ?? []).map((c) => [c.id, { name: c.n, color: c.c }]));
+    const cancelled = new Set(feed.cancelled ?? []);
+
+    return feed.events.map((event) => {
+        const category = cats.get(event.c);
+        const place = centers.get(event.sc) ?? areas.get(event.a) ?? '';
+
+        return {
+            id: event.id,
+            publicId: event.pu ?? null,
+            title: event.t,
+            date: event.d,
+            dateLabel: dayFormat.format(dayOf(event.d)).replace('،', ''),
+            fullDateLabel: fullDayFormat.format(dayOf(event.d)).replace('،', ''),
+            time: event.e ? `${event.s} — ${event.e}` : event.s,
+            start: event.s,
+            area: areas.get(event.a) ?? '',
+            place,
+            address: event.loc ?? null,
+            category: category?.name ?? '',
+            categoryColor: category?.color ?? null,
+            team: event.tm ?? null,
+            description: event.de ?? null,
+            directions: event.di ?? null,
+            terms: event.tr ?? null,
+            ages: event.ag ?? null,
+            fee: event.fe ?? 'مجاناً',
+            audience: event.au ?? null,
+            needsApproval: event.rm === 'approval',
+            expected: event.ec ?? null,
+            image: event.im ?? null,
+            cancelled: cancelled.has(event.id),
+            // ما يُبحث فيه: العنوان والمكان والمحافظة والفريق والفئة
+            haystack: [event.t, place, areas.get(event.a), event.tm, category?.name]
+                .filter(Boolean)
+                .join(' '),
+        };
+    }).sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start));
 }
 
 /** «آخر تحديث 09:30» + تحذير حين تتجاوز النسخة صلاحيتها */
