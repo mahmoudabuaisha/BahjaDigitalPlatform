@@ -7,6 +7,8 @@ const DATA_CACHE = 'data-' + VERSION;
 const STATIC_CACHE = 'static-' + VERSION;
 
 const OFFLINE_URL = '/offline';
+const OFFLINE_EVENT_URL = '/offline/event';
+const EVENT_PATH = /^\/events\/\d+$/;
 const FEED_URL = '/api/v1/events';
 const NETWORK_TIMEOUT_MS = 3500;
 const MAX_UPLOAD_ENTRIES = 60;
@@ -29,6 +31,7 @@ const PRECACHE = [
     '/feedback',
     '/app',
     OFFLINE_URL,
+    OFFLINE_EVENT_URL,
     '/manifest.webmanifest',
     '/fonts/tajawal-arabic-400-normal.woff2',
     '/fonts/tajawal-arabic-500-normal.woff2',
@@ -120,10 +123,22 @@ async function handleNavigation(request, preloadResponse) {
         }
 
         const staticCache = await caches.open(STATIC_CACHE);
-        const precachedPage = await staticCache.match(new URL(request.url).pathname);
+        const pathname = new URL(request.url).pathname;
+        const precachedPage = await staticCache.match(pathname);
 
         if (precachedPage) {
             return precachedPage;
+        }
+
+        // صفحة فعالية لم تُفتح من قبل: نقدّم هيكل الأوفلاين، وهو يقرأ رقمها
+        // من المسار ويرسمها من الروزنامة المحفوظة. العنوان يبقى كما هو،
+        // فلا ينكسر زرّ الرجوع ولا المشاركة.
+        if (EVENT_PATH.test(pathname)) {
+            const shell = await staticCache.match(OFFLINE_EVENT_URL);
+
+            if (shell) {
+                return shell;
+            }
         }
 
         return (await staticCache.match(OFFLINE_URL)) || Response.error();
@@ -376,6 +391,9 @@ self.addEventListener('fetch', (event) => {
 
     if (
         url.pathname.startsWith('/build/')
+        // شعار الترويسة والفوتر: كان يسقط دون شبكة فتظهر صورة مكسورة
+        // أعلى كل صفحة محفوظة — وهو مخزَّن مسبقاً أصلاً
+        || url.pathname.startsWith('/brand/')
         || url.pathname.startsWith('/fonts/')
         || url.pathname.startsWith('/icons/')
         || url.pathname.startsWith('/images/')

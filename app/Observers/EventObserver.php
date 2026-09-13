@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Enums\EventStatus;
 use App\Enums\RevisionStatus;
 use App\Enums\UserRole;
+use App\Http\Controllers\FeedController;
 use App\Models\Event;
 use App\Models\User;
 use App\Models\UserNotification;
@@ -181,6 +182,6 @@ class EventObserver
 
     public static function bustFeedCache(): void
     {
-        Cache::forget('events_feed');
+        Cache::forget(FeedController::CACHE_KEY);
     }
 }

@@ -60,10 +60,6 @@
         </button>
     </div>
 
-    @unless(request()->routeIs('install'))
-        <x-install-invite/>
-    @endunless
-
     {{-- شريط حالة الشبكة --}}
     <div id="offline-banner" class="hidden bg-brand-900 px-4 py-2 text-center text-sm text-white">
         أنتم الآن دون اتصال — تُعرض آخر البيانات المحفوظة على أجهزتكم
@@ -232,7 +228,8 @@
                     </p>
                     @if($whatsapp = \App\Support\Settings::get('site_whatsapp'))
                         <a href="https://wa.me/{{ preg_replace('/\D/', '', $whatsapp) }}" target="_blank" rel="noopener"
-                           class="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-emerald-600 no-underline shadow-md transition hover:bg-emerald-50">
+                           {{-- ‏emerald-600 على الأبيض 3.4:1 — دون حدّ WCAG AA؛ و700 يبلغ 5:1 --}}
+                           class="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-emerald-700 no-underline shadow-md transition hover:bg-emerald-50">
                             <x-ui.icon name="whatsapp" class="size-5"/> واتساب
                         </a>
                     @endif
@@ -309,6 +306,12 @@
             </span>
         </span>
     </a>
+
+    {{-- دعوة التثبيت: آخر عنصر في الصفحة كي تعلو ما سواها، ولا معنى لها
+         داخل النسخة المثبَّتة ولا في صفحة شرح التثبيت نفسها --}}
+    @unless(request()->routeIs('install'))
+        <x-install-sheet/>
+    @endunless
 
 </body>
 </html>

@@ -33,7 +33,12 @@ const PAGES = [
     '/photo-policy',
     '/feedback',
     '/offline',
+    '/offline/event',
 ];
+
+// لوح التثبيت يظهر بعد لحظة من استقرار الصفحة، وaxe لا يفحص مخفيّاً —
+// فننتظره كي يدخل الفحص بدل أن يمرّ من فوقه
+const INSTALL_SHEET_DELAY_MS = 3000;
 
 const browser = await chromium.launch({
     executablePath: process.env.CHROMIUM_PATH || undefined,
@@ -44,6 +49,7 @@ let totalViolations = 0;
 
 for (const path of PAGES) {
     await page.goto(BASE + path, { waitUntil: 'networkidle' });
+    await page.waitForTimeout(INSTALL_SHEET_DELAY_MS);
     await page.addScriptTag({ content: axeSource });
 
     const result = await page.evaluate(async () => await window.axe.run(document, {
