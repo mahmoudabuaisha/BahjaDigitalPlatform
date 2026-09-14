@@ -2,7 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Enums\EventStatus;
+use App\Enums\UserRole;
 use App\Models\Area;
+use App\Models\ContactMessage;
 use App\Models\Event;
 use App\Models\Feedback;
 use App\Models\ShelterCenter;
@@ -59,7 +62,7 @@ class DemoSeeder extends Seeder
                 [
                     'name' => 'مسؤول '.$data['name'],
                     'password' => 'password',
-                    'role' => \App\Enums\UserRole::TeamManager,
+                    'role' => UserRole::TeamManager,
                     'team_id' => $team->id,
                     'is_active' => true,
                 ],
@@ -102,12 +105,16 @@ class DemoSeeder extends Seeder
         // تقييمات تجريبية: عامة وعلى الفعاليات المنفذة
         Feedback::factory()->count(8)->create();
 
-        Event::where('status', \App\Enums\EventStatus::Completed)
+        Event::where('status', EventStatus::Completed)
             ->inRandomOrder()
             ->take(5)
             ->get()
             ->each(function (Event $event) {
                 Feedback::factory()->count(2)->create(['event_id' => $event->id]);
             });
+
+        // رسائل تجريبية من «تواصلوا معنا»: جديدة ومعالَجة
+        ContactMessage::factory()->count(3)->create();
+        ContactMessage::factory()->handled()->count(2)->create();
     }
 }

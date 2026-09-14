@@ -25,6 +25,9 @@ class Settings
         'guide_content' => '',
         'privacy_content' => '',
         'photo_policy_content' => '',
+        // تنبيه الإدارة بالبريد عند كل رسالة من «تواصلوا معنا» — العنوان فارغاً = بريد المدير العام
+        'contact_notify_enabled' => true,
+        'contact_notify_email' => '',
     ];
 
     public static function get(string $key, mixed $default = null): mixed
@@ -37,14 +40,13 @@ class Settings
     /** @return array<string, mixed> */
     public static function all(): array
     {
-        return Cache::rememberForever(self::CACHE_KEY, function (): array {
-            $stored = Setting::query()
-                ->pluck('value', 'key')
-                ->map(fn (?string $value) => $value === null ? null : json_decode($value, true))
-                ->all();
+        $stored = Cache::rememberForever(self::CACHE_KEY, fn (): array => Setting::query()
+            ->pluck('value', 'key')
+            ->map(fn (?string $value) => $value === null ? null : json_decode($value, true))
+            ->all());
 
-            return array_merge(self::DEFAULTS, $stored);
-        });
+        // الدمج عند القراءة لا عند التخزين: كاش قديم لا يُخفي مفتاحاً افتراضياً أُضيف بعده
+        return array_merge(self::DEFAULTS, $stored);
     }
 
     public static function set(string $key, mixed $value): void
