@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\FeedbackSource;
-use App\Models\Feedback;
+use App\Models\ContactMessage;
+use App\Services\ContactMessageNotifier;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -30,10 +30,16 @@ class ContactController extends Controller
             'message' => ['required', 'string', 'max:1000'],
         ]);
 
-        Feedback::create([
-            ...$data,
-            'source' => FeedbackSource::Family,
+        // تُحفظ في صندوق «رسائل التواصل» في اللوحة، ويُنبَّه المدراء بالبريد
+        $message = ContactMessage::create([
+            'name' => $data['contact_name'],
+            'email' => $data['contact_email'] ?? null,
+            'phone' => $data['contact_phone'] ?? null,
+            'subject' => $data['subject'] ?? null,
+            'message' => $data['message'],
         ]);
+
+        ContactMessageNotifier::send($message);
 
         return redirect()->route('contact')->with('contact_sent', true);
     }

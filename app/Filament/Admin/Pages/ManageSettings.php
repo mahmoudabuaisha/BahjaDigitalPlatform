@@ -8,6 +8,7 @@ use BackedEnum;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Section;
@@ -61,6 +62,19 @@ class ManageSettings extends Page
                             ->directory('site')
                             // إعادة الترميز على الخادم تمسح EXIF/GPS قبل التخزين
                             ->saveUploadedFileUsing(fn ($file): string => app(ImageService::class)->store($file, 'site', 'og_default_image')),
+                    ]),
+                Section::make('رسائل «تواصلوا معنا»')
+                    ->description('كل رسالة تصل إلى صندوق «رسائل التواصل» في اللوحة، ويمكن أن يصلكم تنبيه بها بالبريد أيضاً.')
+                    ->columnSpanFull()
+                    ->schema([
+                        Toggle::make('contact_notify_enabled')
+                            ->label('تنبيه بالبريد عند وصول رسالة جديدة')
+                            ->helperText('يصل بريد بنصّ الرسالة كاملاً ورابط فتحها في اللوحة.'),
+                        TextInput::make('contact_notify_email')
+                            ->label('البريد المستلم للتنبيهات')
+                            ->email()
+                            ->placeholder('فارغاً = بريد المدير العام')
+                            ->helperText('اتركوه فارغاً ليصل التنبيه إلى بريد حسابات «مدير عام» النشطة.'),
                     ]),
                 Section::make('محتوى الصفحات (القسم 12): يُحرَّر من هنا دون الرجوع للمطوّر')
                     ->description('اتركوا الحقل فارغاً ليظهر النص الافتراضي المجهّز في الموقع. فقرة جديدة = سطر فارغ بين الفقرتين.')

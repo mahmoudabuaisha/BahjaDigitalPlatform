@@ -23,7 +23,7 @@ class FeedbackResource extends Resource
 
     protected static string|UnitEnum|null $navigationGroup = 'إدارة المحتوى';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     // التقييمات تأتي من الموقع العام فقط — القراءة والحذف بلا إنشاء أو تعديل
     public static function canCreate(): bool

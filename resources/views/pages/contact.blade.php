@@ -57,7 +57,7 @@
         <a href="#contact-form" class="card card-hover tone tone-rose items-start gap-3 p-6 no-underline">
             <span class="icon-tile icon-tile-lg"><x-ui.icon name="envelope"/></span>
             <h2 class="text-lg font-bold">أرسلوا رسالة</h2>
-            <p class="text-sm text-ink-soft">اكتبوا لنا، وتصل رسالتكم مباشرة إلى فريق الإدارة داخل لوحة المنصّة.</p>
+            <p class="text-sm text-ink-soft">اكتبوا لنا، وتصل رسالتكم مباشرة إلى فريق الإدارة، ونردّ عليكم عبر واتساب أو البريد.</p>
             <span class="font-medium text-brand-700">اكتبوا الآن ←</span>
         </a>
     </div>
@@ -151,7 +151,7 @@
                     <x-ui.icon name="envelope" class="size-5"/> إرسال الرسالة
                 </button>
 
-                <p class="text-center text-sm text-ink-soft">لا نشارك بياناتكم مع أي جهة، وتصل الرسالة إلى فريق المنصّة وحده.</p>
+                <p class="text-center text-sm text-ink-soft">اتركوا رقم جوال أو بريداً كي نستطيع الردّ عليكم. لا نشارك بياناتكم مع أي جهة، وتصل الرسالة إلى فريق المنصّة وحده.</p>
             </form>
         </section>
     </div>
