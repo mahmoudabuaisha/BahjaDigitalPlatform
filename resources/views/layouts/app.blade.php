@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {{-- الموقع مصمَّم للنهار فقط: يمنع كروم وسامسونج وأمثالهما من «تعتيمه»
+         إجبارياً حين يكون هاتف الزائر في الوضع الليلي، فتبقى الألوان كما رُسمت --}}
+    <meta name="color-scheme" content="only light">
     <meta name="theme-color" content="#3b93e4">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
