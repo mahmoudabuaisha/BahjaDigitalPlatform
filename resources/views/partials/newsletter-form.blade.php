@@ -11,7 +11,7 @@
     {{-- فخ البوتات — مخفي عن البشر --}}
     <input type="text" name="website" value="" class="hidden" tabindex="-1" autocomplete="off" aria-hidden="true">
 
-    <div class="grid gap-3 sm:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)_auto]">
+    <div class="grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_minmax(11rem,1fr)_auto]">
         <div>
             <label for="newsletter-email-{{ $formId }}" class="sr-only">البريد الإلكتروني</label>
             <input id="newsletter-email-{{ $formId }}" type="email" name="newsletter_email" value="{{ old('newsletter_email') }}"

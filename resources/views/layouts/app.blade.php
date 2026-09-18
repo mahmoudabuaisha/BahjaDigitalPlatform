@@ -206,110 +206,117 @@
     </main>
 
     {{-- فوتر احتفالي: موجة تُدخل إلى جسم كحلي مزخرف، فموجة وردية، فشريط الحقوق --}}
-    <footer class="mt-16">
-        <svg class="-mb-px block h-10 w-full text-brand-800 sm:h-16" viewBox="0 0 1440 64" preserveAspectRatio="none" fill="currentColor" aria-hidden="true">
+    <footer class="mt-14">
+        {{-- موجة قصيرة تفصل الصفحة عن التذييل --}}
+        <svg class="-mb-px block h-6 w-full text-brand-800 sm:h-9" viewBox="0 0 1440 64" preserveAspectRatio="none" fill="currentColor" aria-hidden="true">
             <path d="M0 44 C240 8 480 64 720 40 C960 16 1200 56 1440 28 L1440 64 L0 64 Z"/>
         </svg>
 
         <div class="relative bg-gradient-to-b from-brand-800 to-[#17335a] text-white">
             <x-footer-decor/>
 
-            @unless(request()->routeIs('newsletter'))
-                {{-- نشرة الأسبوع: الاشتراك من أسفل أي صفحة — وصفحة النشرة لها نموذجها فلا يتكرّر --}}
-                <div id="newsletter" class="relative mx-auto max-w-7xl scroll-mt-28 px-4 pt-10 sm:px-6">
-                    <div class="grid gap-6 rounded-3xl bg-white/10 p-6 ring-1 ring-white/15 sm:p-8 lg:grid-cols-[1fr_1.25fr] lg:items-center lg:gap-10">
-                        <div>
-                            <h2 class="flex items-center gap-2.5 text-xl font-bold text-white">
-                                <span class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-300 text-brand-800"><x-ui.icon name="envelope" class="size-5"/></span>
-                                نشرة بَهْجَة البريدية
-                            </h2>
-                            <p class="mt-2.5 leading-relaxed text-white/85">
-                                كل أسبوع، فعاليات الأطفال القادمة قريباً منكم في رسالة واحدة.
-                                <a href="{{ route('newsletter') }}" class="font-bold text-amber-300 underline decoration-amber-300/50 underline-offset-4 hover:text-amber-200">اطّلعوا على نشرة هذا الأسبوع</a>
-                            </p>
-                        </div>
-                        @include('partials.newsletter-form', ['formId' => 'footer', 'dark' => true])
+            <div class="relative mx-auto max-w-7xl px-4 pt-7 pb-8 sm:px-6">
+                {{-- الصفّ الأول: الهوية ووسائل التواصل في سطر واحد --}}
+                <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div class="flex items-center gap-4">
+                        <a href="{{ route('home') }}" class="inline-flex shrink-0 rounded-2xl bg-white px-3 py-1.5 shadow-md shadow-black/25 no-underline">
+                            @if(file_exists(public_path('brand/logo.png')))
+                                <img src="{{ asset('brand/logo.png') }}" alt="{{ \App\Support\Settings::get('site_name') }}" class="h-9 w-auto">
+                            @else
+                                <span class="flex items-center gap-2">
+                                    <x-brand-mark class="size-8"/>
+                                    <span class="text-lg font-bold text-brand-700">{{ \App\Support\Settings::get('site_name') }}</span>
+                                </span>
+                            @endif
+                        </a>
+                        <p class="max-w-md text-sm leading-relaxed text-white/80">
+                            {{ \App\Support\Settings::get('about_text') ?: 'منصّة واحدة تجمع فعاليات الترفيه والدعم النفسي لأطفال غزة، وتصل إلى العائلات حتى حين تضعف الشبكة.' }}
+                        </p>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        @if($whatsapp = \App\Support\Settings::get('site_whatsapp'))
+                            <a href="https://wa.me/{{ preg_replace('/\D/', '', $whatsapp) }}" target="_blank" rel="noopener"
+                               {{-- ‏emerald-700 على الأبيض 5:1 — يبلغ حدّ WCAG AA --}}
+                               class="inline-flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-sm font-bold text-emerald-700 no-underline shadow-md transition hover:bg-emerald-50">
+                                <x-ui.icon name="whatsapp" class="size-4"/> واتساب
+                            </a>
+                        @endif
+                        @if($siteEmail = \App\Support\Settings::get('site_email'))
+                            <a href="mailto:{{ $siteEmail }}"
+                               class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3.5 py-1.5 text-sm font-semibold text-white no-underline ring-1 ring-white/25 transition hover:bg-white/20">
+                                <x-ui.icon name="envelope" class="size-4"/> <span dir="ltr">{{ $siteEmail }}</span>
+                            </a>
+                        @endif
                     </div>
                 </div>
-            @endunless
 
-            <div class="relative mx-auto grid max-w-7xl gap-9 px-4 pt-10 pb-14 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
-                <div>
-                    <a href="{{ route('home') }}" class="inline-flex rounded-2xl bg-white px-4 py-2.5 shadow-lg shadow-black/20 no-underline">
-                        @if(file_exists(public_path('brand/logo.png')))
-                            <img src="{{ asset('brand/logo.png') }}" alt="{{ \App\Support\Settings::get('site_name') }}" class="h-12 w-auto sm:h-14">
-                        @else
-                            <span class="flex items-center gap-2.5">
-                                <x-brand-mark class="size-10"/>
-                                <span class="text-xl font-bold text-brand-700">{{ \App\Support\Settings::get('site_name') }}</span>
-                            </span>
-                        @endif
-                    </a>
-                    <p class="mt-4 max-w-xs leading-relaxed text-white/85">
-                        {{ \App\Support\Settings::get('about_text') ?: 'منصّة واحدة تجمع فعاليات الترفيه والدعم النفسي لأطفال غزة، وتصل إلى العائلات حتى حين تضعف الشبكة.' }}
-                    </p>
-                    @if($whatsapp = \App\Support\Settings::get('site_whatsapp'))
-                        <a href="https://wa.me/{{ preg_replace('/\D/', '', $whatsapp) }}" target="_blank" rel="noopener"
-                           {{-- ‏emerald-600 على الأبيض 3.4:1 — دون حدّ WCAG AA؛ و700 يبلغ 5:1 --}}
-                           class="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-emerald-700 no-underline shadow-md transition hover:bg-emerald-50">
-                            <x-ui.icon name="whatsapp" class="size-5"/> واتساب
+                <div class="my-6 h-px bg-white/10"></div>
+
+                {{-- الصفّ الثاني: الروابط في أربعة أعمدة قصيرة (عمودان على الهاتف) --}}
+                <div class="grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-4">
+                    <nav aria-label="روابط سريعة">
+                        <h2 class="text-[13px] font-bold tracking-wide text-amber-300">روابط سريعة</h2>
+                        <ul class="mt-3 flex flex-col gap-2 text-sm text-white/80">
+                            <li><a href="{{ route('home') }}" class="no-underline transition hover:text-amber-200">الرئيسية</a></li>
+                            <li><a href="{{ route('events.index') }}" class="no-underline transition hover:text-amber-200">الفعاليات</a></li>
+                            <li><a href="{{ route('organizers') }}" class="no-underline transition hover:text-amber-200">المنظِّمون</a></li>
+                            <li><a href="{{ route('about') }}" class="no-underline transition hover:text-amber-200">عن بَهْجَة</a></li>
+                            <li><a href="{{ route('guide') }}" class="no-underline transition hover:text-amber-200">دليل الاستخدام</a></li>
+                            <li><a href="{{ route('faq') }}" class="no-underline transition hover:text-amber-200">الأسئلة الشائعة</a></li>
+                        </ul>
+                    </nav>
+
+                    <nav aria-label="الفئات">
+                        <h2 class="text-[13px] font-bold tracking-wide text-amber-300">الفئات</h2>
+                        <ul class="mt-3 flex flex-col gap-2 text-sm text-white/80">
+                            @foreach(\App\Models\Category::orderBy('sort_order')->limit(6)->get() as $footerCategory)
+                                <li>
+                                    <a href="{{ route('events.index', ['cat' => $footerCategory->slug]) }}" class="no-underline transition hover:text-amber-200">
+                                        {{ $footerCategory->name }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </nav>
+
+                    <nav aria-label="للفرق التطوعية">
+                        <h2 class="text-[13px] font-bold tracking-wide text-amber-300">للفرق التطوعية</h2>
+                        <ul class="mt-3 flex flex-col gap-2 text-sm text-white/80">
+                            <li><a href="{{ route('teams.join') }}" class="no-underline transition hover:text-amber-200">سجّلوا فريقكم</a></li>
+                            <li><a href="{{ route('login') }}" class="no-underline transition hover:text-amber-200">دخول الفرق</a></li>
+                            <li><a href="{{ route('feedback.create') }}" class="no-underline transition hover:text-amber-200">رأيكم يهمنا</a></li>
+                        </ul>
+                    </nav>
+
+                    <div>
+                        <h2 class="text-[13px] font-bold tracking-wide text-amber-300">ابقوا على اطّلاع</h2>
+                        <p class="mt-3 text-sm leading-relaxed text-white/80">فعاليات الأسبوع في بريدكم كل سبت صباحاً.</p>
+                        <a href="{{ route('newsletter') }}"
+                           class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-amber-300 px-3.5 py-1.5 text-sm font-bold text-brand-800 no-underline shadow-md shadow-black/20 transition hover:bg-amber-200">
+                            <x-ui.icon name="envelope" class="size-4"/> اشتركوا الآن
                         </a>
-                    @endif
-                    @if($siteEmail = \App\Support\Settings::get('site_email'))
-                        <a href="mailto:{{ $siteEmail }}"
-                           class="mt-3 flex w-fit items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-bold text-white no-underline ring-1 ring-white/25 transition hover:bg-white/25">
-                            <x-ui.icon name="envelope" class="size-5"/> <span dir="ltr">{{ $siteEmail }}</span>
-                        </a>
-                    @endif
-                </div>
-
-                <div>
-                    <h2 class="text-base font-bold text-amber-300">روابط سريعة</h2>
-                    <ul class="mt-3.5 flex flex-col gap-2.5 text-[15px] text-white/80">
-                        <li><a href="{{ route('home') }}" class="no-underline transition hover:text-amber-200">الرئيسية</a></li>
-                        <li><a href="{{ route('events.index') }}" class="no-underline transition hover:text-amber-200">الفعاليات</a></li>
-                        <li><a href="{{ route('organizers') }}" class="no-underline transition hover:text-amber-200">المنظِّمون</a></li>
-                        <li><a href="{{ route('install') }}" class="no-underline transition hover:text-amber-200">تطبيق بَهْجَة على هاتفكم</a></li>
-                        <li><a href="{{ route('guide') }}" class="no-underline transition hover:text-amber-200">دليل الاستخدام</a></li>
-                        <li><a href="{{ route('faq') }}" class="no-underline transition hover:text-amber-200">الأسئلة الشائعة</a></li>
-                        <li><a href="{{ route('privacy') }}" class="no-underline transition hover:text-amber-200">سياسة الخصوصية</a></li>
-                        <li><a href="{{ route('photo-policy') }}" class="no-underline transition hover:text-amber-200">سياسة صور الأطفال</a></li>
-                        <li><a href="{{ route('contact') }}" class="no-underline transition hover:text-amber-200">تواصلوا معنا</a></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h2 class="text-base font-bold text-amber-300">الفئات</h2>
-                    <ul class="mt-3.5 flex flex-col gap-2.5 text-[15px] text-white/80">
-                        @foreach(\App\Models\Category::orderBy('sort_order')->limit(6)->get() as $footerCategory)
-                            <li>
-                                <a href="{{ route('events.index', ['cat' => $footerCategory->slug]) }}" class="no-underline transition hover:text-amber-200">
-                                    {{ $footerCategory->name }}
-                                </a>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-
-                <div>
-                    <h2 class="text-base font-bold text-amber-300">للفرق التطوعية</h2>
-                    <ul class="mt-3.5 flex flex-col gap-2.5 text-[15px] text-white/80">
-                        <li><a href="{{ route('teams.join') }}" class="no-underline transition hover:text-amber-200">سجّلوا فريقكم</a></li>
-                        <li><a href="{{ route('login') }}" class="no-underline transition hover:text-amber-200">دخول الفرق</a></li>
-                        <li><a href="{{ route('feedback.create') }}" class="no-underline transition hover:text-amber-200">رأيكم يهمنا</a></li>
-                    </ul>
+                        <a href="{{ route('install') }}" class="mt-3 block text-sm text-white/80 no-underline transition hover:text-amber-200">تطبيق بَهْجَة على هاتفكم</a>
+                    </div>
                 </div>
             </div>
 
-            <svg class="relative -mb-px block h-10 w-full sm:h-14" viewBox="0 0 1440 64" preserveAspectRatio="none" aria-hidden="true">
+            <svg class="relative -mb-px block h-5 w-full sm:h-7" viewBox="0 0 1440 64" preserveAspectRatio="none" aria-hidden="true">
                 <path d="M0 40 C260 0 520 64 780 36 C1040 8 1240 52 1440 24 L1440 64 L0 64 Z" fill="#ec4899" opacity=".45"/>
                 <path d="M0 52 C280 16 560 60 840 32 C1080 10 1260 48 1440 36 L1440 64 L0 64 Z" fill="#db2777"/>
             </svg>
         </div>
 
-        <div class="bg-pink-600 px-4 py-4 text-center text-sm font-semibold text-white">
-            جميع الحقوق محفوظة © {{ \App\Support\Settings::get('site_name') }} {{ now()->year }}
-            — صُنعت بحب لأطفال غزة 💙
+        {{-- الشريط السفلي: الحقوق والسياسات في سطر واحد --}}
+        <div class="bg-pink-600 px-4 py-3 text-white">
+            <div class="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 text-[13px] sm:flex-row sm:px-6">
+                <p class="font-semibold">© {{ now()->year }} {{ \App\Support\Settings::get('site_name') }} — صُنعت بحب لأطفال غزة 💙</p>
+                <nav class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-white/90" aria-label="السياسات">
+                    <a href="{{ route('privacy') }}" class="no-underline hover:text-white hover:underline">سياسة الخصوصية</a>
+                    <a href="{{ route('photo-policy') }}" class="no-underline hover:text-white hover:underline">سياسة صور الأطفال</a>
+                    <a href="{{ route('contact') }}" class="no-underline hover:text-white hover:underline">تواصلوا معنا</a>
+                </nav>
+            </div>
         </div>
     </footer>
 

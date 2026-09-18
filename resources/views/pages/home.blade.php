@@ -282,6 +282,50 @@
     </div>
 </section>
 
+{{-- ═══ نشرة بَهْجَة البريدية: فعاليات الأسبوع تصل البريد كل سبت ═══ --}}
+<section id="newsletter" class="mx-auto max-w-7xl scroll-mt-28 px-4 pt-2 pb-14 sm:px-6">
+    <div class="relative overflow-hidden rounded-[2rem] border border-brand-100 bg-white shadow-[0_24px_60px_-32px_rgba(38,120,202,.45)] sm:rounded-[2.5rem]">
+        {{-- شريط لوني علوي بفواصل حادة: أزرق ثم أصفر ثم وردي بلا تدرّج بينها --}}
+        <div class="flex h-2" aria-hidden="true">
+            <span class="flex-1 bg-brand-500"></span><span class="flex-1 bg-amber-300"></span><span class="flex-1 bg-pink-500"></span>
+        </div>
+
+        <div class="grid items-center gap-8 px-6 py-8 sm:px-10 lg:grid-cols-[1fr_1.2fr] lg:gap-12 lg:py-10">
+            <div>
+                <div class="flex items-start gap-4">
+                    <div class="relative shrink-0">
+                        <span class="icon-tile tone tone-sky icon-tile-lg -rotate-6 shadow-lg shadow-sky-200/70"><x-ui.icon name="envelope"/></span>
+                        {{-- «رسالة جديدة»: نقطة تنبيه وردية على الظرف --}}
+                        <span class="absolute -end-1.5 -top-1.5 grid size-6 place-items-center rounded-full bg-pink-500 text-[11px] font-extrabold text-white ring-2 ring-white">1</span>
+                    </div>
+                    <div>
+                        <span class="badge tone tone-amber badge-tone"><x-ui.icon name="sparkles" class="size-4"/> كل سبت صباحاً</span>
+                        <h2 class="mt-2 text-2xl font-extrabold sm:text-3xl">نشرة بَهْجَة البريدية</h2>
+                        <p class="mt-2 leading-relaxed text-ink-soft">
+                            فعاليات الأسبوع القادم في محافظتكم، في رسالة واحدة تصل بريدكم وتبقى فيه حين تنقطع الشبكة.
+                        </p>
+                    </div>
+                </div>
+
+                <ul class="mt-5 flex flex-wrap gap-2">
+                    @foreach(['مرتّبة باليوم والمكان', 'محافظتكم أو كل غزة', 'بلا حساب ولا كلمة مرور', 'إلغاء بضغطة واحدة'] as $perk)
+                        <li class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-700">
+                            <x-ui.icon name="check" class="size-4 text-emerald-600"/> {{ $perk }}
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+
+            <div class="rounded-3xl bg-brand-50/70 p-5 ring-1 ring-brand-100 sm:p-6">
+                @include('partials.newsletter-form', ['formId' => 'home', 'dark' => false])
+                <a href="{{ route('newsletter') }}" class="mt-3 inline-flex items-center gap-1 text-sm font-bold text-brand-700 no-underline hover:text-brand-800">
+                    اطّلعوا على نشرة هذا الأسبوع <x-ui.icon name="chevron-start" class="size-4"/>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
 {{-- ═══ أين الفعاليات؟ خريطة المحافظات المرسومة ═══ --}}
 <section class="mx-auto max-w-7xl px-4 py-14 sm:px-6">
     <div class="grid items-center gap-10 lg:grid-cols-[.85fr_1.15fr]">
