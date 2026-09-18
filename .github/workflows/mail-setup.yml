@@ -1,0 +1,80 @@
+name: ضبط البريد على الاستضافة
+
+# يُشغَّل يدوياً من تبويب Actions: يضبط SMTP في .env على صندوق البريد، ويعيد بناء
+# الكاش، ويرسل رسالة اختبار، ويصرّف الطابور، ويضيف كرون schedule:run إن كان غائباً.
+# كلمة مرور الصندوق تُقرأ من السرّ MAIL_PASSWORD في إعدادات المستودع ولا تُطبع أبداً.
+on:
+  workflow_dispatch:
+    inputs:
+      mail_username:
+        description: 'صندوق البريد الذي ترسل منه المنصّة'
+        default: 'info@bahjagaza.com'
+        required: true
+      test_to:
+        description: 'بريد يُرسَل إليه اختبار فوري (اتركوه فارغاً لتخطّي الاختبار)'
+        default: 'info@bahjagaza.com'
+        required: false
+      install_cron:
+        description: 'إضافة كرون schedule:run إن كان غائباً'
+        type: boolean
+        default: true
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: ضبط SMTP واختبار الإرسال على الاستضافة
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          MAIL_USERNAME: ${{ inputs.mail_username }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          TEST_TO: ${{ inputs.test_to }}
+          INSTALL_CRON: ${{ inputs.install_cron }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          envs: MAIL_USERNAME,MAIL_PASSWORD,TEST_TO,INSTALL_CRON
+          script: |
+            cd ~/bahja || exit 1
+
+            if [ -z "$MAIL_PASSWORD" ]; then
+              echo "✗ السرّ MAIL_PASSWORD غير مضبوط في إعدادات المستودع (Settings → Secrets → Actions)"
+              exit 1
+            fi
+
+            echo "════ قبل التعديل"
+            echo "MAIL_MAILER=$(grep -E '^MAIL_MAILER=' .env | cut -d= -f2-)  QUEUE_CONNECTION=$(grep -E '^QUEUE_CONNECTION=' .env | cut -d= -f2-)"
+
+            echo "════ ضبط .env"
+            php deploy/set-env.php MAIL_MAILER=smtp MAIL_SCHEME=smtps MAIL_HOST=smtp.hostinger.com MAIL_PORT=465 \
+              "MAIL_USERNAME=$MAIL_USERNAME" MAIL_PASSWORD "MAIL_FROM_ADDRESS=$MAIL_USERNAME" 'MAIL_FROM_NAME=بَهْجَة' || exit 1
+            php artisan optimize --quiet && echo "✓ أُعيد بناء الكاش"
+
+            if [ -n "$TEST_TO" ]; then
+              echo "════ اختبار الإرسال إلى $TEST_TO"
+              php artisan mail:test "$TEST_TO" || echo "✗ فشل الاختبار — الخطأ أعلاه يوضّح السبب (كلمة المرور أو الخادم)"
+            fi
+
+            echo "════ تصريف الطابور"
+            php artisan queue:work --stop-when-empty --tries=1 --max-time=60 || true
+
+            if [ "$INSTALL_CRON" = "true" ]; then
+              echo "════ الكرون"
+              if command -v crontab >/dev/null 2>&1; then
+                if crontab -l 2>/dev/null | grep -q 'schedule:run'; then
+                  echo "✓ كرون schedule:run موجود أصلاً"
+                else
+                  (crontab -l 2>/dev/null; echo "* * * * * cd $HOME/bahja && $(command -v php) artisan schedule:run >> /dev/null 2>&1") | crontab - \
+                    && echo "✓ أُضيف كرون schedule:run (كل دقيقة)"
+                fi
+                echo "--- crontab الحالي ---"
+                crontab -l
+              else
+                echo "✗ crontab غير متاح عبر SSH — أضيفوا من hPanel: * * * * * php $HOME/bahja/artisan schedule:run"
+              fi
+            fi
+
+            echo "════ بعد التعديل"
+            echo "MAIL_MAILER=$(grep -E '^MAIL_MAILER=' .env | cut -d= -f2-)  MAIL_HOST=$(grep -E '^MAIL_HOST=' .env | cut -d= -f2-)  MAIL_FROM_ADDRESS=$(grep -E '^MAIL_FROM_ADDRESS=' .env | cut -d= -f2-)"
