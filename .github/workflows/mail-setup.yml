@@ -54,6 +54,8 @@ jobs:
                 echo ($event->mutex->exists($event) ? "LOCKED " : "free   ").$event->expression."  ".$event->getSummaryForDisplay().PHP_EOL;
             }
             '
+            echo "════ نبضة الجدولة"
+            php artisan tinker --execute='echo "heartbeat: ".(cache("schedule:heartbeat") ?: "—")."  (now ".now()->toDateTimeString().")".PHP_EOL;'
             echo "════ أخطاء السجلّ (آخر 3، بلا عناوين بريد)"
             grep -E "\.ERROR" storage/logs/laravel.log 2>/dev/null | tail -n 3 | cut -c1-220 | sed -E 's/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+/<email>/g' || echo "لا أخطاء"
             echo "════ الكرون"
