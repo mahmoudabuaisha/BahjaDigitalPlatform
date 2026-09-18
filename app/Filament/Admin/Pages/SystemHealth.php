@@ -33,6 +33,9 @@ class SystemHealth extends Page
     {
         $failedJobs = (int) DB::table('failed_jobs')->count();
 
+        // نبضة يكتبها المجدول كل دقيقة — غيابها يعني أن الكرون لا يعمل أو المهام تفشل
+        $heartbeat = cache('schedule:heartbeat');
+
         $lastArchiveRun = cache('events_archive_last_run');
 
         // فعاليات منفَّذة منذ أكثر من 72 ساعة دون تقرير حضور (مؤشر الخطة: 85%+)
@@ -53,6 +56,12 @@ class SystemHealth extends Page
         $unverified = AttendanceReport::whereNull('verified_at')->count();
 
         return [
+            [
+                'label' => 'نبضة الجدولة (الكرون)',
+                'value' => $heartbeat ? Carbon::parse($heartbeat)->diffForHumans() : 'لم تُسجَّل بعد',
+                'ok' => $heartbeat ? Carbon::parse($heartbeat)->gt(now()->subMinutes(3)) : false,
+                'hint' => 'تتجدّد كل دقيقة حين يشغّل الكرون schedule:run وتُنفَّذ المهام داخله — ومعها طابور البريد.',
+            ],
             [
                 'label' => 'المهام الفاشلة في الطابور',
                 'value' => (string) $failedJobs,
