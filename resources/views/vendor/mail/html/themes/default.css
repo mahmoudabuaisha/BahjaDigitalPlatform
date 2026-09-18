@@ -147,8 +147,10 @@ img {
     width: 570px;
 }
 
+/* الروابط الطويلة تلتفّ عند الحاجة فقط — لا كسر داخل الكلمة العربية */
 .inner-body a {
-    word-break: break-all;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 /* Subcopy */

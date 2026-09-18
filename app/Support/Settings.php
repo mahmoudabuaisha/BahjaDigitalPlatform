@@ -17,6 +17,8 @@ class Settings
     private const DEFAULTS = [
         'site_name' => 'بَهْجَة',
         'site_whatsapp' => '+970 593 674 330',
+        // بريد المنصّة الرسمي: يظهر في التذييل وصفحة التواصل
+        'site_email' => 'info@bahjagaza.com',
         'about_text' => '',
         'og_default_image' => '',
         'target_children' => 1000,

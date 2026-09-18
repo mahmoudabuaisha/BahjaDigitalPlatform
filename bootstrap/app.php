@@ -21,9 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // ترويسات الأمان على كل استجابة (القسم 15.4 من خطة الإنتاج)
         $middleware->append(SecurityHeaders::class);
 
-        // عدّاد المشاهدات يصل عبر sendBeacon بلا رمز CSRF
+        // عدّاد المشاهدات يصل عبر sendBeacon بلا رمز CSRF، وإلغاء اشتراك النشرة
+        // بضغطة واحدة يصل POST من تطبيق البريد — الرابط محميّ برمزه العشوائي
         $middleware->validateCsrfTokens(except: [
             't/*',
+            'newsletter/unsubscribe/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

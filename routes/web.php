@@ -13,6 +13,7 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NeighbourhoodCallController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OrganizerAttendanceController;
 use App\Http\Controllers\OrganizerController;
@@ -59,6 +60,14 @@ Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])
     ->middleware('throttle:feedback')
     ->name('contact.store');
+
+// النشرة البريدية: صفحة الأسبوع والاشتراك، وتأكيد البريد وإلغاؤه من روابط الرسائل
+Route::get('/newsletter', [NewsletterController::class, 'show'])->name('newsletter');
+Route::post('/newsletter', [NewsletterController::class, 'subscribe'])
+    ->middleware('throttle:feedback')
+    ->name('newsletter.subscribe');
+Route::get('/newsletter/confirm/{subscriber}/{token}', [NewsletterController::class, 'confirm'])->name('newsletter.confirm');
+Route::match(['get', 'post'], '/newsletter/unsubscribe/{subscriber}/{token}', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
 Route::view('/about', 'pages.about')->name('about');
 Route::view('/faq', 'pages.faq')->name('faq');

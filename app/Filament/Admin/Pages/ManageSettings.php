@@ -52,6 +52,10 @@ class ManageSettings extends Page
                             ->label('واتساب المبادرة (بالصيغة الدولية)')
                             ->placeholder('970599999999')
                             ->tel(),
+                        TextInput::make('site_email')
+                            ->label('بريد المنصّة (يظهر في التذييل وصفحة التواصل)')
+                            ->email()
+                            ->placeholder('info@bahjagaza.com'),
                         Textarea::make('about_text')
                             ->label('نبذة عن المبادرة (تظهر في الموقع العام)')
                             ->rows(4),
