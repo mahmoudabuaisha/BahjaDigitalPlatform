@@ -8,6 +8,7 @@ use App\Models\Area;
 use App\Models\ContactMessage;
 use App\Models\Event;
 use App\Models\Feedback;
+use App\Models\NewsletterSubscriber;
 use App\Models\ShelterCenter;
 use App\Models\Team;
 use App\Models\User;
@@ -112,6 +113,14 @@ class DemoSeeder extends Seeder
             ->each(function (Event $event) {
                 Feedback::factory()->count(2)->create(['event_id' => $event->id]);
             });
+
+        // مشتركون تجريبيون في النشرة: مؤكَّدون (بعضهم بمحافظة) وبانتظار التأكيد وملغون
+        $areaIds = Area::pluck('id');
+        NewsletterSubscriber::factory()->count(6)
+            ->sequence(fn ($sequence) => ['area_id' => $sequence->index % 2 ? $areaIds->random() : null])
+            ->create();
+        NewsletterSubscriber::factory()->pending()->count(2)->create();
+        NewsletterSubscriber::factory()->unsubscribed()->create();
 
         // رسائل تجريبية من «تواصلوا معنا»: جديدة ومعالَجة
         ContactMessage::factory()->count(3)->create();

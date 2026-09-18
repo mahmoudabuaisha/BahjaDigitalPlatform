@@ -214,6 +214,25 @@
         <div class="relative bg-gradient-to-b from-brand-800 to-[#17335a] text-white">
             <x-footer-decor/>
 
+            @unless(request()->routeIs('newsletter'))
+                {{-- نشرة الأسبوع: الاشتراك من أسفل أي صفحة — وصفحة النشرة لها نموذجها فلا يتكرّر --}}
+                <div id="newsletter" class="relative mx-auto max-w-7xl scroll-mt-28 px-4 pt-10 sm:px-6">
+                    <div class="grid gap-6 rounded-3xl bg-white/10 p-6 ring-1 ring-white/15 sm:p-8 lg:grid-cols-[1fr_1.25fr] lg:items-center lg:gap-10">
+                        <div>
+                            <h2 class="flex items-center gap-2.5 text-xl font-bold text-white">
+                                <span class="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-amber-300 text-brand-800"><x-ui.icon name="envelope" class="size-5"/></span>
+                                نشرة بَهْجَة البريدية
+                            </h2>
+                            <p class="mt-2.5 leading-relaxed text-white/85">
+                                كل أسبوع، فعاليات الأطفال القادمة قريباً منكم في رسالة واحدة.
+                                <a href="{{ route('newsletter') }}" class="font-bold text-amber-300 underline decoration-amber-300/50 underline-offset-4 hover:text-amber-200">اطّلعوا على نشرة هذا الأسبوع</a>
+                            </p>
+                        </div>
+                        @include('partials.newsletter-form', ['formId' => 'footer', 'dark' => true])
+                    </div>
+                </div>
+            @endunless
+
             <div class="relative mx-auto grid max-w-7xl gap-9 px-4 pt-10 pb-14 sm:px-6 md:grid-cols-2 lg:grid-cols-4">
                 <div>
                     <a href="{{ route('home') }}" class="inline-flex rounded-2xl bg-white px-4 py-2.5 shadow-lg shadow-black/20 no-underline">
@@ -234,6 +253,12 @@
                            {{-- ‏emerald-600 على الأبيض 3.4:1 — دون حدّ WCAG AA؛ و700 يبلغ 5:1 --}}
                            class="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-sm font-bold text-emerald-700 no-underline shadow-md transition hover:bg-emerald-50">
                             <x-ui.icon name="whatsapp" class="size-5"/> واتساب
+                        </a>
+                    @endif
+                    @if($siteEmail = \App\Support\Settings::get('site_email'))
+                        <a href="mailto:{{ $siteEmail }}"
+                           class="mt-3 flex w-fit items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-bold text-white no-underline ring-1 ring-white/25 transition hover:bg-white/25">
+                            <x-ui.icon name="envelope" class="size-5"/> <span dir="ltr">{{ $siteEmail }}</span>
                         </a>
                     @endif
                 </div>

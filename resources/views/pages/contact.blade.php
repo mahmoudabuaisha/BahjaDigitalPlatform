@@ -28,7 +28,7 @@
 <div class="mx-auto max-w-7xl px-4 py-10 sm:px-6">
 
     {{-- ═══ طرق التواصل ═══ --}}
-    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         @if($whatsappDigits)
             <a href="https://wa.me/{{ $whatsappDigits }}" target="_blank" rel="noopener"
                class="card card-hover tone tone-emerald items-start gap-3 p-6 no-underline">
@@ -47,6 +47,14 @@
             </a>
         @endif
 
+        @if($siteEmail = \App\Support\Settings::get('site_email'))
+            <a href="mailto:{{ $siteEmail }}" class="card card-hover tone tone-sky items-start gap-3 p-6 no-underline">
+                <span class="icon-tile icon-tile-lg"><x-ui.icon name="envelope"/></span>
+                <h2 class="text-lg font-bold">البريد الإلكتروني</h2>
+                <p class="text-sm text-ink-soft">للمراسلات الرسمية والشراكات، ونردّ خلال يوم عمل.</p>
+                <span class="font-medium text-brand-700" dir="ltr">{{ $siteEmail }}</span>
+            </a>
+        @endif
         <a href="{{ route('teams.join') }}" class="card card-hover tone tone-violet items-start gap-3 p-6 no-underline">
             <span class="icon-tile icon-tile-lg"><x-ui.icon name="users"/></span>
             <h2 class="text-lg font-bold">فريق يريد الانضمام؟</h2>
@@ -77,6 +85,7 @@
                     ['q' => 'هل يلزم التسجيل لحضور فعالية؟', 'a' => 'لا. الفعاليات مفتوحة ومجانية، وتكفي معرفة الموعد والمكان. لا نطلب منكم أي بيانات شخصية.'],
                     ['q' => 'هل الفعاليات مناسبة لجميع الأعمار؟', 'a' => 'كل فعالية تذكر فئتها العمرية حين يحدّدها الفريق المنظّم، وتجدونها على بطاقة الفعالية وفي صفحتها.'],
                     ['q' => 'هل يعمل الموقع دون إنترنت؟', 'a' => 'نعم. بعد أول زيارة تُحفظ الروزنامة على جهازكم، وتستطيعون مراجعة المواعيد والأماكن حتى لو انقطعت الشبكة.'],
+                    ['q' => 'كيف تصلني الفعاليات على بريدي؟', 'a' => 'اشتركوا في نشرة بَهْجَة من أسفل أي صفحة وأكّدوا بريدكم من الرسالة التي تصلكم، فتصلكم كل أسبوع فعاليات الأيام القادمة في محافظتكم أو في كل غزة.'],
                     ['q' => 'كيف ينضمّ فريقنا التطوعي إلى المنصّة؟', 'a' => 'سجّلوا فريقكم من صفحة تسجيل الفرق، وبعد اعتماد الإدارة تستطيعون رفع جدول فعالياتكم بأنفسكم.'],
                 ] as $index => $faq)
                     <div class="card overflow-hidden">

@@ -71,6 +71,7 @@ class AuditLog extends Model
             'user.toggled' => 'تفعيل/إيقاف حساب',
             'export.csv' => 'تصدير بيانات',
             'broadcast.sent' => 'رسالة عامة',
+            'newsletter.sent' => 'إرسال النشرة البريدية',
             'contact.handled' => 'معالجة رسالة تواصل',
             'contact.reopened' => 'إعادة فتح رسالة تواصل',
             'images.reprocessed' => 'تنظيف صور قديمة',

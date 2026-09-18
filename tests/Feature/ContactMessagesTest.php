@@ -12,9 +12,9 @@ use App\Models\Feedback;
 use App\Models\User;
 use App\Support\Settings;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -262,8 +262,9 @@ class ContactMessagesTest extends TestCase
 
     public function test_legacy_contact_rows_move_out_of_the_feedback_table(): void
     {
-        // نعود خطوة إلى ما قبل هجرة الصندوق، فنضع رسالة قديمة وتقييماً في جدول التقييمات
-        Artisan::call('migrate:rollback', ['--step' => 1]);
+        // نعود إلى ما قبل هجرة الصندوق، فنضع رسالة قديمة وتقييماً في جدول التقييمات
+        Schema::dropIfExists('contact_messages');
+        $migration = require database_path('migrations/2026_09_14_100000_create_contact_messages_table.php');
 
         DB::table('feedback')->insert([
             [
@@ -280,7 +281,7 @@ class ContactMessagesTest extends TestCase
             ],
         ]);
 
-        Artisan::call('migrate');
+        $migration->up();
 
         $this->assertDatabaseHas('contact_messages', [
             'name' => 'أم سامي',
