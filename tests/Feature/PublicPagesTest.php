@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Event;
 use App\Models\Team;
+use Database\Seeders\AreaSeeder;
+use Database\Seeders\CategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,8 +17,8 @@ class PublicPagesTest extends TestCase
     {
         parent::setUp();
 
-        $this->seed(\Database\Seeders\AreaSeeder::class);
-        $this->seed(\Database\Seeders\CategorySeeder::class);
+        $this->seed(AreaSeeder::class);
+        $this->seed(CategorySeeder::class);
     }
 
     public function test_home_renders_upcoming_approved_events_grouped_by_day(): void
@@ -35,6 +37,14 @@ class PublicPagesTest extends TestCase
             ->assertDontSee('مسودة مخفية')
             ->assertDontSee('معلقة مخفية')
             ->assertSee('dir="rtl"', false);
+    }
+
+    public function test_pages_declare_a_light_only_color_scheme(): void
+    {
+        // يمنع متصفحات الهواتف من «تعتيم» الموقع إجبارياً في الوضع الليلي
+        $this->get('/')
+            ->assertOk()
+            ->assertSee('<meta name="color-scheme" content="only light">', false);
     }
 
     public function test_event_page_shows_details_with_og_tags(): void
